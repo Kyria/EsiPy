@@ -48,7 +48,7 @@ class EsiSecurity(object):
 
         :param scopes: The list of scope
         :param state: The state to pass through the auth process
-
+        :return: the authorizationUrl with the correct parameters.
         """
         security_definition = self.app.root.securityDefinitions.get(
             self.security_name
@@ -62,27 +62,70 @@ class EsiSecurity(object):
             "&state=%s" % state if state else ''
         )
 
-    def get_token_uri(self, testing=False):
+    def __make_token_request_parameters(self, params, testing=False):
         """ Return the token uri from the securityDefinition
 
         :param testing: True if we are on Singularity, else false for TQ.
+        :return: the oauth/token uri
         """
         security_definition = self.app.root.securityDefinitions.get(
             self.security_name
         )
 
+        params = {
+            'headers': self.get_token_auth_header(),
+            'params': params,
+        }
+
         # should be: security_definition.tokenUrl
         # but not yet implemented by CCP in ESI so we need the full URL...
         # https://github.com/ccpgames/esi-issues/issues/92
         if testing:
-            return "https://sisilogin.testeveonline.com/oauth"
+            params['url'] = "https://sisilogin.testeveonline.com/oauth/token"
         else:
-            return "https://login.eveonline.com/oauth/token"
+            params['url'] = "https://login.eveonline.com/oauth/token"
+
+        return params
+
+    def get_access_token_request_params(self, code, testing=False):
+        """ Return the param object for the post() call to get the access_token
+        from the auth process (using the code)
+
+        :param code: the code get from the authentification process
+        :param testing: True if we are on Singularity, else false for TQ.
+        :return: a dict with the url, params and header
+        """
+        return self.__make_token_request_parameters(
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+            },
+            testing
+        )
+
+    def get_refresh_token_request_params(self, testing=False):
+        """ Return the param object for the post() call to get the access_token
+        from the refresh_token
+
+        :param code: the refresh token
+        :param testing: True if we are on Singularity, else false for TQ.
+        :return: a dict with the url, params and header
+        """
+        if self.refresh_token is None:
+            raise AttributeError('No refresh token is defined.')
+
+        return self.__make_token_request_parameters(
+            {
+                "grant_type": "refresh_token",
+                "refresh_token": self.refresh_token,
+            },
+            testing
+        )
 
     def get_token_auth_header(self):
         """ Return the Basic Authorization header required to get the tokens
 
-        :return a dict with the headers
+        :return: a dict with the headers
         """
         # encode/decode for py2/py3 compatibility
         auth_b64 = "%s:%s" % (self.client_id, self.secret_key)
@@ -96,6 +139,7 @@ class EsiSecurity(object):
         This method is used in the __call__ function.
 
         :param request: the pyswagger request object where we update the header
+        :return: the updated request object
         """
         if self.access_token is not None:
             request._p['header'].update({
@@ -124,6 +168,7 @@ class EsiSecurity(object):
         - negative value increase the time (later)
 
         :param offset: the expiry offset (in seconds) [default: 0]
+        :return: boolean true if expired, else false.
         """
         return int(time.time()) >= (self.token_expiry - offset)
 
@@ -132,6 +177,7 @@ class EsiSecurity(object):
         Call by client.request.
 
         :param request: the pyswagger request object to check
+        :return: the updated request.
         """
         if not request._security:
             return request
@@ -139,9 +185,9 @@ class EsiSecurity(object):
         for security in request._security:
             if self.security_name not in security:
                 logger.warning(
-                    'Missing Securities: [{0}]' % ', '.join(security.keys())
+                    'Missing Securities: [%s]' % ', '.join(security.keys())
                 )
                 continue
-            apply_auth_header(request)
+            self.apply_auth_header(request)
 
         return req

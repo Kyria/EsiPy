@@ -107,7 +107,7 @@ class EsiClient(BaseClient):
             raw=six.BytesIO(res.content).getvalue()
         )
 
-        return response, res
+        return response
 
     def refresh_auth(self):
         """ Update the auth data (tokens) using the refresh token in auth.

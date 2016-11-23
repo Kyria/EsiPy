@@ -5,6 +5,7 @@ from . import __version__
 from .cache import BaseCache
 from .cache import DummyCache
 from .cache import DictCache
+from .exceptions import APIException
 
 from pyswagger.core import BaseClient
 from requests import Request
@@ -44,15 +45,15 @@ class EsiClient(BaseClient):
         # check for specified headers and update session.headers
         headers = kwargs.pop('headers', {})
         if 'User-Agent' not in headers:
-            headers['User-Agent'] = 'EsiPy/%s' % __version__
+            headers['User-Agent'] = 'EsiPy/Client/%s' % __version__
         self._session.headers.update({"Accept": "application/json"})
         self._session.headers.update(headers)
 
         # transport adapter
         transport_adapter = kwargs.pop('headers', None)
         if isinstance(transport_adapter, HTTPAdapter):
-            session.mount('http://', transport_adapter)
-            session.mount('https://', transport_adapter)
+            self._session.mount('http://', transport_adapter)
+            self._session.mount('https://', transport_adapter)
 
         # initiate the cache object
         if 'cache' not in kwargs:
@@ -66,7 +67,7 @@ class EsiClient(BaseClient):
             else:
                 raise ValueError('Provided cache must implement APICache')
 
-    def request(self, req_and_resp, opt=None):
+    def request(self, req_and_resp, opt={}):
         """ Take a request_and_response object from pyswagger.App and
         check auth, token, headers, prepare the actual request and fill the
         response
@@ -76,26 +77,29 @@ class EsiClient(BaseClient):
 
         :return: the final response.
         """
-        if opt is None:
-            opt = {}
-
         if self.security and self.security.is_token_expired(self.auth_offset):
-            self.refresh_auth()
+            self.security.refresh()
 
-        req, response = super(EsiClient, self).request(req_and_resp, opt)
+        # required because of inheritance
+        request, response = super(EsiClient, self).request(req_and_resp, opt)
 
         # apply request-related options before preparation.
-        req.prepare(scheme=self.prepare_schemes(req).pop(), handle_files=False)
-        req._patch(opt)
-
-        request = Request(
-            method=req.method.upper(),
-            url=req.url,
-            params=req.query,
-            data=req.data,
-            headers=req.header
+        request.prepare(
+            scheme=self.prepare_schemes(request).pop(),
+            handle_files=False
         )
-        prepared_request = self._session.prepare_request(request)
+        request._patch(opt)
+
+        # prepare the request and make it.
+        prepared_request = self._session.prepare_request(
+            Request(
+                method=request.method.upper(),
+                url=request.url,
+                params=request.query,
+                data=request.data,
+                headers=request.header
+            )
+        )
         res = self._session.send(
             prepared_request,
             stream=True
@@ -108,16 +112,3 @@ class EsiClient(BaseClient):
         )
 
         return response
-
-    def refresh_auth(self):
-        """ Update the auth data (tokens) using the refresh token in auth.
-        """
-        request_data = self.security.get_refresh_token_request_params()
-        res = self._session.post(**request_data)
-        if res.status_code != 200:
-            raise APIException(
-                request_data['url'],
-                res.status_code,
-                res.json()
-            )
-        self.security.update_token(res.json())

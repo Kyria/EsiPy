@@ -1,6 +1,15 @@
 # -*- encoding: utf-8 -*-
+from . import __version__
+from .exceptions import APIException
+
+from requests import Session
+from requests.adapters import HTTPAdapter
 from requests.utils import quote
+from urlparse import urlparse
+
+import base64
 import six
+import time
 
 
 class EsiSecurity(object):
@@ -15,7 +24,8 @@ class EsiSecurity(object):
             redirect_uri,
             client_id,
             secret_key,
-            security_name="evesso"):
+            security_name="evesso",
+            **kwargs):
         """ Init the ESI Security Object
 
         :param app: the pyswagger app object
@@ -24,10 +34,12 @@ class EsiSecurity(object):
         :param secret_key: the OAuth2 secret key
         :param security_name: (optionnal) the name of the object holding the
         informations in the securityDefinitions.
+        :param transport_adapter: (optionnal) an HTTPAdapter object / implement
 
         """
         # check if the security_name actually exists in the securityDefinition
-        if app.root.securityDefinitions.get(security_name, None) is None:
+        security = app.root.securityDefinitions.get(security_name, None)
+        if security is None:
             raise NameError(
                 "%s is not defined in the securityDefinitions" % security_name
             )
@@ -38,91 +50,44 @@ class EsiSecurity(object):
         self.client_id = client_id
         self.secret_key = secret_key
 
+        # some URL we still need to "manually" define... sadly
+        # we parse the authUrl so we don't care if it's TQ or SISI.
+        parsed_uri = urlparse(security.authorizationUrl)
+        self.oauth_verify = "%s://%s/oauth/verify" % (
+            parsed_uri.scheme,
+            parsed_uri.netloc
+        )
+
+        # should be: security_definition.tokenUrl
+        # but not yet implemented by CCP in ESI so we need the full URL...
+        # https://github.com/ccpgames/esi-issues/issues/92
+        self.oauth_token = "%s://%s/oauth/token" % (
+            parsed_uri.scheme,
+            parsed_uri.netloc
+        )
+
+        # session request stuff
+        self._session = Session()
+
+        # check for specified headers and update session.headers
+        headers = kwargs.pop('headers', {})
+        if 'User-Agent' not in headers:
+            headers['User-Agent'] = 'EsiPy/Security/%s' % __version__
+        self._session.headers.update({"Accept": "application/json"})
+        self._session.headers.update(headers)
+
+        # transport adapter
+        transport_adapter = kwargs.pop('headers', None)
+        if isinstance(transport_adapter, HTTPAdapter):
+            self._session.mount('http://', transport_adapter)
+            self._session.mount('https://', transport_adapter)
+
         # token data
         self.refresh_token = None
         self.access_token = None
         self.token_expiry = None
 
-    def get_auth_uri(self, scopes=None, state=None):
-        """ Constructs the full auth uri and returns it.
-
-        :param scopes: The list of scope
-        :param state: The state to pass through the auth process
-        :return: the authorizationUrl with the correct parameters.
-        """
-        security_definition = self.app.root.securityDefinitions.get(
-            self.security_name
-        )
-
-        return "%s?response_type=code&redirect_uri=%s&client_id=%s%s%s" % (
-            security_definition.authorizationUrl,
-            quote(self.redirect_uri, safe=''),
-            self.client_id,
-            "&scope=%s" % '+'.join(s) if scopes else '',
-            "&state=%s" % state if state else ''
-        )
-
-    def __make_token_request_parameters(self, params, testing=False):
-        """ Return the token uri from the securityDefinition
-
-        :param testing: True if we are on Singularity, else false for TQ.
-        :return: the oauth/token uri
-        """
-        security_definition = self.app.root.securityDefinitions.get(
-            self.security_name
-        )
-
-        params = {
-            'headers': self.get_token_auth_header(),
-            'params': params,
-        }
-
-        # should be: security_definition.tokenUrl
-        # but not yet implemented by CCP in ESI so we need the full URL...
-        # https://github.com/ccpgames/esi-issues/issues/92
-        if testing:
-            params['url'] = "https://sisilogin.testeveonline.com/oauth/token"
-        else:
-            params['url'] = "https://login.eveonline.com/oauth/token"
-
-        return params
-
-    def get_access_token_request_params(self, code, testing=False):
-        """ Return the param object for the post() call to get the access_token
-        from the auth process (using the code)
-
-        :param code: the code get from the authentification process
-        :param testing: True if we are on Singularity, else false for TQ.
-        :return: a dict with the url, params and header
-        """
-        return self.__make_token_request_parameters(
-            {
-                "grant_type": "authorization_code",
-                "code": code,
-            },
-            testing
-        )
-
-    def get_refresh_token_request_params(self, testing=False):
-        """ Return the param object for the post() call to get the access_token
-        from the refresh_token
-
-        :param code: the refresh token
-        :param testing: True if we are on Singularity, else false for TQ.
-        :return: a dict with the url, params and header
-        """
-        if self.refresh_token is None:
-            raise AttributeError('No refresh token is defined.')
-
-        return self.__make_token_request_parameters(
-            {
-                "grant_type": "refresh_token",
-                "refresh_token": self.refresh_token,
-            },
-            testing
-        )
-
-    def get_token_auth_header(self):
+    def __get_token_auth_header(self):
         """ Return the Basic Authorization header required to get the tokens
 
         :return: a dict with the headers
@@ -134,18 +99,81 @@ class EsiSecurity(object):
 
         return {"Authorization": "Basic %s" % auth_b64}
 
-    def apply_auth_header(self, request):
-        """ Apply the Bearer Authorization header for ESI calls.
-        This method is used in the __call__ function.
+    def __get_oauth_header(self):
+        """ Return the Bearer Authorization header required in oauth calls
 
-        :param request: the pyswagger request object where we update the header
-        :return: the updated request object
+        :return: a dict with the authorization header
         """
-        if self.access_token is not None:
-            request._p['header'].update({
-                "Authorization": "Bearer %s" % self.access_token
-            })
-        return request
+        return {"Authorization": "Bearer %s" % self.access_token}
+
+    def __make_token_request_parameters(self, params):
+        """ Return the token uri from the securityDefinition
+
+        :param params: the data given to the request
+        :return: the oauth/token uri
+        """
+        security_definition = self.app.root.securityDefinitions.get(
+            self.security_name
+        )
+
+        request_params = {
+            'headers': self.__get_token_auth_header(),
+            'data': params,
+            'url': self.oauth_token,
+        }
+
+        return request_params
+
+    def get_auth_uri(self, scopes=None, state=None):
+        """ Constructs the full auth uri and returns it.
+
+        :param scopes: The list of scope
+        :param state: The state to pass through the auth process
+        :return: the authorizationUrl with the correct parameters.
+        """
+        security_definition = self.app.root.securityDefinitions.get(
+            self.security_name
+        )
+        s = [] if not scopes else scopes
+
+        return "%s?response_type=code&redirect_uri=%s&client_id=%s%s%s" % (
+            security_definition.authorizationUrl,
+            quote(self.redirect_uri, safe=''),
+            self.client_id,
+            "&scope=%s" % '+'.join(s) if scopes else '',
+            "&state=%s" % state if state else ''
+        )
+
+    def get_access_token_request_params(self, code):
+        """ Return the param object for the post() call to get the access_token
+        from the auth process (using the code)
+
+        :param code: the code get from the authentification process
+        :return: a dict with the url, params and header
+        """
+        return self.__make_token_request_parameters(
+            {
+                "grant_type": "authorization_code",
+                "code": code,
+            }
+        )
+
+    def get_refresh_token_request_params(self):
+        """ Return the param object for the post() call to get the access_token
+        from the refresh_token
+
+        :param code: the refresh token
+        :return: a dict with the url, params and header
+        """
+        if self.refresh_token is None:
+            raise AttributeError('No refresh token is defined.')
+
+        return self.__make_token_request_parameters(
+            {
+                "grant_type": "refresh_token",
+                "refresh_token": self.refresh_token,
+            }
+        )
 
     def update_token(self, response_json):
         """ Update access_token, refresh_token and token_expiry from the
@@ -172,9 +200,59 @@ class EsiSecurity(object):
         """
         return int(time.time()) >= (self.token_expiry - offset)
 
+    def refresh(self):
+        """ Update the auth data (tokens) using the refresh token in auth.
+        """
+        request_data = self.get_refresh_token_request_params()
+        res = self._session.post(**request_data)
+        if res.status_code != 200:
+            raise APIException(
+                request_data['url'],
+                res.status_code,
+                res.json()
+            )
+        json_res = res.json()
+        self.update_token(json_res)
+        return json_res
+
+    def auth(self, code):
+        """ Request the token to the /oauth/token endpoint.
+        Update the security tokens.
+
+        :param code: the code you get from the auth process
+        """
+        request_data = self.get_access_token_request_params(code)
+        res = self._session.post(**request_data)
+        if res.status_code != 200:
+            raise APIException(
+                request_data['url'],
+                res.status_code,
+                res.json()
+            )
+        json_res = res.json()
+        self.update_token(json_res)
+        return json_res
+
+    def verify(self):
+        """ Make a get call to the oauth/verify endpoint to get the user data
+
+        :return: the json with the data.
+        """
+        res = self._session.get(
+            self.oauth_verify,
+            headers=self.__get_oauth_header()
+        )
+        if res.status_code != 200:
+            raise APIException(
+                self.oauth_verify,
+                res.status_code,
+                res.json()
+            )
+        return res.json()
+
     def __call__(self, request):
         """ Check if the request need security header and apply them.
-        Call by client.request.
+        Required for pyswagger.core.BaseClient.request().
 
         :param request: the pyswagger request object to check
         :return: the updated request.
@@ -188,6 +266,7 @@ class EsiSecurity(object):
                     'Missing Securities: [%s]' % ', '.join(security.keys())
                 )
                 continue
-            self.apply_auth_header(request)
+            if self.access_token is not None:
+                request._p['header'].update(self.__get_oauth_header())
 
-        return req
+        return request

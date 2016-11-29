@@ -161,6 +161,10 @@ class TestMemcachedCache(unittest.TestCase):
     def test_memcached_invalidate(self):
         self.c.invalidate('key')
 
+    def test_memcached_invalid_argument(self):
+        with self.assertRaises(ValueError):
+            MemcachedCache(None)
+        
         
 if __name__ == "__main__":
     unittest.main()

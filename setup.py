@@ -5,7 +5,8 @@ from esipy import __version__
 install_requirements = [
     "requests",
     "pyswagger",
-    "six"
+    "six",
+    "pytz",
 ]
 
 # test requirements

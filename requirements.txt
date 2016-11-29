@@ -1,0 +1,11 @@
+coverage
+coveralls
+httmock
+nose
+mock
+requests>=2.5.1
+future
+python-memcached
+pyswagger
+requests
+six

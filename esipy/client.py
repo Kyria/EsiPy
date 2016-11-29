@@ -5,7 +5,6 @@ from . import __version__
 from .cache import BaseCache
 from .cache import DummyCache
 from .cache import DictCache
-from .exceptions import APIException
 
 from pyswagger.core import BaseClient
 from requests import Request

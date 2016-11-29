@@ -10,8 +10,10 @@ from requests.utils import quote
 from urlparse import urlparse
 
 import base64
-import six
+import logging
 import time
+
+logger = logging.getLogger("esipy.cache")
 
 
 class EsiSecurity(object):
@@ -114,10 +116,6 @@ class EsiSecurity(object):
         :param params: the data given to the request
         :return: the oauth/token uri
         """
-        security_definition = self.app.root.securityDefinitions.get(
-            self.security_name
-        )
-
         request_params = {
             'headers': self.__get_token_auth_header(),
             'data': params,

@@ -30,7 +30,7 @@ def swagger_json_mock(url, request):
         status_code=200,
         content=data
     )
-    
+
 
 def oauth_token(url, request):
     """ Mock endpoint to get token (auth / refresh) """
@@ -41,7 +41,7 @@ def oauth_verify(url, request):
     """ Mock endpoint to get character data after auth """
     pass
 
-    
+
 @httmock.urlmatch(
     scheme="https",
     netloc=r"esi\.tech\.ccp\.is$",
@@ -52,7 +52,7 @@ def public_incursion(url, request):
     Public endpoint
     """
     return httmock.response(
-        headers={'Expires': make_expire_time_str(), 'content-type': 'application/json'},
+        headers={'Expires': make_expire_time_str()},
         status_code=200,
         content=[
             {
@@ -69,8 +69,8 @@ def public_incursion(url, request):
             }
         ]
     )
-        
-        
+
+
 @httmock.urlmatch(
     scheme="https",
     netloc=r"esi\.tech\.ccp\.is$",
@@ -97,7 +97,7 @@ def public_incursion_no_expires(url, request):
             }
         ]
     )
-    
+
 
 @httmock.urlmatch(
     scheme="https",

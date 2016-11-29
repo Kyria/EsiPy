@@ -4,9 +4,7 @@
 from __future__ import absolute_import
 
 import errno
-import httmock
 import mock
-import sys
 import six
 import unittest
 import memcache
@@ -16,14 +14,12 @@ from esipy.cache import DictCache
 from esipy.cache import DummyCache
 from esipy.cache import FileCache
 from esipy.cache import MemcachedCache
-from requests.adapters import HTTPAdapter
-from requests.models import PreparedRequest
 from six.moves import builtins
 
 
 class TestBaseCache(unittest.TestCase):
     """ BaseCache test class """
-    
+
     def setUp(self):
         self.c = BaseCache()
 
@@ -39,7 +35,7 @@ class TestBaseCache(unittest.TestCase):
 
 class TestDictCache(unittest.TestCase):
     """ DictCache test class """
-    
+
     def setUp(self):
         self.c = DictCache()
         self.c.put('key', True)
@@ -53,11 +49,11 @@ class TestDictCache(unittest.TestCase):
     def test_dict_cache_invalidate(self):
         self.c.invalidate('key')
         self.assertIsNone(self.c.get('key'))
-        
-        
+
+
 class TestDummyCache(unittest.TestCase):
     """ DummyCache test class. """
-    
+
     def setUp(self):
         self.c = DummyCache()
         self.c.put('never_stored', True)
@@ -164,7 +160,7 @@ class TestMemcachedCache(unittest.TestCase):
     def test_memcached_invalid_argument(self):
         with self.assertRaises(ValueError):
             MemcachedCache(None)
-        
-        
+
+
 if __name__ == "__main__":
     unittest.main()

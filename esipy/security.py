@@ -13,7 +13,7 @@ import base64
 import logging
 import time
 
-logger = logging.getLogger("esipy.cache")
+logger = logging.getLogger("esipy.security")
 
 
 class EsiSecurity(object):

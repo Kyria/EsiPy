@@ -123,7 +123,7 @@ class MemcachedCache(BaseCache):
         """
         import memcache
         if not isinstance(memcache_client, memcache.Client):
-            raise ValueError('cache must be an instance of memcache.Client')
+            raise TypeError('cache must be an instance of memcache.Client')
         self._mc = memcache_client
 
     def get(self, key):

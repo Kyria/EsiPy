@@ -158,7 +158,7 @@ class TestMemcachedCache(unittest.TestCase):
         self.c.invalidate('key')
 
     def test_memcached_invalid_argument(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             MemcachedCache(None)
 
 

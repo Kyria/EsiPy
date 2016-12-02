@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 import hashlib
-import zlib
 import os
+import zlib
 
 try:
     import pickle
@@ -9,6 +9,7 @@ except ImportError:  # pragma: no cover
     import cPickle as pickle
 
 import logging
+
 logger = logging.getLogger("esipy.cache")
 
 

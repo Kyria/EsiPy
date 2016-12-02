@@ -27,8 +27,7 @@ class EsiSecurity(object):
             redirect_uri,
             client_id,
             secret_key,
-            security_name="evesso",
-            **kwargs):
+            security_name="evesso"):
         """ Init the ESI Security Object
 
         :param app: the pyswagger app object
@@ -54,7 +53,7 @@ class EsiSecurity(object):
         # some URL we still need to "manually" define... sadly
         # we parse the authUrl so we don't care if it's TQ or SISI.
         parsed_uri = urlparse(security.authorizationUrl)
-        self.oauth_verify = "%s://%s/oauth/verify" % (
+        self.oauth_verify = '%s://%s/oauth/verify' % (
             parsed_uri.scheme,
             parsed_uri.netloc
         )
@@ -62,7 +61,7 @@ class EsiSecurity(object):
         # should be: security_definition.tokenUrl
         # but not yet implemented by CCP in ESI so we need the full URL...
         # https://github.com/ccpgames/esi-issues/issues/92
-        self.oauth_token = "%s://%s/oauth/token" % (
+        self.oauth_token = '%s://%s/oauth/token' % (
             parsed_uri.scheme,
             parsed_uri.netloc
         )
@@ -70,8 +69,8 @@ class EsiSecurity(object):
         # session request stuff
         self._session = Session()
         self._session.headers.update({
-            "Accept": "application/json",
-            "User-Agent": "EsiPy/Security/%s" % __version__
+            'Accept': 'application/json',
+            'User-Agent': 'EsiPy/Security/%s' % __version__
         })
 
         # token data
@@ -89,14 +88,14 @@ class EsiSecurity(object):
         auth_b64 = base64.b64encode(auth_b64.encode('latin-1'))
         auth_b64 = auth_b64.decode('latin-1')
 
-        return {"Authorization": "Basic %s" % auth_b64}
+        return {'Authorization': 'Basic %s' % auth_b64}
 
     def __get_oauth_header(self):
         """ Return the Bearer Authorization header required in oauth calls
 
         :return: a dict with the authorization header
         """
-        return {"Authorization": "Bearer %s" % self.access_token}
+        return {'Authorization': 'Bearer %s' % self.access_token}
 
     def __make_token_request_parameters(self, params):
         """ Return the token uri from the securityDefinition
@@ -124,12 +123,12 @@ class EsiSecurity(object):
         )
         s = [] if not scopes else scopes
 
-        return "%s?response_type=code&redirect_uri=%s&client_id=%s%s%s" % (
+        return '%s?response_type=code&redirect_uri=%s&client_id=%s%s%s' % (
             security_definition.authorizationUrl,
             quote(self.redirect_uri, safe=''),
             self.client_id,
-            "&scope=%s" % '+'.join(s) if scopes else '',
-            "&state=%s" % state if state else ''
+            '&scope=%s' % '+'.join(s) if scopes else '',
+            '&state=%s' % state if state else ''
         )
 
     def get_access_token_request_params(self, code):
@@ -141,8 +140,8 @@ class EsiSecurity(object):
         """
         return self.__make_token_request_parameters(
             {
-                "grant_type": "authorization_code",
-                "code": code,
+                'grant_type': 'authorization_code',
+                'code': code,
             }
         )
 
@@ -158,8 +157,8 @@ class EsiSecurity(object):
 
         return self.__make_token_request_parameters(
             {
-                "grant_type": "refresh_token",
-                "refresh_token": self.refresh_token,
+                'grant_type': 'refresh_token',
+                'refresh_token': self.refresh_token,
             }
         )
 
@@ -174,18 +173,24 @@ class EsiSecurity(object):
         self.access_token = response_json['access_token']
         self.token_expiry = int(time.time()) + response_json['expires_in']
 
-        if "refresh_token" in response_json:
+        if 'refresh_token' in response_json:
             self.refresh_token = response_json['refresh_token']
 
     def is_token_expired(self, offset=0):
         """ Return true if the token is expired.
+
         The offset can be used to change the expiry time:
         - positive value decrease the time (sooner)
         - negative value increase the time (later)
+        If the expiry is not set, always return True. This case allow the users
+        to define a security object, only knowing the refresh_token and get
+        a new access_token / expiry_time without errors.
 
         :param offset: the expiry offset (in seconds) [default: 0]
         :return: boolean true if expired, else false.
         """
+        if self.token_expiry is None:
+            return True
         return int(time.time()) >= (self.token_expiry - offset)
 
     def refresh(self):
@@ -251,7 +256,7 @@ class EsiSecurity(object):
         for security in request._security:
             if self.security_name not in security:
                 logger.warning(
-                    'Missing Securities: [%s]' % ', '.join(security.keys())
+                    "Missing Securities: [%s]" % ", ".join(security.keys())
                 )
                 continue
             if self.access_token is not None:

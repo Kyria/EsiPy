@@ -3,9 +3,9 @@ from __future__ import absolute_import
 
 from . import __version__
 from .cache import BaseCache
-from .cache import DummyCache
 from .cache import DictCache
-from .events import client_alarm
+from .cache import DummyCache
+from .events import after_token_refresh
 
 from pyswagger.core import BaseClient
 from requests import Request
@@ -65,7 +65,7 @@ class EsiClient(BaseClient):
             elif cache is None:
                 self.cache = DummyCache()
             else:
-                raise ValueError('Provided cache must implement APICache')
+                raise ValueError('Provided cache must implement BaseCache')
 
     def request(self, req_and_resp, opt={}):
         """ Take a request_and_response object from pyswagger.App and
@@ -79,7 +79,7 @@ class EsiClient(BaseClient):
         """
         if self.security and self.security.is_token_expired(self.auth_offset):
             json_response = self.security.refresh()
-            client_alarm.notify('notify_update', **json_response)
+            after_token_refresh.send(**json_response)
 
         # required because of inheritance
         request, response = super(EsiClient, self).request(req_and_resp, opt)

@@ -1,49 +1,58 @@
 # -*- encoding: utf-8 -*-
+import logging
+import sys
+
+logger = logging.getLogger("esipy.events")
 
 
-class BaseClientEventObserver(object):
-    def notify_update(self, access_token, refresh_token, expires_in):
-        """ Notify triggered when the token is updated automatically
-        by the security object
+class Signal(object):
+    def __init__(self):
+        """ Alarm constructor. """
+        self.event_receivers = []
 
-        :param access_token: the new access_token
-        :param refresh_token: the refresh token used
-        :param expires_in: the validity of the access token in seconds
+    def add_receiver(self, receiver):
+        """ Add a receiver to the list of receivers.
+
+        :param receiver: a callable variable
         """
-        raise NotImplementedError
+        if not callable(receiver):
+            raise TypeError("receiver must be callable")
+        self.event_receivers.append(receiver)
 
+    def remove_receiver(self, receiver):
+        """ Remove a receiver to the list of receivers.
 
-class Alarm(object):
-    def __init__(self, observer_class):
-        """ Alarm constructor.
-
-        :param observer_class: the class expected for the observers
+        :param receiver: a callable variable
         """
-        self.event_observers = []
+        if receiver in self.event_receivers:
+            self.event_receivers.remove(receiver)
 
-        if not isinstance(observer_class, type):
-            raise TypeError("observer_class must be a class")
-        self.observer_class = observer_class
+    def send(self, **kwargs):
+        """ Trigger all receiver and pass them the parameters
+        If an exception is raised, it will stop the process and all receivers
+        may not be triggered at this moment.
 
-    def notify(self, notify_event, **kwargs):
-        """ Call the notify_event on all observers and pass them the parameters
-
-        :param notify_event: the notify event method to call
-        :param kwargs: all required arguments depending on the notify_event.
+        :param kwargs: all arguments from the event.
         """
+        for receiver in self.event_receivers:
+            receiver(**kwargs)
 
-        for observer in self.event_observers:
-            getattr(observer, notify_event)(**kwargs)
+    def send_robust(self, **kwargs):
+        """ Trigger all receiver and pass them the parameters
+        If an exception is raised it will be catched and displayed as error
+        in the logger (if defined).
 
-    def append(self, observer):
-        """ Add an obserevr to the list of observers.
-
-        :param observer: an instance of BaseObserver
+        :param kwargs: all arguments from the event.
         """
-        if not isinstance(observer, self.observer_class):
-            raise TypeError("Observer must be an instance of BaseObserver")
-        self.event_observers.append(observer)
+        for receiver in self.event_receivers:
+            try:
+                receiver(**kwargs)
+            except Exception as err:
+                if not hasattr(err, '__traceback__'):
+                    logger.error(sys.exc_info()[2])
+                else:
+                    logger.error(err.__traceback__)
 
 
 # define required alarms
-client_alarm = Alarm(BaseClientEventObserver)
+after_token_refresh = Signal()

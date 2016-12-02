@@ -1,5 +1,5 @@
+from esipy import __version__
 from setuptools import setup
-from esipy import __version__ 
 
 # install requirements
 install_requirements = [

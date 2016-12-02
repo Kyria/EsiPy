@@ -3,12 +3,11 @@ from __future__ import absolute_import
 
 import datetime
 import httmock
-import json
 
 
 def make_expire_time_str():
     """ Generate a date string for the Expires header
-    RFC 7231 format
+    RFC 7231 format (always GMT datetime)
     """
     date = datetime.datetime.utcnow()
     date += datetime.timedelta(days=1)
@@ -17,29 +16,62 @@ def make_expire_time_str():
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
-    path=r"^/latest/swagger.json$"
+    netloc=r"login\.eveonline\.com$",
+    path=r"^/oauth/token$"
 )
-def swagger_json_mock(url, request):
-    """ Root Mock for the tests"""
-    with open('test/resources/swagger.json') as file:
-        data = json.load(file)
+def oauth_token(url, request):
+    """ Mock endpoint to get token (auth / refresh) """
+    if 'fail_test' in request.body:
+        return httmock.response(
+            status_code=400,
+            content={'message': 'Failed successfuly'}
+        )
+
+    if 'no_refresh' in request.body:
+        return httmock.response(
+            status_code=200,
+            content={
+                'access_token': 'access_token',
+                'expires_in': 1200,
+            }
+        )
 
     return httmock.response(
-        headers={'Expires': make_expire_time_str()},
         status_code=200,
-        content=data
+        content={
+            'access_token': 'access_token',
+            'expires_in': 1200,
+            'refresh_token': 'refresh_token'
+        }
     )
 
 
-def oauth_token(url, request):
-    """ Mock endpoint to get token (auth / refresh) """
-    pass
-
-
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"login\.eveonline\.com$",
+    path=r"^/oauth/verify$"
+)
 def oauth_verify(url, request):
-    """ Mock endpoint to get character data after auth """
-    pass
+    return httmock.response(
+        status_code=200,
+        content={
+            'CharacterID': 123456789,
+            'CharacterName': 'EsiPy Tester',
+            'CharacterOwnerHash': 'YetAnotherHash'
+        }
+    )
+
+
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"login\.eveonline\.com$",
+    path=r"^/oauth/verify$"
+)
+def oauth_verify_fail(url, request):
+    return httmock.response(
+        status_code=400,
+        content={'message': 'Failed successfuly'}
+    )
 
 
 @httmock.urlmatch(

@@ -5,7 +5,6 @@ from . import __version__
 from .exceptions import APIException
 
 from requests import Session
-from requests.adapters import HTTPAdapter
 from requests.utils import quote
 from urlparse import urlparse
 
@@ -38,8 +37,6 @@ class EsiSecurity(object):
         :param secret_key: the OAuth2 secret key
         :param security_name: (optionnal) the name of the object holding the
         informations in the securityDefinitions.
-        :param transport_adapter: (optionnal) an HTTPAdapter object / implement
-
         """
         # check if the security_name actually exists in the securityDefinition
         security = app.root.securityDefinitions.get(security_name, None)
@@ -72,19 +69,10 @@ class EsiSecurity(object):
 
         # session request stuff
         self._session = Session()
-
-        # check for specified headers and update session.headers
-        headers = kwargs.pop('headers', {})
-        if 'User-Agent' not in headers:
-            headers['User-Agent'] = 'EsiPy/Security/%s' % __version__
-        self._session.headers.update({"Accept": "application/json"})
-        self._session.headers.update(headers)
-
-        # transport adapter
-        transport_adapter = kwargs.pop('headers', None)
-        if isinstance(transport_adapter, HTTPAdapter):
-            self._session.mount('http://', transport_adapter)
-            self._session.mount('https://', transport_adapter)
+        self._session.headers.update({
+            "Accept": "application/json",
+            "User-Agent": "EsiPy/Security/%s" % __version__
+        })
 
         # token data
         self.refresh_token = None

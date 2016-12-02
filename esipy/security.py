@@ -6,7 +6,7 @@ from .exceptions import APIException
 
 from requests import Session
 from requests.utils import quote
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 
 import base64
 import logging

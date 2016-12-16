@@ -111,7 +111,7 @@ class EsiSecurity(object):
 
         return request_params
 
-    def get_auth_uri(self, scopes=None, state=None):
+    def get_auth_uri(self, scopes=None, state=None, implicit=False):
         """ Constructs the full auth uri and returns it.
 
         :param scopes: The list of scope
@@ -123,8 +123,11 @@ class EsiSecurity(object):
         )
         s = [] if not scopes else scopes
 
-        return '%s?response_type=code&redirect_uri=%s&client_id=%s%s%s' % (
+        response_type = 'code' if not implicit else 'token'
+
+        return '%s?response_type=%s&redirect_uri=%s&client_id=%s%s%s' % (
             security_definition.authorizationUrl,
+            response_type,
             quote(self.redirect_uri, safe=''),
             self.client_id,
             '&scope=%s' % '+'.join(s) if scopes else '',

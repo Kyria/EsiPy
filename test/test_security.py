@@ -4,10 +4,10 @@ from __future__ import absolute_import
 from .mock import oauth_token
 from .mock import oauth_verify
 from .mock import oauth_verify_fail
+from esipy import App
+from esipy import EsiSecurity
 from esipy.exceptions import APIException
-from esipy.security import EsiSecurity
 
-from pyswagger import App
 from requests.utils import quote
 
 import httmock
@@ -97,6 +97,16 @@ class TestEsiSecurity(unittest.TestCase):
         self.assertEqual(
             self.security.get_auth_uri(),
             ("%s/oauth/authorize?response_type=code"
+             "&redirect_uri=%s&client_id=%s") % (
+                TestEsiSecurity.LOGIN_EVE,
+                quote(TestEsiSecurity.CALLBACK_URI, safe=''),
+                TestEsiSecurity.CLIENT_ID
+            )
+        )
+
+        self.assertEqual(
+            self.security.get_auth_uri(implicit=True),
+            ("%s/oauth/authorize?response_type=token"
              "&redirect_uri=%s&client_id=%s") % (
                 TestEsiSecurity.LOGIN_EVE,
                 quote(TestEsiSecurity.CALLBACK_URI, safe=''),

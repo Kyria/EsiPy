@@ -60,7 +60,7 @@ Operations are the different endpoint exposed from the API and are defined by en
 
 
 # if your endpoint need some parameter, just give it to the operation
->>> character_location_operation = app.op['get_characters_character_id_location(character_id=123456789)
+>>> character_location_operation = app.op['get_characters_character_id_location'](character_id=123456789)
 >>> char_location = client.request(character_location_operation)
 >>> char_location.data.station_id
 60004756

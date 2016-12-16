@@ -148,3 +148,10 @@ def auth_character_location(url, request):
             "solar_system_id": 30002543
         }
     )
+
+
+_all_auth_mock_ = [
+    oauth_token,
+    oauth_verify,
+    auth_character_location,
+]

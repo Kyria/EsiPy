@@ -50,7 +50,7 @@ class EsiClient(BaseClient):
         self._session.headers.update(headers)
 
         # transport adapter
-        transport_adapter = kwargs.pop('headers', None)
+        transport_adapter = kwargs.pop('transport_adapter', None)
         if isinstance(transport_adapter, HTTPAdapter):
             self._session.mount('http://', transport_adapter)
             self._session.mount('https://', transport_adapter)

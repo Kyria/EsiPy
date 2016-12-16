@@ -44,7 +44,7 @@ Now to auth:
 ```
 
 Once this is done, you can query any endpoint (if the endpoint don't require auth, skip the auth part for example).
-Operations are the different endpoint exposed from the API. To find an operation you can either use the operationId.
+Operations are the different endpoint exposed from the API and are defined by endpoints OperationID
 ```python
 # get the list of incursions
 >>> incursion_operation = app.op['get_incursion']()

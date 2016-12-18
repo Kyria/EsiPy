@@ -5,7 +5,6 @@ from . import __version__
 from .cache import BaseCache
 from .cache import DictCache
 from .cache import DummyCache
-from .events import after_token_refresh
 
 from pyswagger.core import BaseClient
 from requests import Request
@@ -34,13 +33,11 @@ class EsiClient(BaseClient):
         :param headers: (optionnal) additional headers we want to add
         :param transport_adapter: (optionnal) an HTTPAdapter object / implement
         :param cache: (optionnal) esipy.cache.BaseCache cache implementation.
-        :param auth_offset: (optionnal) time in second to substract to the
         expiry date of the token
         """
         super(EsiClient, self).__init__(security)
         self.security = security
         self._session = Session()
-        self.auth_offset = kwargs.pop('auth_offset', 0)
 
         # check for specified headers and update session.headers
         headers = kwargs.pop('headers', {})
@@ -77,10 +74,6 @@ class EsiClient(BaseClient):
 
         :return: the final response.
         """
-        if self.security and self.security.is_token_expired(self.auth_offset):
-            json_response = self.security.refresh()
-            after_token_refresh.send(**json_response)
-
         # required because of inheritance
         request, response = super(EsiClient, self).request(req_and_resp, opt)
 

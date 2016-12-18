@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 from .client import EsiClient  # noqa
 from .security import EsiSecurity  # noqa

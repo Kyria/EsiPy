@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 from . import __version__
+from .events import after_token_refresh
 from .exceptions import APIException
 
 from requests import Session
@@ -255,6 +256,10 @@ class EsiSecurity(object):
         """
         if not request._security:
             return request
+
+        if self.is_token_expired():
+            json_response = self.refresh()
+            after_token_refresh.send(**json_response)
 
         for security in request._security:
             if self.security_name not in security:

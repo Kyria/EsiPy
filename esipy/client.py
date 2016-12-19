@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 
-from . import __version__
 from .cache import BaseCache
 from .cache import DictCache
 from .cache import DummyCache
@@ -42,7 +41,8 @@ class EsiClient(BaseClient):
         # check for specified headers and update session.headers
         headers = kwargs.pop('headers', {})
         if 'User-Agent' not in headers:
-            headers['User-Agent'] = 'EsiPy/Client/%s' % __version__
+            headers['User-Agent'] = ('EsiPy/Client - '
+                'https://github.com/Kyria/EsiPy')
         self._session.headers.update({"Accept": "application/json"})
         self._session.headers.update(headers)
 

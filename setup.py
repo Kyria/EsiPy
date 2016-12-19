@@ -1,4 +1,3 @@
-from esipy import __version__
 from setuptools import setup
 
 # install requirements
@@ -22,7 +21,7 @@ test_requirements = [
 
 setup(
     name='EsiPy',
-    version=__version__,
+    version='0.0.4',
     packages=['esipy'],
     url='https://github.com/Kyria/EsiPy',
     license='BSD 3-Clause License',

@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 
-from . import __version__
 from .events import after_token_refresh
 from .exceptions import APIException
 
@@ -71,7 +70,8 @@ class EsiSecurity(object):
         self._session = Session()
         self._session.headers.update({
             'Accept': 'application/json',
-            'User-Agent': 'EsiPy/Security/%s' % __version__
+            'User-Agent': ('EsiPy/Security/ - '
+                'https://github.com/Kyria/EsiPy')
         })
 
         # token data

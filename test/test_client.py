@@ -3,7 +3,6 @@ from __future__ import absolute_import
 
 from .mock import _all_auth_mock_
 from .mock import public_incursion
-from esipy import __version__
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -59,7 +58,7 @@ class TestEsiPy(unittest.TestCase):
         self.assertTrue(isinstance(client_no_args.cache, DictCache))
         self.assertEqual(
             client_no_args._session.headers['User-Agent'],
-            'EsiPy/Client/%s' % __version__
+            'EsiPy/Client - https://github.com/Kyria/EsiPy'
         )
 
         client_with_headers = EsiClient(headers={'User-Agent': 'foobar'})

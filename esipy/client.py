@@ -41,8 +41,10 @@ class EsiClient(BaseClient):
         # check for specified headers and update session.headers
         headers = kwargs.pop('headers', {})
         if 'User-Agent' not in headers:
-            headers['User-Agent'] = ('EsiPy/Client - '
-                'https://github.com/Kyria/EsiPy')
+            headers['User-Agent'] = (
+                'EsiPy/Client - '
+                'https://github.com/Kyria/EsiPy'
+            )
         self._session.headers.update({"Accept": "application/json"})
         self._session.headers.update(headers)
 
@@ -64,12 +66,19 @@ class EsiClient(BaseClient):
             else:
                 raise ValueError('Provided cache must implement BaseCache')
 
-    def request(self, req_and_resp, opt={}):
+    def request(self, req_and_resp, raw_body_only=False, opt={}):
         """ Take a request_and_response object from pyswagger.App and
         check auth, token, headers, prepare the actual request and fill the
         response
 
+        Note on performance : if you need more performance (because you are
+        using this in a batch) you'd rather set raw_body_only=True, as parsed
+        body is really slow. You'll then have to get data from response.raw
+        and convert it to json using "json.loads(response.raw)"
+
         :param req_and_resp: the request and response object from pyswagger.App
+        :param raw_body_only: define if we want the body to be parsed as object
+                              instead of staying a raw dict. [Default: False]
         :param opt: options, see pyswagger/blob/master/pyswagger/io.py#L144
 
         :return: the final response.
@@ -94,11 +103,13 @@ class EsiClient(BaseClient):
                 headers=request.header
             )
         )
+
         res = self._session.send(
             prepared_request,
             stream=True
         )
 
+        response.raw_body_only = raw_body_only
         response.apply_with(
             status=res.status_code,
             header=res.headers,

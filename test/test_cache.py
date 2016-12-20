@@ -3,18 +3,17 @@
 # -- https://github.com/pycrest/PyCrest/blob/master/tests/test_pycrest.py
 from __future__ import absolute_import
 
-import errno
-import mock
-import six
-import unittest
 import memcache
+import mock
+import shutil
+import time
+import unittest
 
 from esipy.cache import BaseCache
 from esipy.cache import DictCache
 from esipy.cache import DummyCache
 from esipy.cache import FileCache
 from esipy.cache import MemcachedCache
-from six.moves import builtins
 
 
 class TestBaseCache(unittest.TestCase):
@@ -23,11 +22,11 @@ class TestBaseCache(unittest.TestCase):
     def setUp(self):
         self.c = BaseCache()
 
-    def test_base_cache_put(self):
+    def test_base_cache_set(self):
         self.assertRaises(NotImplementedError, self.c.get, 'key')
 
     def test_base_cache_get(self):
-        self.assertRaises(NotImplementedError, self.c.put, 'key', 'val')
+        self.assertRaises(NotImplementedError, self.c.set, 'key', 'val')
 
     def test_base_cache_invalidate(self):
         self.assertRaises(NotImplementedError, self.c.invalidate, 'key')
@@ -38,10 +37,10 @@ class TestDictCache(unittest.TestCase):
 
     def setUp(self):
         self.c = DictCache()
-        self.c.put('key', True)
+        self.c.set('key', True)
 
-    def test_dict_cache_put(self):
-        self.assertEqual(self.c._dict['key'], True)
+    def test_dict_cache_set(self):
+        self.assertEqual(self.c._dict['key'][0], True)
 
     def test_dict_cache_get(self):
         self.assertEqual(self.c.get('key'), True)
@@ -50,15 +49,22 @@ class TestDictCache(unittest.TestCase):
         self.c.invalidate('key')
         self.assertIsNone(self.c.get('key'))
 
+    def test_dict_cache_expiry(self):
+        self.assertEqual(self.c._dict['key'][0], True)
+        self.assertEqual(self.c.get('key'), True)
+        self.c._dict['key'] = (True, time.time() - 1)
+        self.assertIsNone(self.c.get('key'))
+        self.assertNotIn('key', self.c._dict)
+
 
 class TestDummyCache(unittest.TestCase):
     """ DummyCache test class. """
 
     def setUp(self):
         self.c = DummyCache()
-        self.c.put('never_stored', True)
+        self.c.set('never_stored', True)
 
-    def test_dummy_cache_put(self):
+    def test_dummy_cache_set(self):
         self.assertNotIn('never_stored', self.c._dict)
 
     def test_dummy_cache_get(self):
@@ -72,70 +78,34 @@ class TestDummyCache(unittest.TestCase):
 class TestFileCache(unittest.TestCase):
     """ Class for testing the filecache """
 
-    DIR = '/tmp/TestFileCache'
+    def setUp(self):
+        shutil.rmtree('tmp', ignore_errors=True)
+        self.c = FileCache('tmp')
 
-    @mock.patch('os.path.isdir')
-    @mock.patch('os.mkdir')
-    @mock.patch('{0}.open'.format(builtins.__name__))
-    def setUp(self, open_function, mkdir_function, isdir_function):
-        self.c = FileCache(TestFileCache.DIR)
-        self.c.put('key', 'value')
+    def tearDown(self):
+        del self.c
+        shutil.rmtree('tmp', ignore_errors=True)
 
-    @mock.patch('os.path.isdir', return_value=False)
-    @mock.patch('os.mkdir')
-    def test_file_cache_init(self, mkdir_function, isdir_function):
-        c = FileCache(TestFileCache.DIR)
+    def test_file_cache_set(self):
+        self.c.set('key', 'bar')
+        self.assertEqual(self.c.get('key'), 'bar')
 
-        # Ensure path has been set
-        self.assertEqual(c.path, TestFileCache.DIR)
+    def test_file_cache_get(self):
+        self.c.set('key', 'bar')
+        self.assertEqual(self.c.get('key'), 'bar')
 
-        # Ensure we checked if the dir was already there
-        args, kwargs = isdir_function.call_args
-        self.assertEqual((TestFileCache.DIR,), args)
+        self.c.set('expired', 'baz', -1)
+        self.assertEqual(
+            self.c.get('expired', 'default_because_expired'),
+            'default_because_expired'
+        )
+        self.assertEqual(self.c.get('expired'), None)
 
-        # Ensure we called mkdir with the right args
-        args, kwargs = mkdir_function.call_args
-        self.assertEqual((TestFileCache.DIR, 0o700), args)
-
-    def test_file_cache_get_uncached(self):
-        # Check non-existant key
-        self.assertIsNone(self.c.get('nope'))
-
-    @mock.patch('{0}.open'.format(builtins.__name__))
-    def test_file_cache_get_cached(self, open_function):
-        self.assertEqual(self.c.get('key'), 'value')
-
-    @unittest.skipIf(six.PY2, 'Python 2.x uses a diffrent protocol')
-    @mock.patch('{0}.open'.format(builtins.__name__), mock.mock_open(
-        read_data=b'x\x9ck`\ne-K\xcc)M-d\xd0\x03\x00\x17\xde\x03\x99'))
-    def test_file_cache_get_cached_file_py3(self):
-        del(self.c._cache['key'])
-        self.assertEqual(self.c.get('key'), 'value')
-
-    @unittest.skipIf(six.PY3, 'Python 3.x uses a diffrent protocol')
-    @mock.patch('{0}.open'.format(builtins.__name__), mock.mock_open(
-        read_data='x\x9ck`\ne-K\xcc)M-d\xd0\x03\x00\x17\xde\x03\x99'))
-    def test_file_cache_get_cached_file_py2(self):
-        del(self.c._cache['key'])
-        self.assertEqual(self.c.get('key'), 'value')
-
-    @mock.patch('os.unlink')
-    def test_file_cache_invalidate(self, unlink_function):
-        # Make sure our key is here in the first place
-        self.assertIn('key', self.c._cache)
-
-        # Unset the key and ensure unlink() was called
+    def test_file_cache_invalidate(self):
+        self.c.set('key', 'bar')
+        self.assertEqual(self.c.get('key'), 'bar')
         self.c.invalidate('key')
-        self.assertTrue(unlink_function.called)
-
-    @mock.patch(
-        'os.unlink',
-        side_effect=OSError(
-            errno.ENOENT,
-            'No such file or directory')
-    )
-    def test_file_cache_unlink_exception(self, unlink_function):
-        self.assertIsNone(self.c.invalidate('key'))
+        self.assertEqual(self.c.get('key'), None)
 
 
 class TestMemcachedCache(unittest.TestCase):
@@ -148,8 +118,8 @@ class TestMemcachedCache(unittest.TestCase):
         memcached.get = mock.MagicMock(return_value='value')
         self.c = MemcachedCache(memcached)
 
-    def test_memcached_put(self):
-        self.c.put('key', 'value')
+    def test_memcached_set(self):
+        self.c.set('key', 'value')
 
     def test_memcached_get(self):
         self.assertEqual(self.c.get('key'), 'value')
@@ -160,7 +130,3 @@ class TestMemcachedCache(unittest.TestCase):
     def test_memcached_invalid_argument(self):
         with self.assertRaises(TypeError):
             MemcachedCache(None)
-
-
-if __name__ == "__main__":
-    unittest.main()

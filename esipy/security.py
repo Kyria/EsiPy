@@ -70,8 +70,10 @@ class EsiSecurity(object):
         self._session = Session()
         self._session.headers.update({
             'Accept': 'application/json',
-            'User-Agent': ('EsiPy/Security/ - '
-                'https://github.com/Kyria/EsiPy')
+            'User-Agent': (
+                'EsiPy/Security/ - '
+                'https://github.com/Kyria/EsiPy'
+            )
         })
 
         # token data

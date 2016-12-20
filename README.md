@@ -1,6 +1,7 @@
-# EsiPy
+# EsiPy [![PyPI](https://img.shields.io/pypi/v/EsiPy.svg)](https://pypi.python.org/pypi/EsiPy) [![PyPI](https://img.shields.io/pypi/pyversions/EsiPy.svg)](https://pypi.python.org/pypi/EsiPy)
 
-[![Build Status](https://travis-ci.org/Kyria/EsiPy.svg?branch=master)](https://travis-ci.org/Kyria/EsiPy) [![Coverage Status](https://coveralls.io/repos/github/Kyria/EsiPy/badge.svg)](https://coveralls.io/github/Kyria/EsiPy)
+[![Build Status](https://travis-ci.org/Kyria/EsiPy.svg?branch=master)](https://travis-ci.org/Kyria/EsiPy) [![Coverage Status](https://coveralls.io/repos/github/Kyria/EsiPy/badge.svg)](https://coveralls.io/github/Kyria/EsiPy) [![Code Health](https://landscape.io/github/Kyria/EsiPy/master/landscape.svg?style=flat)](https://landscape.io/github/Kyria/EsiPy/master)
+
 
 ## What is EsiPy
 EsiPy is a python swagger client, taking advantages of [pyswagger](https://github.com/mission-liao/pyswagger) while rewriting some parts of it to be better used with EVE Online ESI API.
@@ -65,3 +66,8 @@ Operations are the different endpoint exposed from the API and are defined by en
 >>> char_location.data.station_id
 60004756
 ```
+
+## Contacts
+* Kyria
+    * Github: @Kyria
+    * [TweetFleet Slack](https://www.fuzzwork.co.uk/tweetfleet-slack-invites/): @althalus

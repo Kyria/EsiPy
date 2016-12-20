@@ -6,6 +6,7 @@ nose
 mock
 future
 python-memcached
+diskcache
 pyswagger
 requests
 six

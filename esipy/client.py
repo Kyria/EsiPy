@@ -5,12 +5,15 @@ from .cache import BaseCache
 from .cache import DictCache
 from .cache import DummyCache
 
+from collections import namedtuple
+from email.utils import parsedate
 from pyswagger.core import BaseClient
 from requests import Request
 from requests import Session
 from requests.adapters import HTTPAdapter
 
 import six
+import datetime
 
 
 class EsiClient(BaseClient):
@@ -86,29 +89,40 @@ class EsiClient(BaseClient):
         # required because of inheritance
         request, response = super(EsiClient, self).request(req_and_resp, opt)
 
-        # apply request-related options before preparation.
-        request.prepare(
-            scheme=self.prepare_schemes(request).pop(),
-            handle_files=False
-        )
-        request._patch(opt)
+        # check cache here so we have all headers, formed url and params
+        cache_key = self.__make_cache_key(request)
+        cached_response = self.cache.get(cache_key, None)
+        
+        if cached_response is not None:
+            res = cached_response
+            
+        else:
+            # apply request-related options before preparation.
+            request.prepare(
+                scheme=self.prepare_schemes(request).pop(),
+                handle_files=False
+            )            
+            request._patch(opt)
 
-        # prepare the request and make it.
-        prepared_request = self._session.prepare_request(
-            Request(
-                method=request.method.upper(),
-                url=request.url,
-                params=request.query,
-                data=request.data,
-                headers=request.header
+            # prepare the request and make it.
+            prepared_request = self._session.prepare_request(
+                Request(
+                    method=request.method.upper(),
+                    url=request.url,
+                    params=request.query,
+                    data=request.data,
+                    headers=request.header
+                )
             )
-        )
 
-        res = self._session.send(
-            prepared_request,
-            stream=True
-        )
-
+            res = self._session.send(
+                prepared_request,
+                stream=True
+            )
+            
+            if res.status_code == 200:
+                self.__cache_response(cache_key, res)
+        
         response.raw_body_only = raw_body_only
         response.apply_with(
             status=res.status_code,
@@ -117,3 +131,39 @@ class EsiClient(BaseClient):
         )
 
         return response
+        
+    def __cache_response(self, cache_key, res):
+        if 'expires' in res.headers:
+            # this date is ALWAYS in UTC (RFC 7231)
+            expire = datetime.datetime(
+                *parsedate(res.headers['expires'])[:6]
+            ).strftime('%s')
+            now = datetime.datetime.utcnow().strftime('%s')
+            cache_timeout = int(expire) - int(now)
+            
+        else:
+            # if no expire, define that there is no cache
+            # -1 will be now -1sec, so it'll expire
+            cache_timeout = -1
+        
+        # create a named tuple to store the data
+        CachedResponse = namedtuple(
+            'CachedResponse',
+            ['status_code', 'headers', 'content']
+        )                
+        self.cache.set(
+            cache_key,
+            CachedResponse(
+                status_code= res.status_code,
+                headers= res.headers,
+                content= res.content,
+            ), 
+            cache_timeout,
+        )
+ 
+
+    def __make_cache_key(self, request):
+        headers = frozenset(request._p['header'].items())
+        path = frozenset(request._p['path'].items())
+        query = frozenset(request._p['query'])
+        return (request.url, headers, path, query)

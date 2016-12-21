@@ -3,6 +3,8 @@ from __future__ import absolute_import
 
 from .mock import _all_auth_mock_
 from .mock import public_incursion
+from .mock import public_incursion_no_expires
+from .mock import public_incursion_no_expires_second
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -49,8 +51,13 @@ class TestEsiPy(unittest.TestCase):
             TestEsiPy.SECRET_KEY
         )
 
-        self.client = EsiClient(self.security)
-        self.client_no_auth = EsiClient()
+        self.cache = DictCache()
+        self.client = EsiClient(self.security, cache=self.cache)
+        self.client_no_auth = EsiClient(cache=self.cache)
+        
+    def tearDown(self):
+        """ clear the cache so we don't have residual data """
+        self.cache._dict = {}
 
     def test_esipy_client_instanciation(self):
         client_no_args = EsiClient()
@@ -119,3 +126,27 @@ class TestEsiPy(unittest.TestCase):
                 char_location_with_refresh.data.station_id,
                 60004756
             )
+
+    def test_client_cache_request(self):          
+        @httmock.all_requests
+        def fail_if_request(url, request):
+            self.fail('Cached data is not supposed to do requests')
+        
+        incursion_operation = self.app.op['get_incursions']
+
+        with httmock.HTTMock(public_incursion_no_expires):
+            incursions = self.client_no_auth.request(incursion_operation())
+            self.assertEqual(incursions.data[0].state, 'mobilizing')       
+            
+        with httmock.HTTMock(public_incursion_no_expires_second):
+            incursions = self.client_no_auth.request(incursion_operation())
+            self.assertEqual(incursions.data[0].state, 'established')    
+            
+        with httmock.HTTMock(public_incursion):
+            incursions = self.client_no_auth.request(incursion_operation())
+            self.assertEqual(incursions.data[0].state, 'mobilizing')  
+            
+        with httmock.HTTMock(fail_if_request):
+            incursions = self.client_no_auth.request(incursion_operation())
+            self.assertEqual(incursions.data[0].state, 'mobilizing')   
+        

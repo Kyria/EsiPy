@@ -26,7 +26,14 @@ class BaseCache(object):
     def invalidate(self, key):
         raise NotImplementedError
 
+    def _hash(self, data):
+        h = hashlib.new('md5')
+        h.update(pickle.dumps(data))
+        # prefix allows possibility of multiple applications
+        # sharing same keyspace
+        return 'esi_' + h.hexdigest()
 
+        
 class FileCache(BaseCache):
     """ BaseCache implementation using files to store the data.
     This implementation uses diskcache.Cache
@@ -53,13 +60,13 @@ class FileCache(BaseCache):
         self._cache.close()
 
     def set(self, key, value, timeout=300):
-        self._cache.set(key, value, expire=timeout)
+        self._cache.set(self._hash(key), value, expire=timeout)
 
     def get(self, key, default=None):
-        return self._cache.get(key, default)
+        return self._cache.get(self._hash(key), default)
 
     def invalidate(self, key):
-        self._cache.delete(key)
+        self._cache.delete(self._hash(key))
 
 
 class DictCache(BaseCache):
@@ -114,13 +121,6 @@ class MemcachedCache(BaseCache):
         if not isinstance(memcache_client, memcache.Client):
             raise TypeError('cache must be an instance of memcache.Client')
         self._mc = memcache_client
-
-    def _hash(self, data):
-        h = hashlib.new('md5')
-        h.update(pickle.dumps(data))
-        # prefix allows possibility of multiple applications
-        # sharing same keyspace
-        return 'pyc_' + h.hexdigest()
 
     def get(self, key, default=None):
         value = self._mc.get(self._hash(key))

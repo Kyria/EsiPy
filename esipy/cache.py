@@ -33,7 +33,7 @@ class BaseCache(object):
         # sharing same keyspace
         return 'esi_' + h.hexdigest()
 
-        
+
 class FileCache(BaseCache):
     """ BaseCache implementation using files to store the data.
     This implementation uses diskcache.Cache

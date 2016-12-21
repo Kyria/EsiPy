@@ -54,7 +54,7 @@ class TestEsiPy(unittest.TestCase):
         self.cache = DictCache()
         self.client = EsiClient(self.security, cache=self.cache)
         self.client_no_auth = EsiClient(cache=self.cache)
-        
+
     def tearDown(self):
         """ clear the cache so we don't have residual data """
         self.cache._dict = {}
@@ -127,26 +127,25 @@ class TestEsiPy(unittest.TestCase):
                 60004756
             )
 
-    def test_client_cache_request(self):          
+    def test_client_cache_request(self):
         @httmock.all_requests
         def fail_if_request(url, request):
             self.fail('Cached data is not supposed to do requests')
-        
+
         incursion_operation = self.app.op['get_incursions']
 
         with httmock.HTTMock(public_incursion_no_expires):
             incursions = self.client_no_auth.request(incursion_operation())
-            self.assertEqual(incursions.data[0].state, 'mobilizing')       
-            
+            self.assertEqual(incursions.data[0].state, 'mobilizing')
+
         with httmock.HTTMock(public_incursion_no_expires_second):
             incursions = self.client_no_auth.request(incursion_operation())
-            self.assertEqual(incursions.data[0].state, 'established')    
-            
+            self.assertEqual(incursions.data[0].state, 'established')
+
         with httmock.HTTMock(public_incursion):
             incursions = self.client_no_auth.request(incursion_operation())
-            self.assertEqual(incursions.data[0].state, 'mobilizing')  
-            
+            self.assertEqual(incursions.data[0].state, 'mobilizing')
+
         with httmock.HTTMock(fail_if_request):
             incursions = self.client_no_auth.request(incursion_operation())
-            self.assertEqual(incursions.data[0].state, 'mobilizing')   
-        
+            self.assertEqual(incursions.data[0].state, 'mobilizing')

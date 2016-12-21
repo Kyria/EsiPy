@@ -130,7 +130,7 @@ def public_incursion_no_expires(url, request):
         ]
     )
 
-    
+
 @httmock.urlmatch(
     scheme="https",
     netloc=r"esi\.tech\.ccp\.is$",

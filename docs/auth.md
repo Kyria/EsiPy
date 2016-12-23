@@ -2,6 +2,8 @@
 
 If you want to access endpoints that require some Auth, you'll have to use a EsiSecurity object.
 
+
+
 ## EsiSecurity
 
 The EsiSecurity provides everything you need that is related to OAuth and SSO for the ESI API.
@@ -28,6 +30,8 @@ The redirect URI, the client ID and the secret key are all get and set on [Eve D
 >>> esi_client = EsiClient(esi_security)
 ```
 
+
+
 ## Authorization URI
 
 ### Normal flow
@@ -42,6 +46,7 @@ u'https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=ht
 u'https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A65430%2Fcallback&client_id=foobarbazclient_id&scope=your+scopes&state=thestate'
 ```
 
+
 ### Implicit flow
 
 If you don't want to ship your secret_key in your app, you can use the implicit flow authentication process. To do this, add the `implicit=True` parameter
@@ -50,6 +55,8 @@ If you don't want to ship your secret_key in your app, you can use the implicit 
 u'https://login.eveonline.com/oauth/authorize?response_type=token&redirect_uri=http%3A%2F%2F91.121.112.50%3A65430%2Fcallback&client_id=a5b6c74daf704408bfa84f46975ed73a'
 ```
 The main difference is the `response_type=token` value.
+
+
 
 
 ## Authentication
@@ -61,12 +68,16 @@ Now that you have the code from the previous user auth, you'll have to tell the 
 ```
 And you are done. You can now do you requests and the security object (you gave to the client) will be automatically called. If the endpoint requires auth header, they will be automatically set.
 
+
+
 ### Implicit flow
 With implicit flow, you get the `access_token` and `expires_in` values in the URL hash parameter.
 Once you get them, you'll have to manually update the security object:
 ```
 >>> esi_security.update_token({'access_token': 'the token', 'expires_in': 123456})
 ```
+
+
 
 
 ## Refresh
@@ -78,6 +89,8 @@ If you want to manually refresh it, you just have to call the refresh method:
 ```
 
 When a refresh is done while doing a request, a notification is send to the `after_token_refresh` [signal](advance/signals.md)
+
+
 
 
 ## Get the character informations

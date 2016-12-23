@@ -54,7 +54,7 @@ The main difference is the `response_type=token` value.
 
 ## Authentication
 
-### Normal flow 
+### Normal flow
 Now that you have the code from the previous user auth, you'll have to tell the security object to get the tokens.
 ```
 >>> esi_security.auth('code')
@@ -77,7 +77,7 @@ If you want to manually refresh it, you just have to call the refresh method:
 >>> esi_security.refresh()
 ```
 
-When a refresh is done while doing a request, a notification is send to the `after_token_refresh` [signal](advance/signal.md)
+When a refresh is done while doing a request, a notification is send to the `after_token_refresh` [signal](advance/signals.md)
 
 
 ## Get the character informations

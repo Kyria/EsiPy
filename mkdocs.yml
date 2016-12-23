@@ -7,7 +7,7 @@ pages:
 - 'SSO Authentication': 'auth.md'
 - 'Advanced usage':
     - 'Cache': 'advance/cache.md'
-    - 'Signal': 'advance/signal.md'
+    - 'Signal': 'advance/signals.md'
 - About:
     - 'Contact/Contributors': 'about/contact.md'
     - 'Licence': 'about/licence.md'

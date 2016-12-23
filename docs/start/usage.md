@@ -1,6 +1,6 @@
 # Usage
 
-To use EsiPy, you'll have to define a client, an app, and if you need it, a security object (see the [SSO Authentication](auth.md) section)
+To use EsiPy, you'll have to define a client, an app, and if you need it, a security object (see the [SSO Authentication](../auth.md) section)
 
 
 ## The App
@@ -12,19 +12,19 @@ The App object is actually a pyswagger object. You can import it from esipy as a
 >>> from esipy import App
 >>> esi_app = App.create('https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility')
 ```
-And you are done. 
+And you are done.
 
 For more detail about this object, please read the pyswagger documentation.
 
 
 ## The EsiClient
 
-The client is only here to do some basic tasks : 
-- [Caching](advance/cache.md)
+The client is only here to do some basic tasks :
+- [Caching](../advance/cache.md)
 - Doing the requests
 - Asking the security object to do its job.
 
-All EsiClient init parameters are optional and it will work with a simple: 
+All EsiClient init parameters are optional and it will work with a simple:
 ```
 >>> from esipy import EsiClient
 >>> esi_client = EsiClient()

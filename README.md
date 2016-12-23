@@ -1,4 +1,5 @@
-# EsiPy [![PyPI](https://img.shields.io/pypi/v/EsiPy.svg)](https://pypi.python.org/pypi/EsiPy) [![PyPI](https://img.shields.io/pypi/pyversions/EsiPy.svg)](https://pypi.python.org/pypi/EsiPy)
+# EsiPy [![PyPI](https://img.shields.io/pypi/v/EsiPy.svg)](https://pypi.python.org/pypi/EsiPy) [![PyPI](https://img.shields.io/pypi/pyversions/EsiPy.svg)](https://pypi.python.org/pypi/EsiPy) [![Documentation Status](https://readthedocs.org/projects/esipy/badge/?version=latest)](http://esipy.readthedocs.io/en/latest/?badge=latest)
+
 
 [![Build Status](https://travis-ci.org/Kyria/EsiPy.svg?branch=master)](https://travis-ci.org/Kyria/EsiPy) [![Coverage Status](https://coveralls.io/repos/github/Kyria/EsiPy/badge.svg)](https://coveralls.io/github/Kyria/EsiPy) [![Code Health](https://landscape.io/github/Kyria/EsiPy/master/landscape.svg?style=flat)](https://landscape.io/github/Kyria/EsiPy/master)
 

@@ -31,6 +31,7 @@ All EsiClient init parameters are optional and it will work with a simple:
 ```
 
 Here are the parameters you can pass the `EsiClient()`:
+
 Parameter | Type | Description
 --------- | ---- | -----------
 security  | EsiSecurity | The security object that will manage the security parts
@@ -60,7 +61,7 @@ If your endpoint is waiting for path parameters or query parameters, this is als
     type_id=34,
     order_type='all',
 )
-
+```
 
 ## Make the request and get the response.
 

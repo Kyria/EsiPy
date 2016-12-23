@@ -40,8 +40,10 @@ u'https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=ht
 # if you need specific scopes, or state value
 >>> esi_security.get_auth_uri(scopes=['your','scopes'], state='thestate')
 u'https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A65430%2Fcallback&client_id=foobarbazclient_id&scope=your+scopes&state=thestate'
+```
 
 ### Implicit flow
+
 If you don't want to ship your secret_key in your app, you can use the implicit flow authentication process. To do this, add the `implicit=True` parameter
 ```
 >>> esi_security.get_auth_uri(implicit=True)

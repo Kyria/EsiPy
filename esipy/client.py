@@ -6,14 +6,15 @@ from .cache import DictCache
 from .cache import DummyCache
 
 from collections import namedtuple
+from datetime import datetime
 from email.utils import parsedate
 from pyswagger.core import BaseClient
 from requests import Request
 from requests import Session
 from requests.adapters import HTTPAdapter
 
+
 import six
-import datetime
 
 
 class EsiClient(BaseClient):
@@ -135,10 +136,14 @@ class EsiClient(BaseClient):
     def __cache_response(self, cache_key, res):
         if 'expires' in res.headers:
             # this date is ALWAYS in UTC (RFC 7231)
-            expire = datetime.datetime(
-                *parsedate(res.headers['expires'])[:6]
-            ).strftime('%s')
-            now = datetime.datetime.utcnow().strftime('%s')
+            #
+            epoch = datetime(1970, 1, 1)
+            expire = (
+                datetime(
+                    *parsedate(res.headers['expires'])[:6]
+                ) - epoch
+            ).total_seconds()
+            now = (datetime.utcnow() - epoch).total_seconds()
             cache_timeout = int(expire) - int(now)
 
         else:

@@ -22,7 +22,7 @@ test_requirements = [
     "python-memcached"
 ] + install_requirements
 
-with io.open('README.md', encoding='UTF-8') as reader:
+with io.open('README.rst', encoding='UTF-8') as reader:
     readme = reader.read()
 
 setup(

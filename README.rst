@@ -1,7 +1,9 @@
-EsiPy |PyPI Version| |PyPI Python Version| |Documentation Status|
-=================================================================
+EsiPy |PyPI Version| |PyPI Python Version|
+==========================================
 
 |Build Status| |Coverage Status| |Code Health|
+
+Documentation: |Documentation Status|
 
 What is EsiPy
 -------------

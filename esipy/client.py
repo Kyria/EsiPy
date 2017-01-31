@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from .cache import BaseCache
 from .cache import DictCache
 from .cache import DummyCache
+from .events import api_call_stats
 
 from collections import namedtuple
 from datetime import datetime
@@ -13,8 +14,12 @@ from requests import Request
 from requests import Session
 from requests.adapters import HTTPAdapter
 
-
+import time
 import six
+import warnings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EsiClient(BaseClient):
@@ -32,15 +37,19 @@ class EsiClient(BaseClient):
             **kwargs):
         """ Init the ESI client object
 
-        :param security: (optionnal) the security object [default: None]
-        :param headers: (optionnal) additional headers we want to add
-        :param transport_adapter: (optionnal) an HTTPAdapter object / implement
-        :param cache: (optionnal) esipy.cache.BaseCache cache implementation.
-        expiry date of the token
+        :param security: (optional) the security object [default: None]
+        :param headers: (optional) additional headers we want to add
+        :param transport_adapter: (optional) an HTTPAdapter object / implement
+        :param cache: (optional) esipy.cache.BaseCache cache implementation.
+        :param raw_body_only: (optional) default value [False] for all requests
+
         """
         super(EsiClient, self).__init__(security)
         self.security = security
         self._session = Session()
+
+        # store default raw_body_only in case user never want parsing
+        self.raw_body_only = kwargs.pop('raw_body_only', False)
 
         # check for specified headers and update session.headers
         headers = kwargs.pop('headers', {})
@@ -70,7 +79,7 @@ class EsiClient(BaseClient):
             else:
                 raise ValueError('Provided cache must implement BaseCache')
 
-    def request(self, req_and_resp, raw_body_only=False, opt={}):
+    def request(self, req_and_resp, raw_body_only=None, opt={}):
         """ Take a request_and_response object from pyswagger.App and
         check auth, token, headers, prepare the actual request and fill the
         response
@@ -115,28 +124,45 @@ class EsiClient(BaseClient):
                     headers=request.header
                 )
             )
-
+            start_api_call = time.time()
             res = self._session.send(
                 prepared_request,
                 stream=True
             )
 
+            # event for api call stats
+            api_call_stats.send(
+                url=res.url,
+                status_code=res.status_code,
+                elapsed_time=time.time() - start_api_call,
+                message=res.content if res.status_code != 200 else None
+            )
+
             if res.status_code == 200:
                 self.__cache_response(cache_key, res)
 
-        response.raw_body_only = raw_body_only
+        if raw_body_only is None:
+            response.raw_body_only = self.raw_body_only
+        else:
+            response.raw_body_only = raw_body_only
+
         response.apply_with(
             status=res.status_code,
             header=res.headers,
             raw=six.BytesIO(res.content).getvalue()
         )
 
+        if 'warning' in res.headers:
+            # send in logger and warnings, so the user doesn't have to use
+            # logging to see it (at least once)
+            logger.warning("[%s] %s" % (res.url, res.headers['warning']))
+            warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
+
         return response
 
     def __cache_response(self, cache_key, res):
         if 'expires' in res.headers:
             # this date is ALWAYS in UTC (RFC 7231)
-            #
             epoch = datetime(1970, 1, 1)
             expire = (
                 datetime(

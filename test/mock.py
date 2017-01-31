@@ -178,6 +178,35 @@ def auth_character_location(url, request):
     )
 
 
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"esi\.tech\.ccp\.is$",
+    path=r"^/latest/incursions/$"
+)
+def public_incursion_warning(url, request):
+    """ Mock endpoint for incursion.
+    Public endpoint without cache
+    """
+    return httmock.response(
+        status_code=200,
+        headers={"Warning": "199 - This endpoint has been updated."},
+        content=[
+            {
+                "type": "Incursion",
+                "state": "established",
+                "staging_solar_system_id": 30003893,
+                "constellation_id": 20000568,
+                "infested_solar_systems": [
+                    30003888,
+                ],
+                "has_boss": True,
+                "faction_id": 500019,
+                "influence": 1
+            }
+        ]
+    )
+
+
 _all_auth_mock_ = [
     oauth_token,
     oauth_verify,

@@ -9,7 +9,7 @@ except ImportError:  # pragma: no cover
 
 import logging
 
-logger = logging.getLogger("esipy.cache")
+logger = logging.getLogger(__name__)
 
 
 class BaseCache(object):

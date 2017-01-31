@@ -2,7 +2,7 @@
 import logging
 import sys
 
-logger = logging.getLogger("esipy.events")
+logger = logging.getLogger(__name__)
 
 
 class Signal(object):
@@ -56,3 +56,4 @@ class Signal(object):
 
 # define required alarms
 after_token_refresh = Signal()
+api_call_stats = Signal()

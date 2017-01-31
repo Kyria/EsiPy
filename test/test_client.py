@@ -5,6 +5,7 @@ from .mock import _all_auth_mock_
 from .mock import public_incursion
 from .mock import public_incursion_no_expires
 from .mock import public_incursion_no_expires_second
+from .mock import public_incursion_warning
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -18,6 +19,7 @@ import httmock
 import mock
 import six
 import unittest
+import warnings
 
 import logging
 # set pyswagger logger to error, as it displays too much thing for test needs
@@ -59,7 +61,7 @@ class TestEsiPy(unittest.TestCase):
         """ clear the cache so we don't have residual data """
         self.cache._dict = {}
 
-    def test_esipy_client_instanciation(self):
+    def test_esipy_client_no_args(self):
         client_no_args = EsiClient()
         self.assertIsNone(client_no_args.security)
         self.assertTrue(isinstance(client_no_args.cache, DictCache))
@@ -67,13 +69,16 @@ class TestEsiPy(unittest.TestCase):
             client_no_args._session.headers['User-Agent'],
             'EsiPy/Client - https://github.com/Kyria/EsiPy'
         )
+        self.assertEqual(client_no_args.raw_body_only, False)
 
+    def test_esipy_client_with_headers(self):
         client_with_headers = EsiClient(headers={'User-Agent': 'foobar'})
         self.assertEqual(
             client_with_headers._session.headers['User-Agent'],
             'foobar'
         )
 
+    def test_esipy_client_with_adapter(self):
         transport_adapter = HTTPAdapter()
         client_with_adapters = EsiClient(
             transport_adapter=transport_adapter
@@ -87,18 +92,21 @@ class TestEsiPy(unittest.TestCase):
             transport_adapter
         )
 
+    def test_esipy_client_without_cache(self):
         client_without_cache = EsiClient(cache=None)
         self.assertTrue(isinstance(client_without_cache.cache, DummyCache))
 
+    def test_esipy_client_with_cache(self):
         cache = DictCache()
         client_with_cache = EsiClient(cache=cache)
         self.assertTrue(isinstance(client_with_cache.cache, BaseCache))
         self.assertEqual(client_with_cache.cache, cache)
 
+    def test_esipy_client_wrong_cache(self):
         with self.assertRaises(ValueError):
             EsiClient(cache=DictCache)
 
-    def test_esipy_request(self):
+    def test_esipy_request_public(self):
         with httmock.HTTMock(public_incursion):
             incursions = self.client_no_auth.request(
                 self.app.op['get_incursions']()
@@ -106,6 +114,7 @@ class TestEsiPy(unittest.TestCase):
             self.assertEqual(incursions.data[0].type, 'Incursion')
             self.assertEqual(incursions.data[0].faction_id, 500019)
 
+    def test_esipy_request_authed(self):
         with httmock.HTTMock(*_all_auth_mock_):
             self.security.auth('let it bee')
             char_location = self.client.request(
@@ -149,3 +158,26 @@ class TestEsiPy(unittest.TestCase):
         with httmock.HTTMock(fail_if_request):
             incursions = self.client_no_auth.request(incursion_operation())
             self.assertEqual(incursions.data[0].state, 'mobilizing')
+
+    def test_client_warning_header(self):
+        with httmock.HTTMock(public_incursion_warning):
+            warnings.simplefilter('error')
+            incursion_operation = self.app.op['get_incursions']
+
+            with self.assertRaises(UserWarning):
+                self.client_no_auth.request(incursion_operation())
+
+    def test_client_raw_body_only(self):
+        client = EsiClient(raw_body_only=True)
+        self.assertEqual(client.raw_body_only, True)
+
+        with httmock.HTTMock(public_incursion):
+            incursions = client.request(self.app.op['get_incursions']())
+            self.assertIsNone(incursions.data)
+            self.assertTrue(len(incursions.raw) > 0)
+
+            incursions = client.request(
+                self.app.op['get_incursions'](),
+                raw_body_only=False
+            )
+            self.assertIsNotNone(incursions.data)

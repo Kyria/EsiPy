@@ -96,8 +96,16 @@ class EsiClient(BaseClient):
 
         :return: the final response.
         """
+        # reset the request and response to reuse existing req_and_resp
+        base_request, base_response = req_and_resp
+        base_request.reset()
+        base_response.reset()
+
         # required because of inheritance
-        request, response = super(EsiClient, self).request(req_and_resp, opt)
+        request, response = super(EsiClient, self).request(
+            (base_request, base_response),
+            opt
+        )
 
         # check cache here so we have all headers, formed url and params
         cache_key = self.__make_cache_key(request)

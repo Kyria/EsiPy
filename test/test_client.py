@@ -181,3 +181,13 @@ class TestEsiPy(unittest.TestCase):
                 raw_body_only=False
             )
             self.assertIsNotNone(incursions.data)
+
+    def test_esipy_reuse_operation(self):
+        operation = self.app.op['get_incursions']()
+        with httmock.HTTMock(public_incursion):
+            incursions = self.client_no_auth.request(operation)
+            self.assertEqual(incursions.data[0].faction_id, 500019)
+
+            # this shouldn't create any errors
+            incursions = self.client_no_auth.request(operation)
+            self.assertEqual(incursions.data[0].faction_id, 500019)

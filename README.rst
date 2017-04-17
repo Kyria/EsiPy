@@ -13,6 +13,11 @@ EsiPy is a python swagger client, taking advantages of `pyswagger`_
 while rewriting some parts of it to be better used with EVE Online ESI
 API.
 
+Example using EsiPy
+-------------------
+
+If you need it, you can find here an example of webapp using `Flask+EsiPy`_ 
+
 Contacts
 --------
 
@@ -22,7 +27,7 @@ Contacts
    -  `TweetFleet Slack <https://www.fuzzwork.co.uk/tweetfleet-slack-invites/>`_: @althalus
 
 .. _pyswagger: https://github.com/mission-liao/pyswagger
-
+.. _Flask+EsiPy: https://github.com/Kyria/flask-esipy-example
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/EsiPy.svg
    :target: https://pypi.python.org/pypi/EsiPy
 .. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/EsiPy.svg

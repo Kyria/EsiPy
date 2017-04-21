@@ -13,6 +13,7 @@ from pyswagger.core import BaseClient
 from requests import Request
 from requests import Session
 from requests.adapters import HTTPAdapter
+from concurrent.futures import ThreadPoolExecutor
 
 import time
 import six
@@ -31,13 +32,11 @@ class EsiClient(BaseClient):
         'tranquility': 'https://imageserver.eveonline.com/',
     }
 
-    def __init__(
-            self,
-            security=None,
-            **kwargs):
+    def __init__(self, security=None, retry_requests=False, **kwargs):
         """ Init the ESI client object
 
         :param security: (optional) the security object [default: None]
+        :param retry_requests: (optional) use a retry loop for all requests
         :param headers: (optional) additional headers we want to add
         :param transport_adapter: (optional) an HTTPAdapter object / implement
         :param cache: (optional) esipy.cache.BaseCache cache implementation.
@@ -47,6 +46,12 @@ class EsiClient(BaseClient):
         super(EsiClient, self).__init__(security)
         self.security = security
         self._session = Session()
+
+        # set the proper request implementation
+        if retry_requests:
+            self.request = self._retry_request
+        else:
+            self.request = self._request
 
         # store default raw_body_only in case user never want parsing
         self.raw_body_only = kwargs.pop('raw_body_only', False)
@@ -79,7 +84,71 @@ class EsiClient(BaseClient):
             else:
                 raise ValueError('Provided cache must implement BaseCache')
 
-    def request(self, req_and_resp, raw_body_only=None, opt={}):
+    def _retry_request(self, req_and_resp, _retry=0, **kwargs):
+        """Uses self._request in a sane retry loop (for 5xx level errors).
+
+        Do not use the _retry parameter, use the same params as _request
+
+        Used when ESIClient is initialized with retry_requests=True
+        """
+
+        if _retry:
+            # backoff delay loop in seconds: 0.01, 0.16, 0.81, 2.56, 6.25
+            time.sleep(_retry ** 4 / 100)
+
+        res = self._request(req_and_resp, **kwargs)
+
+        if 500 <= res.status <= 599:
+            _retry += 1
+            if _retry < 5:
+                logger.warning(
+                    "[failure #%d] %s %d: %r",
+                    _retry,
+                    res._Response__path,
+                    res.status,
+                    res.data,
+                )
+                return self._retry_request(
+                    req_and_resp,
+                    _retry=_retry,
+                    **kwargs
+                )
+
+        return res
+
+    def multi_request(self, reqs_and_resps, raw_body_only=None, opt=None,
+                      threads=20):
+        """Use a threadpool to send multiple requests in parallel.
+
+        :param reqs_and_resps: iterable of req_and_resp tuples
+        :param raw_body_only: applied to every request call
+        :param opt: applies to every request call
+        :param threads: number of concurrent workers to use
+
+        :return: a list of [(pyswagger.io.Request, pyswagger.io.Response), ...]
+        """
+
+        # you shouldnt need more than 100, 20 is probably fine in most cases
+        threads = max(min(threads, 100), 1)
+
+        def _multi_shim(req_and_resp):
+            """Shim self.request to also return the original request."""
+
+            return req_and_resp[0], self.request(
+                req_and_resp,
+                raw_body_only=raw_body_only,
+                opt=opt,
+            )
+
+        results = []
+
+        with ThreadPoolExecutor(max_workers=threads) as pool:
+            for result in pool.map(_multi_shim, reqs_and_resps):
+                results.append(result)
+
+        return results
+
+    def _request(self, req_and_resp, raw_body_only=None, opt=None):
         """ Take a request_and_response object from pyswagger.App and
         check auth, token, headers, prepare the actual request and fill the
         response
@@ -96,6 +165,10 @@ class EsiClient(BaseClient):
 
         :return: the final response.
         """
+
+        if opt is None:
+            opt = {}
+
         # reset the request and response to reuse existing req_and_resp
         base_request, base_response = req_and_resp
         base_request.reset()

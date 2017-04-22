@@ -199,7 +199,8 @@ class TestEsiPy(unittest.TestCase):
 
         with httmock.HTTMock(public_incursion):
             count = 0
-            for req, incursions in self.client_no_auth.multi_request([operation,operation,operation], threads=2):
+            for req, incursions in self.client_no_auth.multi_request(
+                    [operation, operation, operation], threads=2):
                 self.assertEqual(incursions.data[0].faction_id, 500019)
                 count += 1
             

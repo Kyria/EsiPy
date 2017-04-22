@@ -6,6 +6,7 @@ from .mock import public_incursion
 from .mock import public_incursion_no_expires
 from .mock import public_incursion_no_expires_second
 from .mock import public_incursion_warning
+from .mock import public_incursion_server_error
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -17,6 +18,7 @@ from requests.adapters import HTTPAdapter
 
 import httmock
 import mock
+import time
 import six
 import unittest
 import warnings
@@ -55,7 +57,7 @@ class TestEsiPy(unittest.TestCase):
 
         self.cache = DictCache()
         self.client = EsiClient(self.security, cache=self.cache)
-        self.client_no_auth = EsiClient(cache=self.cache)
+        self.client_no_auth = EsiClient(cache=self.cache, retry_requests=True)
 
     def tearDown(self):
         """ clear the cache so we don't have residual data """
@@ -191,3 +193,33 @@ class TestEsiPy(unittest.TestCase):
             # this shouldn't create any errors
             incursions = self.client_no_auth.request(operation)
             self.assertEqual(incursions.data[0].faction_id, 500019)
+
+    def test_esipy_multi_request(self):
+        operation = self.app.op['get_incursions']()
+
+        with httmock.HTTMock(public_incursion):
+            count = 0
+            for req, incursions in self.client_no_auth.multi_request(
+                    [operation, operation, operation], threads=2):
+                self.assertEqual(incursions.data[0].faction_id, 500019)
+                count += 1
+
+            # Check we made 3 requests
+            self.assertEqual(count, 3)
+
+    def test_esipy_backoff(self):
+        operation = self.app.op['get_incursions']()
+
+        start_calls = time.time()
+
+        with httmock.HTTMock(public_incursion_server_error):
+            incursions = self.client_no_auth.request(operation)
+            self.assertEqual(incursions.data.error, 'broke')
+
+        end_calls = time.time()
+
+        # Check we retried 5 times
+        self.assertEqual(incursions.data.count, 5)
+
+        # Check that backoff slept for a sum > 2 seconds
+        self.assertTrue(end_calls - start_calls > 2)

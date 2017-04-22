@@ -194,7 +194,7 @@ class TestEsiPy(unittest.TestCase):
             incursions = self.client_no_auth.request(operation)
             self.assertEqual(incursions.data[0].faction_id, 500019)
 
-    def test_esipy_multi_request(self): 
+    def test_esipy_multi_request(self):
         operation = self.app.op['get_incursions']()
 
         with httmock.HTTMock(public_incursion):
@@ -203,11 +203,11 @@ class TestEsiPy(unittest.TestCase):
                     [operation, operation, operation], threads=2):
                 self.assertEqual(incursions.data[0].faction_id, 500019)
                 count += 1
-            
+
             # Check we made 3 requests
             self.assertEqual(count, 3)
 
-    def test_esipy_backoff(self): 
+    def test_esipy_backoff(self):
         operation = self.app.op['get_incursions']()
 
         start_calls = time.time()
@@ -217,7 +217,7 @@ class TestEsiPy(unittest.TestCase):
             self.assertEqual(incursions.data.error, 'broke')
 
         end_calls = time.time()
-  
+
         # Check we retried 5 times
         self.assertEqual(incursions.data.count, 5)
 

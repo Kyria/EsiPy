@@ -207,6 +207,25 @@ def public_incursion_warning(url, request):
     )
 
 
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"esi\.tech\.ccp\.is$",
+    path=r"^/latest/incursions/$"
+)
+def public_incursion_server_error(url, request):
+    """ Mock endpoint for incursion.
+    Public endpoint without cache
+    """
+    public_incursion_server_error.count += 1
+    return httmock.response(
+        status_code=500,
+        content={            
+            "error": "broke",
+            "count": public_incursion_server_error.count
+        }
+    )
+public_incursion_server_error.count = 0
+
 _all_auth_mock_ = [
     oauth_token,
     oauth_verify,

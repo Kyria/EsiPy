@@ -104,9 +104,18 @@ class EsiClient(BaseClient):
                 pass
 
             res = Object()
-            res._Response__path = e.message.url
+            try:
+                res._Response__path = e.message.url
+            except:
+                # Some error responses don't have a path.  Specifically SSL errors due to early EOF.
+                res._Response__path = ""
+
             res.status = 500
-            res.data = e.message.message
+
+            try:
+                res.data = e.message.message
+            except:
+                res.data = ""
 
         if 500 <= res.status <= 599:
             _retry += 1

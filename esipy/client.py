@@ -106,7 +106,7 @@ class EsiClient(BaseClient):
             res = Object()
             try:
                 res._Response__path = e.message.url
-            except:
+            except AttributeError:
                 # Some error responses don't have a path.  Specifically SSL errors due to early EOF.
                 res._Response__path = ""
 

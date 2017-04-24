@@ -12,7 +12,7 @@ from email.utils import parsedate
 from pyswagger.core import BaseClient
 from requests import Request
 from requests import Session
-from requests.exceptions import ConnectionError, ConnectTimeout
+from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout
 from requests.adapters import HTTPAdapter
 from concurrent.futures import ThreadPoolExecutor
 
@@ -99,7 +99,7 @@ class EsiClient(BaseClient):
 
         try:
             res = self._request(req_and_resp, **kwargs)
-        except (ConnectionError, ConnectTimeout) as e:
+        except (RequestsConnectionError, Timeout) as e:
             class Object(object):
                 pass
 

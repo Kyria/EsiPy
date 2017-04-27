@@ -25,6 +25,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# create a named tuple to store the data
+CachedResponse = namedtuple(
+    'CachedResponse',
+    ['status_code', 'headers', 'content', 'url']
+)
+
 
 class EsiClient(BaseClient):
 
@@ -99,14 +105,7 @@ class EsiClient(BaseClient):
             # backoff delay loop in seconds: 0.01, 0.16, 0.81, 2.56, 6.25
             time.sleep(_retry ** 4 / 100)
 
-        try:
-            res = self._request(req_and_resp, **kwargs)
-        except (RequestsConnectionError, Timeout) as e:
-            req, res = req_and_resp
-            res._Response__status = 500
-            # request__path is the same as response, and is always set
-            res._Response__path = req._Request__path
-            res._Response__data = str(e)
+        res = self._request(req_and_resp, **kwargs)
 
         if 500 <= res.status <= 599:
             _retry += 1
@@ -216,10 +215,22 @@ class EsiClient(BaseClient):
                 )
             )
             start_api_call = time.time()
-            res = self._session.send(
-                prepared_request,
-                stream=True
-            )
+
+            try:
+                res = self._session.send(
+                    prepared_request,
+                    stream=True
+                )
+
+            except (RequestsConnectionError, Timeout) as e:
+                # timeout issue, generate a fake response to finish the process
+                # as a normal error 500
+                res = CachedResponse(
+                    status_code=500,
+                    headers={},
+                    content='{"error": "%s"}' % str(e),
+                    url=prepared_request.url
+                )
 
             # event for api call stats
             api_call_stats.send(
@@ -268,17 +279,13 @@ class EsiClient(BaseClient):
             # -1 will be now -1sec, so it'll expire
             cache_timeout = -1
 
-        # create a named tuple to store the data
-        CachedResponse = namedtuple(
-            'CachedResponse',
-            ['status_code', 'headers', 'content']
-        )
         self.cache.set(
             cache_key,
             CachedResponse(
                 status_code=res.status_code,
                 headers=res.headers,
                 content=res.content,
+                url=res.url,
             ),
             cache_timeout,
         )

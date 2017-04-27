@@ -15,6 +15,7 @@ from esipy.cache import DictCache
 from esipy.cache import DummyCache
 
 from requests.adapters import HTTPAdapter
+from requests.exceptions import ConnectionError
 
 import httmock
 import mock
@@ -223,3 +224,23 @@ class TestEsiPy(unittest.TestCase):
 
         # Check that backoff slept for a sum > 2 seconds
         self.assertTrue(end_calls - start_calls > 2)
+
+    def test_esipy_timeout(self):
+        def send_function(*args, **kwargs):
+            """ manually create a ConnectionError to test the retry and be sure
+            no exception is thrown """
+            send_function.count += 1
+            raise ConnectionError
+        send_function.count = 0
+
+        self.client_no_auth._session.send = mock.MagicMock(
+            side_effect=send_function
+        )
+
+        operation = self.app.op['get_incursions']()
+        with httmock.HTTMock(public_incursion):
+            incursions = self.client_no_auth.request(operation)
+            # there shouldn't be any exceptions
+
+        self.assertEqual(incursions.status, 500)
+        self.assertEqual(send_function.count, 5)

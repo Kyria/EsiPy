@@ -103,14 +103,10 @@ class EsiClient(BaseClient):
             res = self._request(req_and_resp, **kwargs)
         except (RequestsConnectionError, Timeout) as e:
             req, res = req_and_resp
-            res.status = 500
+            res._Response__status = 500
             # request__path is the same as response, and is always set
             res._Response__path = req._Request__path
-
-            try:
-                res.data = e.message.message
-            except AttributeError:
-                res.data = ""
+            res._Response__data = str(e)
 
         if 500 <= res.status <= 599:
             _retry += 1

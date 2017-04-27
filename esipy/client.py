@@ -100,21 +100,13 @@ class EsiClient(BaseClient):
         try:
             res = self._request(req_and_resp, **kwargs)
         except (RequestsConnectionError, Timeout) as e:
-            class Object(object):
-                pass
-
-            res = Object()
-            try:
-                res._Response__path = e.message.url
-            except AttributeError:
-                # Some error responses don't have a path.  Specifically SSL errors due to early EOF.
-                res._Response__path = ""
-
+            req, res = req_and_resp
             res.status = 500
+            res._Response__path = req._Request__path  # request__path is the same as response, and is always set
 
             try:
                 res.data = e.message.message
-            except:
+            except AttributeError:
                 res.data = ""
 
         if 500 <= res.status <= 599:

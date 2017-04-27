@@ -228,7 +228,7 @@ class EsiClient(BaseClient):
                 res = CachedResponse(
                     status_code=500,
                     headers={},
-                    content='{"error": "%s"}' % str(e),
+                    content='{"error": "%s"}' % six.binary_type(e),
                     url=prepared_request.url
                 )
 

@@ -12,7 +12,9 @@ from email.utils import parsedate
 from pyswagger.core import BaseClient
 from requests import Request
 from requests import Session
-from requests.exceptions import ConnectionError as RequestsConnectionError, Timeout
+from requests.exceptions import (
+    ConnectionError as RequestsConnectionError, Timeout
+)
 from requests.adapters import HTTPAdapter
 from concurrent.futures import ThreadPoolExecutor
 
@@ -102,7 +104,8 @@ class EsiClient(BaseClient):
         except (RequestsConnectionError, Timeout) as e:
             req, res = req_and_resp
             res.status = 500
-            res._Response__path = req._Request__path  # request__path is the same as response, and is always set
+            # request__path is the same as response, and is always set
+            res._Response__path = req._Request__path
 
             try:
                 res.data = e.message.message

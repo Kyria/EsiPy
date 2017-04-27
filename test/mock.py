@@ -219,11 +219,13 @@ def public_incursion_server_error(url, request):
     public_incursion_server_error.count += 1
     return httmock.response(
         status_code=500,
-        content={            
+        content={
             "error": "broke",
             "count": public_incursion_server_error.count
         }
     )
+
+
 public_incursion_server_error.count = 0
 
 _all_auth_mock_ = [

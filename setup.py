@@ -6,7 +6,7 @@ from setuptools import setup
 # install requirements
 install_requirements = [
     "requests",
-    "pyswagger >= 0.8.27",
+    "pyswagger >= 0.8.30",
     "six",
     "pytz",
     "futures",
@@ -40,7 +40,7 @@ setup(
     tests_require=test_requirements,
     test_suite='nose.collector',
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",

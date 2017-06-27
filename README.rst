@@ -25,7 +25,7 @@ Contacts
 
    -  Github: @Kyria
    -  `TweetFleet Slack <https://www.fuzzwork.co.uk/tweetfleet-slack-invites/>`_: @althalus
-   - Reddit: @Karlyna
+   - Reddit: /u/Karlyna
 
 .. _pyswagger: https://github.com/mission-liao/pyswagger
 .. _Flask+EsiPy: https://github.com/Kyria/flask-esipy-example

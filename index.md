@@ -1,9 +1,8 @@
 ---
 layout: base
+section: index
 ---
-# EsiPy
-
-## What is EsiPy
+# What is EsiPy
 EsiPy is a python swagger client that will parse the `swagger.json` to know the structure of the API.
 
 It takes advantages of [pyswagger](https://github.com/mission-liao/pyswagger), while rewriting some parts of it: <br>

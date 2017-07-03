@@ -1,0 +1,59 @@
+html,
+body {
+  height: 100%;
+  /* The html and body elements cannot have any padding or margin. */
+}
+
+#wrap {
+  min-height: 100%;
+  height: auto;
+  /* Negative indent footer by its height */
+  margin: 0 auto -30px;
+  /* Pad bottom by footer height */
+  padding: 0 0 30px;
+}
+
+footer {
+  bottom: 0;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  background: #f4f4f4;
+  margin:0;
+}
+
+.list-group-item.active {
+  background-color: #d9230f;
+  border-color: #d9230f;
+}
+.list-group-item.active:hover {
+  background-color: #a91b0c;
+  border-color: #a91b0c;
+}
+
+.submenu .list-group-item {
+  background-color: #f4f4f4;
+}
+.submenu .list-group-item:hover {
+  background-color: #f0f0f0;
+}
+
+.submenu a.list-group-item:before {
+   font-family: FontAwesome;
+   content: "\f101";
+   padding: 0 5px;
+   vertical-align: middle;
+}
+
+.collapse-title {
+  cursor: pointer;
+}
+.collapse-title:after {
+   font-family: FontAwesome;
+   content: "\f0d7";
+   float:right;
+}
+.collapse-title.collapsed:after {
+   font-family: FontAwesome;
+   content: "\f0da";
+}

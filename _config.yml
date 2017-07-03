@@ -1,0 +1,4 @@
+highlighter: rouge
+permalink: /:collection/:slug/
+github_url: https://github.com/Kyria/EsiPy
+app_name: EsiPy

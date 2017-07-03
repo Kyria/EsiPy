@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!--[if IE]>
+    <meta http-equiv="X-UA-Compatible" content="IE=10">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="G. (Kyria) Bisch">
+
+    <title>kyria.github.io{% if page.title }%} - {{page.title}}{% endif %}</title>
+
+    <link href="../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../assets/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../assets/css/kyria.github.io.css" rel="stylesheet">
+</head>
+
+
+<body>
+    <div id="wrap">
+        <div class="navbar navbar-default navbar-static-top" role="navigation">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/">kyria.github.io</a>
+                </div>
+                <div class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a href="/EsiPy">EsiPy</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+
+                <div class="col-sm-3 col-md-2">
+                    <div class="list-group">
+                        <span class="list-group-item collapse-title" data-toggle="collapse" data-target=".submenu">Menu 1</span>
+                        <div class="collapse in submenu">
+                            <a href="#" class="list-group-item">Sub Menu 1</a>
+                            <a href="#" class="list-group-item">Sub Menu 2</a>
+                            <a href="#" class="list-group-item">Sub Menu 3</a>
+                        </div>
+                        <a href="#" class="list-group-item">Menu 2</a>
+                        <a href="#" class="list-group-item">Menu 3</a>
+                    </div>
+                </div>
+
+                <div class="col-sm-9 col-md-10">
+                {{content}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <span class="text-muted pull-right"><a href="{{site.github_url}}">View source on GitHub</span>
+            {{site.app_name}} 
+            <a href="https://pypi.python.org/pypi/EsiPy">
+                <img src="https://img.shields.io/pypi/v/EsiPy.svg" alt="PyPI version">
+            </a> 
+            <a href="https://pypi.python.org/pypi/EsiPy">
+                <img src="https://img.shields.io/pypi/pyversions/EsiPy.svg" alt="PyPI supported version">
+            </a> 
+            <a href="https://travis-ci.org/Kyria/EsiPy">
+                <img src="https://travis-ci.org/Kyria/EsiPy.svg?branch=master" alt="Build Status">
+            </a> 
+            <a href="https://coveralls.io/github/Kyria/EsiPy">
+                <img src="https://coveralls.io/repos/github/Kyria/EsiPy/badge.svg" alt="Coverage Status">
+            </a> 
+            <a href="https://landscape.io/github/Kyria/EsiPy/master">
+                <img src="https://landscape.io/github/Kyria/EsiPy/master/landscape.svg?style=flat" alt="Code Health">
+            </a>
+        </div>
+    </footer>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        // ajouter data-section="/chemindufichier" dans les menus sidebar
+        $('#menu [data-section="{{page.section}}"]').addClass('active');
+    </script>
+</body>
+</html>

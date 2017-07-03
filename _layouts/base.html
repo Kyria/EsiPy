@@ -41,7 +41,7 @@
             <div class="row">
 
                 <div class="col-sm-3 col-md-2">
-                    <div class="list-group">
+                    <div class="list-group" id="menu">
                         <a href="/EsiPy" class="list-group-item" data-section="index">What is EsiPy</a>
 
                         <span class="list-group-item collapse-title" data-toggle="collapse" data-target=".started">Getting Started</span>
@@ -52,17 +52,17 @@
                         </div>
 
                         <span class="list-group-item collapse-title" data-toggle="collapse" data-target=".advanced">Advanced Uses</span>
-                        <div class="collapse in submenu started">
+                        <div class="collapse in submenu advanced">
                             <a href="#" class="list-group-item">Multiple page request</a>
                             <a href="#" class="list-group-item">Event hooks / Signals</a>
                             <a href="#" class="list-group-item">Using your own cache</a>
                         </div>
 
-                        <span class="list-group-item collapse-title" data-toggle="collapse" data-target=".advanced">Examples</span>
-                        <div class="collapse in submenu started">
+                        <span class="list-group-item collapse-title" data-toggle="collapse" data-target=".examples">Examples</span>
+                        <div class="collapse in submenu examples">
                             <a href="#" class="list-group-item">SSO Login using EsiPy</a>
                             <a href="#" class="list-group-item">Using the refresh token</a>
-                            <a href="https://github.com/Kyria/flask-esipy-example" class="list-group-item">Example with Flask integration</a>
+                            <a href="https://github.com/Kyria/flask-esipy-example" class="list-group-item">Flask integration</a>
                         </div>
 
                         <a href="#" class="list-group-item">Contacts</a>
@@ -103,7 +103,7 @@
 
     <script>
         // ajouter data-section="/chemindufichier" dans les menus sidebar
-        $('#menu [data-section="{{page.section}}"]').addClass('active');
+        $('#menu .list-group-item[data-section="{{page.section}}"]').addClass('active');
     </script>
 </body>
 </html>

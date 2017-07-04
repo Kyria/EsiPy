@@ -22,11 +22,12 @@ footer {
   margin:0;
 }
 
-.list-group-item.active {
+.submenu .list-group-item.active {
   background-color: #d9230f;
   border-color: #d9230f;
 }
-.list-group-item.active:hover {
+.list-group-item.active:hover,
+.submenu .list-group-item.active:hover {
   background-color: #a91b0c;
   border-color: #a91b0c;
 }
@@ -56,4 +57,5 @@ footer {
 .collapse-title.collapsed:after {
    font-family: FontAwesome;
    content: "\f0da";
+   float:right;
 }

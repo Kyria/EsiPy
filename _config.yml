@@ -3,6 +3,6 @@ permalink: /:title/
 github_url: https://github.com/Kyria/EsiPy
 app_name: EsiPy
 collections:
-  _doc:
+  doc:
     output: true
     permalink: /:path/

@@ -3,7 +3,7 @@ layout: base
 section: getting_started/basic_usage
 title: Basic Usage
 ---
-# Simple Usage
+# Using EsiPy
 
 To use EsiPy, you will need to define at least two objects:
 * an `App`

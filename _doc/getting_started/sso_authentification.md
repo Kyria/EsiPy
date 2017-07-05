@@ -49,10 +49,10 @@ To authenticate yourself to the EVE SSO, you'll need to follow the auth flow fro
 
 We'll see here `EsiSecurity` methods that allow you to follow this auth flow.
 
-<span class="alert alert-dismissible alert-info">
+<div class="alert alert-dismissible alert-info">
 	<strong>Reminder:</strong> This is only a basic set of information. <br>
 	If you want to see a full example with login, see the examples in the menu, or go to <a href="/EsiPy/examples/sso_login_esipy/">this page</a>
-</span>
+</div>
 
 #### Redirecting the user to EVE SSO Login
 

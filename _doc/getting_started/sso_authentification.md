@@ -25,7 +25,7 @@ The `EsiSecurity` object provides:
 * Tokens management (get, refresh)
 
 ```python
-from esipy import 
+from esipy import EsiSecurity
 
 # creating the security object
 security = EsiSecurity(

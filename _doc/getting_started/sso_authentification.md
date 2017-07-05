@@ -9,7 +9,7 @@ As soon as you want to start using authed endpoints with ESI, you'll have to dea
 
 ## developers.eveonline.com
 
-First thing first, you'll have to create an application on https://developers.eveonline.com/ to get:
+First thing first, you'll have to create an application on [https://developers.eveonline.com/](https://developers.eveonline.com/) to get:
 * your `Client ID`
 * your `Secret Key`
 * your `Callback URL`
@@ -41,25 +41,34 @@ security = EsiSecurity(
 client = EsiClient(security=security)
 ```
 
+<br><br>
+
 ## EVE SSO Authentification
 
 To authenticate yourself to the EVE SSO, you'll need to follow the auth flow from [Eve Third Party Documentation](http://eveonline-third-party-documentation.readthedocs.io/en/latest/sso/authentication.html).
 
 We'll see here `EsiSecurity` methods that allow you to follow this auth flow.
 
-### Redirecting the user to EVE SSO Login
+<span class="alert alert-dismissible alert-info">
+	<strong>Reminder:</strong> This is only a basic set of information. <br>
+	If you want to see a full example with login, see the examples in the menu, or go to <a href="/EsiPy/examples/sso_login_esipy/">this page</a>
+</span>
 
-First, you'll need to make your user go the SSO Login from EVE Online. As the login URL have to have some mandatory informations in it, you can use the `EsiSecurity.get_auth_uri()` method:
+#### Redirecting the user to EVE SSO Login
+
+First, you'll need to make your user go the SSO Login from EVE Online. 
+
+As the login URL have to have some mandatory informations in it, you can use the `EsiSecurity.get_auth_uri()` method:
 
 ```python
 # this will give you the url where your user must be redirected to.
 eve_sso_auth_url = security.get_auth_uri(
-	scopes=['Scope1', 'Scope2', 'Scope3'],  # or None if you don't need any scope
-	state="what you want and can be None"
+	scopes=['Scope1', 'Scope2', 'Scope3'],  # or None (default) if you don't need any scope
+	state="what you want and can be None(default)"
 )
 ```
 
-### Code from login
+#### Code from login
 
 Once your user logged in, he will be redirected to your callback URL, with a `code` parameter.
 
@@ -81,7 +90,8 @@ tokens = esi_security.auth(code_you_get_from_user_login)
 Now the security object knows everything, it can use OAuth endpoints without problems. <br>
 You don't also have to get the tokens returned if you don't need them as they are stored within the security object.
 
-### Getting the logged in character informations
+#### Getting the logged in character informations
+
 When you are logged in, you can get the character data with the verify method.
 
 ```python
@@ -99,6 +109,3 @@ esi_security.verify()
 }
 ```
 
-<div class="alert alert-dismissible alert-info">
-	**Keep in mind** that this is only a basic set of information. If you want to see a full example with login, see the examples in the menu, or go to [this page](/EsiPy/examples/sso_login_esipy/)
-</div>

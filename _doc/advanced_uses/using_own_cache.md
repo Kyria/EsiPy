@@ -7,11 +7,17 @@ title: Caching data
 
 EsiPy is packaged with some default caching mechanism you may use.
 
+&nbsp;
+
 ## DummyCache
 This is a fake cache, only used to disable caching. This is used by default when `cache` is set to `None` in the `EsiClient`.
 
+&nbsp;
+
 ## DictCache
 This is the default EsiPy cache. It stores everything in memory dictionary and may then use many memory on your system.
+
+&nbsp;
 
 ## FileCache
 This cache use `DiskCache` to work, thus requires you to install `diskcache` using `pip instal diskcache`. <br>
@@ -34,6 +40,8 @@ cache = FileCache(path="/tmp")
 client = EsiClient(cache=cache)
 ```
 
+&nbsp;
+
 ## MemcachedCache
 This cache use a `memcache.Client` object you give it as parameter to cache everything. <br>
 __It requires you to have `python-memcached` installed.__
@@ -46,6 +54,8 @@ mc = memcache.Client(['127.0.0.1:11211'], debug=0)
 # and feed the client you create
 client = EsiClient(cache=mc)
 ``` 
+
+&nbsp;
 
 ## You own custom cache for your custom needs
 If you need a specific cache, because you already use your own, there's a way to define a valid cache for EsiPy.

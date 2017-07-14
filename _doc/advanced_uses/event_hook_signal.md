@@ -12,6 +12,8 @@ Signals are "events" that will be triggered in some circumstances. When triggere
 To hook to any signal, just call the `add_receiver` method from the signal you want to subscribe.<br>
 To remove your subscription to a signal, call the `remove_receiver` method from the signal.
 
+&nbsp;
+
 ## Example
 
 To have a little more details on how it work, let's take the `after_token_refresh` signal, which is triggered when the token is refreshed while the app is doing a `EsiClient.request()` call.<br>
@@ -42,6 +44,8 @@ refresh token used: J31498HDF83G0187GD40318G
 Expires in 1200
 ```
 
+&nbsp;
+
 ## List of signals
 
 ### __after_token_refresh__
@@ -69,3 +73,5 @@ url | String | The url called
 status_code | int | The status code of the request
 elapsed_time | int | The elapsed time to get the response in seconds
 message | String | JSON response string only if status_code is not 200, else None.
+
+&nbsp;

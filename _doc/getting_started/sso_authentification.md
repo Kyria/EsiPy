@@ -41,7 +41,7 @@ security = EsiSecurity(
 client = EsiClient(security=security)
 ```
 
-<br><br>
+&nbsp;
 
 ## EVE SSO Authentification
 

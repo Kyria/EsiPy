@@ -7,8 +7,8 @@ title: Multiple requests
 
 In some cases, you may need to do multiple requests at the same time to save time. You can achieve this using the `EsiClient.multi_request()` method.
 
-<div class="alert alert-dismissible alert-warning">
-    <strong>Attention:</strong> Unlike the "standard" request method, mutli_request return a tuple (&lt;original request&gt;, &lt;response&gt;) for each operation it calls !
+<div class="alert alert-dismissible alert-danger">
+    <strong>Attention:</strong> Unlike the "standard" request method, mutli_request returns a list of tuple (&lt;original request&gt;, &lt;response&gt;) for each operation it calls !
 </div>
 
 ## Parameters

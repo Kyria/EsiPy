@@ -9,6 +9,8 @@ To use EsiPy, you will need to define at least two objects:
 * an `App`
 * an `EsiClient`
 
+&nbsp;
+
 ## App
 
 The `App` object will deal with everything that comes from swagger: 
@@ -24,6 +26,8 @@ from esipy import App
 # with url = the swagger spec URL, leave strict to default
 app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
 ```
+
+&nbsp;
 
 ## EsiClient
 
@@ -43,6 +47,8 @@ client = EsiClient(
     raw_body_only=False,  # default False, set to True to never parse response and only return raw JSON string content.
 )
 ```
+
+&nbsp;
 
 ## Requesting an endpoint
 
@@ -69,6 +75,8 @@ print response.data[0].price
 # to get the headers objects, you can get the header attribute
 print response.header
 ```
+
+&nbsp;
 
 ## Requesting without parsing the response
 

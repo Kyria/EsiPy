@@ -7,6 +7,8 @@ title: EVE SSO Authentification
 
 As soon as you want to start using authed endpoints with ESI, you'll have to deal with the EVE SSO. This is what the `EsiSecurity` object is made for.
 
+&nbsp;
+
 ## developers.eveonline.com
 
 First thing first, you'll have to create an application on [https://developers.eveonline.com/](https://developers.eveonline.com/) to get:
@@ -16,6 +18,8 @@ First thing first, you'll have to create an application on [https://developers.e
 * the scopes you want to use.
 
 Once you have all this, lets continue.
+
+&nbsp;
 
 ## EsiSecurity
 

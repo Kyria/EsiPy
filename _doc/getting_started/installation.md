@@ -12,12 +12,16 @@ The **easiest and recommanded** way to install the library is by using the `pip`
 pip install esipy
 ```
 
+&nbsp;
+
 ## Using `setuptools`
 
 You also can install it by downloading the latest sources [here](https://github.com/Kyria/EsiPy/releases/latest) and running
 ```
 python setup.py install
 ```
+
+&nbsp;
 
 ## Integrating the lib in your project
 

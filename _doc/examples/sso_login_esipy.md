@@ -12,6 +12,8 @@ Here we'll see, step by step, how to log in, using EVE Online SSO and EsiPy.
     It doesn't use any sort of webserver, database or anything but just manual actions to explain how it works!
 </div>
 
+&nbsp;
+
 ## Step 1 - Creating an application CCP side.
 
 Go to [EVE Online Developers](https://developers.eveonline.com/applications), log in and click on `Create new application`
@@ -92,7 +94,8 @@ print security.get_auth_uri(scopes=['esi-wallet.read_character_wallet.v1'])
 The URL will have the form of <br>
 ```https://login.eveonline.com/oauth/authorize?response_type=code&redirect_uri=[CALLBACK URL]&client_id=[CLIENT ID]&scope=esi-wallet.read_character_wallet.v1```
 
-Copy the URL and paste it in your browser. You will be prompted to log in, accept the scope then redirected to our callback.
+Copy the URL and paste it in your browser. <br>
+You will be prompted to log in, accept the scope then redirected to our callback.
 
 __Of course, you will get a 404 error, BUT__ check the URL: you should notice a `?=code=xxxxxxxx` within. <br>
 __Get this code, all of it, we'll use it very soon.__

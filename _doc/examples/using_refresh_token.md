@@ -14,6 +14,8 @@ In the following steps, I will admit you saved somewhere your tokens, closed the
     Before starting this example, be sure you saved the tokens from the <a href="EsiPy/examples/sso_login_esipy/#step-4---use-the-code-and-get-the-tokens">SSO Login Example - Step 4</a> as we will use them here.
 </div>
 
+&nbsp;
+
 ## Step 1 - Creating EsiPy objects
 
 Like in the login example, we'll need to create the esipy objects before beeing able to do anything.

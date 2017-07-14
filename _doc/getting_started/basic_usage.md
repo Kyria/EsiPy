@@ -65,6 +65,9 @@ response = client.request(market_order_operation)
 
 # use it: response.data contains the parsed result of the request.
 print response.data[0].price
+
+# to get the headers objects, you can get the header attribute
+print response.header
 ```
 
 ## Requesting without parsing the response

@@ -45,7 +45,7 @@ for page in range(1,27):
     operations.append(
         app.op['get_markets_region_id_orders'](
             region_id=10000002,
-            page=1,
+            page=page,
             order_type='all',
         )
     )

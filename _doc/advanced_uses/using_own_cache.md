@@ -49,10 +49,12 @@ __It requires you to have `python-memcached` installed.__
 ```python
 # create the cache
 import memcache
+from esipy.cache import MemcachedCache
 mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+cache = MemcachedCache(memcache_client=mc)
 
 # and feed the client you create
-client = EsiClient(cache=mc)
+client = EsiClient(cache=cache)
 ``` 
 
 &nbsp;

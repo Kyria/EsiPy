@@ -11,7 +11,7 @@ Here we'll see, step by step, how to use saved tokens from a previous login.
 In the following steps, I will admit you saved somewhere your tokens, closed the previous python interpreter and opened a new one. 
 
 <div class="alert alert-dismissible alert-info">
-    Before starting this example, be sure you saved the tokens from the <a href="EsiPy/examples/sso_login_esipy/#step-4---use-the-code-and-get-the-tokens">SSO Login Example - Step 4</a> as we will use them here.
+    Before starting this example, be sure you saved the tokens from the <a href="/EsiPy/examples/sso_login_esipy/#step-4---use-the-code-and-get-the-tokens">SSO Login Example - Step 4</a> as we will use them here.
 </div>
 
 &nbsp;
@@ -45,7 +45,7 @@ client = EsiClient(
 ```
 
 <div class="alert alert-dismissible alert-warning">
-    If you don't know where to get the <strong>CALLBACK URL, CLIENT ID and SECRET KEY</strong>, please take a look at the <a href="EsiPy/examples/sso_login_esipy/#step-2---esipy-initialization">SSO Login Example - Step 2</a>.
+    If you don't know where to get the <strong>CALLBACK URL, CLIENT ID and SECRET KEY</strong>, please take a look at the <a href="/EsiPy/examples/sso_login_esipy/#step-2---esipy-initialization">SSO Login Example - Step 2</a>.
 </div>
 
 &nbsp;
@@ -95,7 +95,7 @@ print tokens
 ```
 
 <div class="alert alert-dismissible alert-success">
-    Now you can make a query like in the <a href="EsiPy/examples/sso_login_esipy/#step-5---using-the-auth">SSO Login Example - Step 5</a>.
+    Now you can make a query like in the <a href="/EsiPy/examples/sso_login_esipy/#step-5---using-the-auth">SSO Login Example - Step 5</a>.
 
     <br> You can now see another example using <a href="https://github.com/Kyria/flask-esipy-example">Flask + Flask Login and sqlite as a database</a>.
 </div>

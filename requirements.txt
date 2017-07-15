@@ -7,6 +7,6 @@ mock
 future
 python-memcached
 diskcache
-pyswagger>=0.8.30
+pyswagger>=0.8.31
 requests
 six

@@ -3,7 +3,7 @@ EsiPy |PyPI Version| |PyPI Python Version|
 
 |Build Status| |Coverage Status| |Code Health|
 
-| **Full Documentation:**
+| **Full Documentation can be found here:**
 | |Documentation Status|
 
 What is EsiPy
@@ -33,8 +33,8 @@ Contacts
    :target: https://pypi.python.org/pypi/EsiPy
 .. |PyPI Python Version| image:: https://img.shields.io/pypi/pyversions/EsiPy.svg
    :target: https://pypi.python.org/pypi/EsiPy
-.. |Documentation Status| image:: https://readthedocs.org/projects/esipy/badge/?version=latest
-   :target: http://esipy.readthedocs.io/en/latest/?badge=latest
+.. |Documentation Status| image:: https://img.shields.io/badge/Documentation-GitHub%20Page-lightgrey.svg
+   :target: https://kyria.github.io/EsiPy/
 .. |Build Status| image:: https://travis-ci.org/Kyria/EsiPy.svg?branch=master
    :target: https://travis-ci.org/Kyria/EsiPy
 .. |Coverage Status| image:: https://coveralls.io/repos/github/Kyria/EsiPy/badge.svg

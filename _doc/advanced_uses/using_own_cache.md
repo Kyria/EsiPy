@@ -59,11 +59,13 @@ client = EsiClient(cache=cache)
 
 &nbsp;
 
-## You own custom cache for your custom needs
+## Your own custom cache for your custom needs
 If you need a specific cache, because you already use your own, there's a way to define a valid cache for EsiPy.
 
 1. First you need to inherit from `esipy.cache.BaseCache` and override the `get`, `set` and `invalidate` methods
 2. You need to handle outdated data within the cache, as it's not done in EsiPy.
+
+&nbsp;
 
 __IMPORTANT:__ the caches keys used by EsiPy are tuples of frozendicts, which cannot be used everywhere. An existing `_hash` method allows you to get a md5 hash of the tuple, but you can define you own.
 

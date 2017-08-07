@@ -61,7 +61,7 @@ __As it probably pasts more than 20minute, we'll assume the access_token is expi
 security.update_token({
     'access_token': '',  # leave this empty
     'expires_in': -1,  # seconds until expiry, so we force refresh anyway
-    'refresh_token ': 'YOUR_SAVED_REFRESH_TOKEN'
+    'refresh_token': 'YOUR_SAVED_REFRESH_TOKEN'
 })
 ```
 

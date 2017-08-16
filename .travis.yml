@@ -6,8 +6,6 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-  - "pypy"
-  - "pypy3"
 
 install:
   - if [[ `python --version | grep 3.6` ]]; then pip install -U setuptools; fi;

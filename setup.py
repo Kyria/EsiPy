@@ -20,7 +20,8 @@ test_requirements = [
     "nose",
     "mock",
     "future",
-    "python-memcached"
+    "python-memcached",
+    "redis",
 ] + install_requirements
 
 with io.open('README.rst', encoding='UTF-8') as reader:
@@ -49,6 +50,5 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
     ]
 )

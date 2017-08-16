@@ -94,6 +94,7 @@ class DictCache(BaseCache):
 class DummyCache(BaseCache):
     """ Base cache implementation that provide a fake cache that
     allows a "no cache" use without breaking everything """
+
     def __init__(self):
         self._dict = {}
 
@@ -132,3 +133,28 @@ class MemcachedCache(BaseCache):
 
     def invalidate(self, key):
         return self._mc.delete(self._hash(key))
+
+
+class RedisCache(BaseCache):
+    """ BaseCache implementation for Redis cache.
+
+    This cache handler requires the redis package to be installed
+    `pip install redis`
+    """
+
+    def __init__(self, redis_client):
+        """ redis_client must be an instance of redis.Redis"""
+        from redis import Redis
+        if not isinstance(redis_client, Redis):
+            raise TypeError('cache must be an instance of redis.Redis')
+        self._r = redis_client
+
+    def get(self, key, default=None):
+        value = self._r.get(self._hash(key))
+        return pickle.loads(value) if value is not None else default
+
+    def set(self, key, value, timeout=300):
+        return self._r.setex(self._hash(key), timeout, pickle.dumps(value))
+
+    def invalidate(self, key):
+        return self._r.delete(self._hash(key))

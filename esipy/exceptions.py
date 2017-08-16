@@ -6,6 +6,7 @@ class APIException(Exception):
         self.url = url
         self.status_code = code
         self.response = json_response
+        super(APIException, self).__init__(str(self))
 
     def __str__(self):
         if 'error' in self.response:

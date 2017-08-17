@@ -8,6 +8,7 @@ import mock
 import shutil
 import time
 import unittest
+import redis
 
 from collections import namedtuple
 
@@ -16,6 +17,7 @@ from esipy.cache import DictCache
 from esipy.cache import DummyCache
 from esipy.cache import FileCache
 from esipy.cache import MemcachedCache
+from esipy.cache import RedisCache
 
 CachedResponse = namedtuple(
     'CachedResponse',
@@ -149,9 +151,7 @@ class TestFileCache(BaseTest):
 
 
 class TestMemcachedCache(BaseTest):
-    """A very basic MemcachedCache TestCase
-    Primairy goal of this unittest is to get the coverage up
-    to spec. Should probably make use of `mockcache` in the future"""
+    """ Memcached tests """
 
     def setUp(self):
         memcached = memcache.Client(['localhost:11211'], debug=0)
@@ -172,8 +172,41 @@ class TestMemcachedCache(BaseTest):
         self.assertEqual(self.c.get('expired'), None)
 
     def test_memcached_invalidate(self):
-        self.c.invalidate('key')
+        self.c.set(*self.ex_str)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        self.c.invalidate(self.ex_str[0])
+        self.assertEqual(self.c.get(self.ex_str[0]), None)
 
     def test_memcached_invalid_argument(self):
         with self.assertRaises(TypeError):
             MemcachedCache(None)
+
+
+class TestRedisCache(BaseTest):
+    """RedisCache tests"""
+
+    def setUp(self):
+        redis_client = redis.Redis(host='localhost', port=6379, db=0)
+        self.c = RedisCache(redis_client)
+
+    def test_redis_get_set(self):
+        self.c.set(*self.ex_str)
+        self.c.set(*self.ex_int)
+        self.c.set(*self.ex_cpx)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        self.assertEqual(self.c.get(self.ex_int[0]), self.ex_int[1])
+        self.check_complex(self.c.get(self.ex_cpx[0]))
+
+        self.c.set('expired', 'baz', 1)
+        time.sleep(2)
+        self.assertEqual(self.c.get('expired'), None)
+
+    def test_redis_invalidate(self):
+        self.c.set(*self.ex_str)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        self.c.invalidate(self.ex_str[0])
+        self.assertEqual(self.c.get(self.ex_str[0]), None)
+
+    def test_redis_invalid_argument(self):
+        with self.assertRaises(TypeError):
+            RedisCache(None)

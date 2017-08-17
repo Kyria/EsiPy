@@ -154,7 +154,7 @@ class RedisCache(BaseCache):
         return pickle.loads(value) if value is not None else default
 
     def set(self, key, value, timeout=300):
-        return self._r.setex(self._hash(key), timeout, pickle.dumps(value))
+        return self._r.setex(self._hash(key), pickle.dumps(value), timeout)
 
     def invalidate(self, key):
         return self._r.delete(self._hash(key))

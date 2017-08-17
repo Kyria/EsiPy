@@ -1,5 +1,9 @@
 language: python
 
+services:
+  - memcached
+  - redis
+
 python:
   - "2.7"
   - "3.3"

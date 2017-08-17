@@ -59,6 +59,23 @@ client = EsiClient(cache=cache)
 
 &nbsp;
 
+## RedisCache
+This cache use a `redis.Redis` object you give it as parameter to cache everything. <br>
+__It requires you to have python [`redis` package](https://pypi.python.org/pypi/redis) installed.__
+
+```python
+# create the cache
+import redis
+from esipy.cache import RedisCache
+redis_client = redis.Redis(host='localhost', port=6379, db=0)
+cache = RedisCache(redis_client)
+
+# and feed the client you create
+client = EsiClient(cache=cache)
+``` 
+
+&nbsp;
+
 ## Your own custom cache for your custom needs
 If you need a specific cache, because you already use your own, there's a way to define a valid cache for EsiPy.
 

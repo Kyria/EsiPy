@@ -40,7 +40,7 @@ sso_url | String | [Default: https://login.eveonline.com] The default SSO URL us
 esi_url | String | [Default: https://esi.tech.ccp.is] The default ESI URL used to generated `/verify/` endpoint URL
 security_name | String | [Default: evesso] The security name in the ESI Swagger Spec. Leave it default 
 
-__If `app` and `ssoUrl` are provided, priority is given to the `app` parameter__
+__If `app` and `sso_url` are provided, priority is given to the `app` parameter__
 
 
 ```python

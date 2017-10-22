@@ -28,12 +28,34 @@ The `EsiSecurity` object provides:
 * Headers autofilling when doing requests to add OAuth2 headers
 * Tokens management (get, refresh)
 
+`EsiSecurity.__init__()` takes the following parameters. Parameters with default values are optionnal.
+
+Parameter | Type | Description
+--- | --- | ---
+redirect_uri | String | The URI you want the user redirected after he logs in with EVE SSO
+client_id | String | You client ID from developers.eveonline.com
+secret_key | String | You secret key from developers.eveonline.com
+app | App | [Default: None] The pyswagger app object you create with `App.create()`. 
+ssoUrl | String | [Default: https://login.eveonline.com] The default SSO URL used to generated `oauth/token` and `oauth/authorize` URLs when no `app` is provided
+esiUrl | String | [Default: https://esi.tech.ccp.is] The default ESI URL used to generated `/verify/` endpoint URL
+security_name | String | [Default: evesso] The security name in the ESI Swagger Spec. Leave it default 
+
+__If `app` and `ssoUrl` are provided, priority is given to the `app` parameter__
+
+
 ```python
 from esipy import EsiSecurity
 
-# creating the security object
+# creating the security object using the app 
 security = EsiSecurity(
     app=app,
+    redirect_uri='https://callback.com/you/set/on/developers/eveonline',
+    client_id='you client id',
+    secret_key='the_secret_key',
+)
+
+# creating the security object without app, using default TQ sso URL 
+security = EsiSecurity(
     redirect_uri='https://callback.com/you/set/on/developers/eveonline',
     client_id='you client id',
     secret_key='the_secret_key',

@@ -66,7 +66,7 @@ class TestEsiSecurity(unittest.TestCase):
                 redirect_uri=TestEsiSecurity.CALLBACK_URI,
                 client_id=TestEsiSecurity.CLIENT_ID,
                 secret_key=TestEsiSecurity.SECRET_KEY,
-                esiUrl=""
+                esi_url=""
             )
 
         self.assertEqual(
@@ -105,15 +105,15 @@ class TestEsiSecurity(unittest.TestCase):
                 redirect_uri=TestEsiSecurity.CALLBACK_URI,
                 client_id=TestEsiSecurity.CLIENT_ID,
                 secret_key=TestEsiSecurity.SECRET_KEY,
-                ssoUrl=""
+                sso_url=""
             )
 
         security = EsiSecurity(
             redirect_uri=TestEsiSecurity.CALLBACK_URI,
             client_id=TestEsiSecurity.CLIENT_ID,
             secret_key=TestEsiSecurity.SECRET_KEY,
-            ssoUrl='foo.com',
-            esiUrl='bar.baz'
+            sso_url='foo.com',
+            esi_url='bar.baz'
         )
 
         self.assertEqual(

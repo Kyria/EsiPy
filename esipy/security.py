@@ -27,16 +27,16 @@ class EsiSecurity(object):
             client_id,
             secret_key,
             app=None,
-            ssoUrl="https://login.eveonline.com",
-            esiUrl="https://esi.tech.ccp.is",
+            sso_url="https://login.eveonline.com",
+            esi_url="https://esi.tech.ccp.is",
             security_name="evesso"):
         """ Init the ESI Security Object
 
         :param redirect_uri: the uri to redirect the user after login into SSO
         :param client_id: the OAuth2 client ID
         :param secret_key: the OAuth2 secret key
-        :param ssoUrl: the default sso URL used when no "app" is provided
-        :param esiUrl: the default esi URL used for verify endpoint
+        :param sso_url: the default sso URL used when no "app" is provided
+        :param esi_url: the default esi URL used for verify endpoint
         :param app: (optionnal) the pyswagger app object
         :param security_name: (optionnal) the name of the object holding the
         informations in the securityDefinitions, used to check authed endpoint
@@ -46,7 +46,7 @@ class EsiSecurity(object):
         self.client_id = client_id
         self.secret_key = secret_key
 
-        # we provide app object, so we don't use ssoUrl
+        # we provide app object, so we don't use sso_url
         if app is not None:
             # check if the security_name exists in the securityDefinition
             security = app.root.securityDefinitions.get(security_name, None)
@@ -69,17 +69,17 @@ class EsiSecurity(object):
 
         # no app object is provided, so we use direct URLs
         else:
-            if ssoUrl is None or ssoUrl == "":
-                raise AttributeError("ssoUrl cannot be None or empty "
+            if sso_url is None or sso_url == "":
+                raise AttributeError("sso_url cannot be None or empty "
                                      "without app parameter")
 
-            self.oauth_authorize = '%s/oauth/authorize' % ssoUrl
-            self.oauth_token = '%s/oauth/token' % ssoUrl
+            self.oauth_authorize = '%s/oauth/authorize' % sso_url
+            self.oauth_token = '%s/oauth/token' % sso_url
 
         # use ESI url for verify, since it's better for caching
-        if esiUrl is None or esiUrl == "":
-            raise AttributeError("esiUrl cannot be None or empty")
-        self.oauth_verify = '%s/verify/' % esiUrl
+        if esi_url is None or esi_url == "":
+            raise AttributeError("esi_url cannot be None or empty")
+        self.oauth_verify = '%s/verify/' % esi_url
 
         # session request stuff
         self._session = Session()

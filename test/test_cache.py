@@ -1,14 +1,11 @@
 # -*- encoding: utf-8 -*-
-# -- Tests based on pycrest cache tests (as these are the same classes)
-# -- https://github.com/pycrest/PyCrest/blob/master/tests/test_pycrest.py
 from __future__ import absolute_import
 
 import memcache
-import mock
+import redis
 import shutil
 import time
 import unittest
-import redis
 
 from collections import namedtuple
 

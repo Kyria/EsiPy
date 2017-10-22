@@ -5,8 +5,8 @@ from .mock import _all_auth_mock_
 from .mock import public_incursion
 from .mock import public_incursion_no_expires
 from .mock import public_incursion_no_expires_second
-from .mock import public_incursion_warning
 from .mock import public_incursion_server_error
+from .mock import public_incursion_warning
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -19,8 +19,8 @@ from requests.exceptions import ConnectionError
 
 import httmock
 import mock
-import time
 import six
+import time
 import unittest
 import warnings
 
@@ -50,10 +50,10 @@ class TestEsiPy(unittest.TestCase):
         )
 
         self.security = EsiSecurity(
-            self.app,
-            TestEsiPy.CALLBACK_URI,
-            TestEsiPy.CLIENT_ID,
-            TestEsiPy.SECRET_KEY
+            app=self.app,
+            redirect_uri=TestEsiPy.CALLBACK_URI,
+            client_id=TestEsiPy.CLIENT_ID,
+            secret_key=TestEsiPy.SECRET_KEY,
         )
 
         self.cache = DictCache()

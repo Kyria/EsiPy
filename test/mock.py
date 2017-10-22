@@ -48,8 +48,8 @@ def oauth_token(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"login\.eveonline\.com$",
-    path=r"^/oauth/verify$"
+    netloc=r"esi\.tech\.ccp\.is$",
+    path=r"^/verify/$"
 )
 def oauth_verify(url, request):
     return httmock.response(
@@ -64,8 +64,8 @@ def oauth_verify(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"login\.eveonline\.com$",
-    path=r"^/oauth/verify$"
+    netloc=r"esi\.tech\.ccp\.is$",
+    path=r"^/verify/$"
 )
 def oauth_verify_fail(url, request):
     return httmock.response(

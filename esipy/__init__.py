@@ -9,4 +9,4 @@ except Exception:  # pragma: no cover
     # Not installed or in install (not yet installed) so ignore
     pass
 
-__version__ = '0.1.8'
+__version__ = '0.2.0'

@@ -23,48 +23,63 @@ class EsiSecurity(object):
 
     def __init__(
             self,
-            app,
             redirect_uri,
             client_id,
             secret_key,
+            app=None,
+            ssoUrl="https://login.eveonline.com",
+            esiUrl="https://esi.tech.ccp.is",
             security_name="evesso"):
         """ Init the ESI Security Object
 
-        :param app: the pyswagger app object
         :param redirect_uri: the uri to redirect the user after login into SSO
         :param client_id: the OAuth2 client ID
         :param secret_key: the OAuth2 secret key
+        :param ssoUrl: the default sso URL used when no "app" is provided
+        :param esiUrl: the default esi URL used for verify endpoint
+        :param app: (optionnal) the pyswagger app object
         :param security_name: (optionnal) the name of the object holding the
-        informations in the securityDefinitions.
+        informations in the securityDefinitions, used to check authed endpoint
         """
-        # check if the security_name actually exists in the securityDefinition
-        security = app.root.securityDefinitions.get(security_name, None)
-        if security is None:
-            raise NameError(
-                "%s is not defined in the securityDefinitions" % security_name
-            )
-
-        self.app = app
         self.security_name = security_name
         self.redirect_uri = redirect_uri
         self.client_id = client_id
         self.secret_key = secret_key
 
-        # some URL we still need to "manually" define... sadly
-        # we parse the authUrl so we don't care if it's TQ or SISI.
-        parsed_uri = urlparse(security.authorizationUrl)
-        self.oauth_verify = '%s://%s/oauth/verify' % (
-            parsed_uri.scheme,
-            parsed_uri.netloc
-        )
+        # we provide app object, so we don't use ssoUrl
+        if app is not None:
+            # check if the security_name exists in the securityDefinition
+            security = app.root.securityDefinitions.get(security_name, None)
+            if security is None:
+                raise NameError(
+                    "%s is not defined in the securityDefinitions" %
+                    security_name
+                )
 
-        # should be: security_definition.tokenUrl
-        # but not yet implemented by CCP in ESI so we need the full URL...
-        # https://github.com/ccpgames/esi-issues/issues/92
-        self.oauth_token = '%s://%s/oauth/token' % (
-            parsed_uri.scheme,
-            parsed_uri.netloc
-        )
+            self.oauth_authorize = security.authorizationUrl
+
+            # some URL we still need to "manually" define... sadly
+            # we parse the authUrl so we don't care if it's TQ or SISI.
+            # https://github.com/ccpgames/esi-issues/issues/92
+            parsed_uri = urlparse(security.authorizationUrl)
+            self.oauth_token = '%s://%s/oauth/token' % (
+                parsed_uri.scheme,
+                parsed_uri.netloc
+            )
+
+        # no app object is provided, so we use direct URLs
+        else:
+            if ssoUrl is None or ssoUrl == "":
+                raise AttributeError("ssoUrl cannot be None or empty "
+                                     "without app parameter")
+
+            self.oauth_authorize = '%s/oauth/authorize' % ssoUrl
+            self.oauth_token = '%s/oauth/token' % ssoUrl
+
+        # use ESI url for verify, since it's better for caching
+        if esiUrl is None or esiUrl == "":
+            raise AttributeError("esiUrl cannot be None or empty")
+        self.oauth_verify = '%s/verify/' % esiUrl
 
         # session request stuff
         self._session = Session()
@@ -121,15 +136,12 @@ class EsiSecurity(object):
         :param state: The state to pass through the auth process
         :return: the authorizationUrl with the correct parameters.
         """
-        security_definition = self.app.root.securityDefinitions.get(
-            self.security_name
-        )
         s = [] if not scopes else scopes
 
         response_type = 'code' if not implicit else 'token'
 
         return '%s?response_type=%s&redirect_uri=%s&client_id=%s%s%s' % (
-            security_definition.authorizationUrl,
+            self.oauth_authorize,
             response_type,
             quote(self.redirect_uri, safe=''),
             self.client_id,

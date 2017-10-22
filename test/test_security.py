@@ -25,8 +25,9 @@ pyswagger_logger.setLevel(logging.ERROR)
 class TestEsiSecurity(unittest.TestCase):
     CALLBACK_URI = "https://foo.bar/baz/callback"
     LOGIN_EVE = "https://login.eveonline.com"
-    OAUTH_VERIFY = "%s/oauth/verify" % LOGIN_EVE
+    OAUTH_VERIFY = "https://esi.tech.ccp.is/verify/"
     OAUTH_TOKEN = "%s/oauth/token" % LOGIN_EVE
+    OAUTH_AUTHORIZE = "%s/oauth/authorize" % LOGIN_EVE
     CLIENT_ID = 'foo'
     SECRET_KEY = 'bar'
     BASIC_TOKEN = six.u('Zm9vOmJhcg==')
@@ -42,20 +43,30 @@ class TestEsiSecurity(unittest.TestCase):
         )
 
         self.security = EsiSecurity(
-            self.app,
-            TestEsiSecurity.CALLBACK_URI,
-            TestEsiSecurity.CLIENT_ID,
-            TestEsiSecurity.SECRET_KEY
+            app=self.app,
+            redirect_uri=TestEsiSecurity.CALLBACK_URI,
+            client_id=TestEsiSecurity.CLIENT_ID,
+            secret_key=TestEsiSecurity.SECRET_KEY,
         )
 
-    def test_esisecurity_init(self):
+    def test_esisecurity_init_with_app(self):
+        """ test security init with app and URL"""
         with self.assertRaises(NameError):
             EsiSecurity(
-                self.app,
-                TestEsiSecurity.CALLBACK_URI,
-                TestEsiSecurity.CLIENT_ID,
-                TestEsiSecurity.SECRET_KEY,
-                "security_name_that_does_not_exist"
+                app=self.app,
+                redirect_uri=TestEsiSecurity.CALLBACK_URI,
+                client_id=TestEsiSecurity.CLIENT_ID,
+                secret_key=TestEsiSecurity.SECRET_KEY,
+                security_name="security_name_that_does_not_exist"
+            )
+
+        with self.assertRaises(AttributeError):
+            EsiSecurity(
+                app=self.app,
+                redirect_uri=TestEsiSecurity.CALLBACK_URI,
+                client_id=TestEsiSecurity.CLIENT_ID,
+                secret_key=TestEsiSecurity.SECRET_KEY,
+                esiUrl=""
             )
 
         self.assertEqual(
@@ -82,6 +93,41 @@ class TestEsiSecurity(unittest.TestCase):
             self.security.oauth_token,
             TestEsiSecurity.OAUTH_TOKEN
         )
+        self.assertEqual(
+            self.security.oauth_authorize,
+            TestEsiSecurity.OAUTH_AUTHORIZE
+        )
+
+    def test_esisecurity_other_init(self):
+        """ test security init without app and with urls """
+        with self.assertRaises(AttributeError):
+            EsiSecurity(
+                redirect_uri=TestEsiSecurity.CALLBACK_URI,
+                client_id=TestEsiSecurity.CLIENT_ID,
+                secret_key=TestEsiSecurity.SECRET_KEY,
+                ssoUrl=""
+            )
+
+        security = EsiSecurity(
+            redirect_uri=TestEsiSecurity.CALLBACK_URI,
+            client_id=TestEsiSecurity.CLIENT_ID,
+            secret_key=TestEsiSecurity.SECRET_KEY,
+            ssoUrl='foo.com',
+            esiUrl='bar.baz'
+        )
+
+        self.assertEqual(
+            security.oauth_verify,
+            "bar.baz/verify/"
+        )
+        self.assertEqual(
+            security.oauth_token,
+            "foo.com/oauth/token"
+        )
+        self.assertEqual(
+            security.oauth_authorize,
+            "foo.com/oauth/authorize"
+        )
 
     def test_esisecurity_update_token(self):
         self.security.update_token({
@@ -91,7 +137,7 @@ class TestEsiSecurity(unittest.TestCase):
         })
         self.assertEqual(self.security.access_token, 'access_token')
         self.assertEqual(self.security.refresh_token, 'refresh_token')
-        self.assertEqual(self.security.token_expiry, int(time.time()+60))
+        self.assertEqual(self.security.token_expiry, int(time.time() + 60))
 
     def test_esisecurity_get_auth_uri(self):
         self.assertEqual(
@@ -229,6 +275,7 @@ class TestEsiSecurity(unittest.TestCase):
 
     def test_esisecurity_call(self):
         class RequestTest(object):
+
             def __init__(self):
                 self._security = []
                 self._p = {'header': {}}

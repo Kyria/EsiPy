@@ -36,8 +36,8 @@ redirect_uri | String | The URI you want the user redirected after he logs in wi
 client_id | String | You client ID from developers.eveonline.com
 secret_key | String | You secret key from developers.eveonline.com
 app | App | [Default: None] The pyswagger app object you create with `App.create()`. 
-ssoUrl | String | [Default: https://login.eveonline.com] The default SSO URL used to generated `oauth/token` and `oauth/authorize` URLs when no `app` is provided
-esiUrl | String | [Default: https://esi.tech.ccp.is] The default ESI URL used to generated `/verify/` endpoint URL
+sso_url | String | [Default: https://login.eveonline.com] The default SSO URL used to generated `oauth/token` and `oauth/authorize` URLs when no `app` is provided
+esi_url | String | [Default: https://esi.tech.ccp.is] The default ESI URL used to generated `/verify/` endpoint URL
 security_name | String | [Default: evesso] The security name in the ESI Swagger Spec. Leave it default 
 
 __If `app` and `ssoUrl` are provided, priority is given to the `app` parameter__

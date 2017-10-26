@@ -33,7 +33,6 @@ CachedResponse = namedtuple(
 
 
 class EsiClient(BaseClient):
-
     __schemes__ = set(['https'])
 
     __image_server__ = {
@@ -274,21 +273,20 @@ class EsiClient(BaseClient):
             now = (datetime.utcnow() - epoch).total_seconds()
             cache_timeout = int(expire) - int(now)
 
-        else:
-            # if no expire, define that there is no cache
-            # -1 will be now -1sec, so it'll expire
-            cache_timeout = -1
+            self.cache.set(
+                cache_key,
+                CachedResponse(
+                    status_code=res.status_code,
+                    headers=res.headers,
+                    content=res.content,
+                    url=res.url,
+                ),
+                cache_timeout,
+            )
 
-        self.cache.set(
-            cache_key,
-            CachedResponse(
-                status_code=res.status_code,
-                headers=res.headers,
-                content=res.content,
-                url=res.url,
-            ),
-            cache_timeout,
-        )
+        else:
+            # no expires header so we won't cache the call
+            pass
 
     def __make_cache_key(self, request):
         headers = frozenset(request._p['header'].items())

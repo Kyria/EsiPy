@@ -1,29 +1,25 @@
 # -*- encoding: utf-8 -*-
 from __future__ import absolute_import
 
-from .cache import BaseCache
-from .cache import DictCache
-from .cache import DummyCache
-from .events import api_call_stats
-
+import logging
+import time
+import warnings
 from collections import namedtuple
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from email.utils import parsedate
-from pyswagger.core import BaseClient
-from requests import Request
-from requests import Session
-from requests.exceptions import (
-    ConnectionError as RequestsConnectionError, Timeout
-)
-from requests.adapters import HTTPAdapter
-from concurrent.futures import ThreadPoolExecutor
 
-import time
 import six
-import warnings
-import logging
+from pyswagger.core import BaseClient
+from requests import Request, Session
+from requests.adapters import HTTPAdapter
+from requests.exceptions import ConnectionError as RequestsConnectionError
+from requests.exceptions import Timeout
 
-logger = logging.getLogger(__name__)
+from .cache import BaseCache, DictCache, DummyCache
+from .events import API_CALL_STATS
+
+LOGGER = logging.getLogger(__name__)
 
 # create a named tuple to store the data
 CachedResponse = namedtuple(
@@ -33,6 +29,7 @@ CachedResponse = namedtuple(
 
 
 class EsiClient(BaseClient):
+    '''ESI Client Object'''
     __schemes__ = set(['https'])
 
     __image_server__ = {
@@ -109,7 +106,7 @@ class EsiClient(BaseClient):
         if 500 <= res.status <= 599:
             _retry += 1
             if _retry < 5:
-                logger.warning(
+                LOGGER.warning(
                     "[failure #%d] %s %d: %r",
                     _retry,
                     res._Response__path,
@@ -221,18 +218,18 @@ class EsiClient(BaseClient):
                     stream=True
                 )
 
-            except (RequestsConnectionError, Timeout) as e:
+            except (RequestsConnectionError, Timeout) as err:
                 # timeout issue, generate a fake response to finish the process
                 # as a normal error 500
                 res = CachedResponse(
                     status_code=500,
                     headers={},
-                    content=('{"error": "%s"}' % str(e)).encode('latin-1'),
+                    content=('{"error": "%s"}' % str(err)).encode('latin-1'),
                     url=prepared_request.url
                 )
 
             # event for api call stats
-            api_call_stats.send(
+            API_CALL_STATS.send(
                 url=res.url,
                 status_code=res.status_code,
                 elapsed_time=time.time() - start_api_call,
@@ -256,7 +253,7 @@ class EsiClient(BaseClient):
         if 'warning' in res.headers:
             # send in logger and warnings, so the user doesn't have to use
             # logging to see it (at least once)
-            logger.warning("[%s] %s" % (res.url, res.headers['warning']))
+            LOGGER.warning("[%s] %s", res.url, res.headers['warning'])
             warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
 
         return response

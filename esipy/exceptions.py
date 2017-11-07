@@ -2,6 +2,7 @@
 
 
 class APIException(Exception):
+    '''Exception handling for API HTTP errors'''
     def __init__(self, url, code, json_response):
         self.url = url
         self.status_code = code

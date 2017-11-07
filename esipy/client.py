@@ -280,6 +280,7 @@ class EsiClient(BaseClient):
                 ),
                 cache_timeout,
             )
+
     def __make_cache_key(self, request):
         headers = frozenset(request._p['header'].items())
         path = frozenset(request._p['path'].items())

@@ -27,8 +27,6 @@ class BaseCache(object):
         raise NotImplementedError
 
 
-
-
 class FileCache(BaseCache):
     """ BaseCache implementation using files to store the data.
     This implementation uses diskcache.Cache
@@ -153,6 +151,7 @@ class RedisCache(BaseCache):
 
     def invalidate(self, key):
         return self._r.delete(_hash(key))
+
 
 def _hash(data):
     hash5 = hashlib.new('md5')

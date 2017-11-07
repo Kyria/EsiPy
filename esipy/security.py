@@ -25,9 +25,7 @@ class EsiSecurity(object):
     Based on pyswagger Security object, to be used with pyswagger BaseClient
     implementation.
     """
-    # pylint: disable=too-many-instance-attributes
-    #pylint: disable=too-many-arguments
-    #refactor later?
+
     def __init__(
             self,
             redirect_uri,

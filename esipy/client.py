@@ -17,7 +17,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from requests.exceptions import Timeout
 
 from .cache import BaseCache, DictCache, DummyCache
-from .events import api_call_stats
+from .events import API_CALL_STATS
 
 LOGGER = logging.getLogger(__name__)
 
@@ -229,7 +229,7 @@ class EsiClient(BaseClient):
                 )
 
             # event for api call stats
-            api_call_stats.send(
+            API_CALL_STATS.send(
                 url=res.url,
                 status_code=res.status_code,
                 elapsed_time=time.time() - start_api_call,

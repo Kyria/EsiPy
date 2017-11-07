@@ -1,11 +1,12 @@
-# -*- encoding: utf-8 -*-
+'''-*- encoding: utf-8 -*-'''
 import logging
 import sys
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Signal(object):
+    '''Handles event recievers for the ESIClient object'''
     def __init__(self):
         """ Alarm constructor. """
         self.event_receivers = []
@@ -49,11 +50,11 @@ class Signal(object):
                 receiver(**kwargs)
             except Exception as err:
                 if not hasattr(err, '__traceback__'):
-                    logger.error(sys.exc_info()[2])
+                    LOGGER.error(sys.exc_info()[2])
                 else:
-                    logger.error(err.__traceback__)
+                    LOGGER.error(err.__traceback__)
 
 
 # define required alarms
-after_token_refresh = Signal()
-api_call_stats = Signal()
+AFTER_TOKEN_REFRESH = Signal()
+API_CALL_STATS = Signal()

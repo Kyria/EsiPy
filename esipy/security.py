@@ -1,18 +1,23 @@
-# -*- encoding: utf-8 -*-
+'''-*- encoding: utf-8 -*-'''
 from __future__ import absolute_import
-
-from .events import after_token_refresh
-from .exceptions import APIException
-
-from requests import Session
-from requests.utils import quote
-from six.moves.urllib.parse import urlparse
 
 import base64
 import logging
 import time
 
-logger = logging.getLogger(__name__)
+from requests import Session
+from requests.utils import quote
+
+from .events import AFTER_TOKEN_REFRESH
+from .exceptions import APIException
+
+try:
+    from six.moves.urllib.parse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 class EsiSecurity(object):
@@ -20,7 +25,9 @@ class EsiSecurity(object):
     Based on pyswagger Security object, to be used with pyswagger BaseClient
     implementation.
     """
-
+    # pylint: disable=too-many-instance-attributes
+    #pylint: disable=too-many-arguments
+    #refactor later?
     def __init__(
             self,
             redirect_uri,
@@ -136,7 +143,7 @@ class EsiSecurity(object):
         :param state: The state to pass through the auth process
         :return: the authorizationUrl with the correct parameters.
         """
-        s = [] if not scopes else scopes
+        scopeset = [] if not scopes else scopes
 
         response_type = 'code' if not implicit else 'token'
 
@@ -145,7 +152,7 @@ class EsiSecurity(object):
             response_type,
             quote(self.redirect_uri, safe=''),
             self.client_id,
-            '&scope=%s' % '+'.join(s) if scopes else '',
+            '&scope=%s' % '+'.join(scopeset) if scopes else '',
             '&state=%s' % state if state else ''
         )
 
@@ -273,12 +280,12 @@ class EsiSecurity(object):
 
         if self.is_token_expired():
             json_response = self.refresh()
-            after_token_refresh.send(**json_response)
+            AFTER_TOKEN_REFRESH.send(**json_response)
 
         for security in request._security:
             if self.security_name not in security:
-                logger.warning(
-                    "Missing Securities: [%s]" % ", ".join(security.keys())
+                LOGGER.warning(
+                    "Missing Securities: [%s]", ", ".join(security.keys())
                 )
                 continue
             if self.access_token is not None:

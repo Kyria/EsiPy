@@ -254,7 +254,7 @@ class EsiClient(BaseClient):
             # send in logger and warnings, so the user doesn't have to use
             # logging to see it (at least once)
             LOGGER.warning("[%s] %s", res.url, res.headers['warning'])
-            warnings.warn("[%s] %s", res.url, res.headers['warning'])
+            warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
 
         return response
 

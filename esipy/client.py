@@ -186,7 +186,7 @@ class EsiClient(BaseClient):
         )
 
         # check cache here so we have all headers, formed url and params
-        cache_key = __make_cache_key(request)
+        cache_key = self.__make_cache_key(request)
         cached_response = self.cache.get(cache_key, None)
 
         if cached_response is not None:
@@ -280,9 +280,8 @@ class EsiClient(BaseClient):
                 ),
                 cache_timeout,
             )
-
-def __make_cache_key(request):
-    headers = frozenset(request._p['header'].items())
-    path = frozenset(request._p['path'].items())
-    query = frozenset(request._p['query'])
-    return (request.url, headers, path, query)
+    def __make_cache_key(self, request):
+        headers = frozenset(request._p['header'].items())
+        path = frozenset(request._p['path'].items())
+        query = frozenset(request._p['query'])
+        return (request.url, headers, path, query)

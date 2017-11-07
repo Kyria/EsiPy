@@ -11,10 +11,7 @@ from requests.utils import quote
 from .events import AFTER_TOKEN_REFRESH
 from .exceptions import APIException
 
-try:
-    from six.moves.urllib.parse import urlparse
-except ImportError:
-    from urllib.parse import urlparse
+from six.moves.urllib.parse import urlparse
 
 
 LOGGER = logging.getLogger(__name__)

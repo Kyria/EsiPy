@@ -8,11 +8,10 @@ import time
 from requests import Session
 from requests.utils import quote
 
-from .events import AFTER_TOKEN_REFRESH
-from .exceptions import APIException
-
 from six.moves.urllib.parse import urlparse
 
+from .events import AFTER_TOKEN_REFRESH
+from .exceptions import APIException
 
 LOGGER = logging.getLogger(__name__)
 

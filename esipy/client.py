@@ -20,10 +20,9 @@ from requests.exceptions import (
 )
 from requests.adapters import HTTPAdapter
 
-from .cache import BaseCache
-from .cache import DictCache
-from .cache import DummyCache
 from .events import API_CALL_STATS
+from .utils import make_cache_key
+from .utils import check_cache
 
 
 LOGGER = logging.getLogger(__name__)
@@ -33,14 +32,6 @@ CachedResponse = namedtuple(
     'CachedResponse',
     ['status_code', 'headers', 'content', 'url']
 )
-
-
-def make_cache_key(request):
-    """ Generate a cache key from request object data """
-    headers = frozenset(request._p['header'].items())
-    path = frozenset(request._p['path'].items())
-    query = frozenset(request._p['query'])
-    return (request.url, headers, path, query)
 
 
 class EsiClient(BaseClient):
@@ -95,16 +86,7 @@ class EsiClient(BaseClient):
             self._session.mount('https://', transport_adapter)
 
         # initiate the cache object
-        if 'cache' not in kwargs:
-            self.cache = DictCache()
-        else:
-            cache = kwargs.pop('cache')
-            if isinstance(cache, BaseCache):
-                self.cache = cache
-            elif cache is None:
-                self.cache = DummyCache()
-            else:
-                raise ValueError('Provided cache must implement BaseCache')
+        self.cache = check_cache(kwargs.pop('cache', False))
 
     def _retry_request(self, req_and_resp, _retry=0, **kwargs):
         """Uses self._request in a sane retry loop (for 5xx level errors).

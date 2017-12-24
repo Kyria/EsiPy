@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 """ Cache objects for EsiPy """
 import hashlib
+import logging
 import time
 
 try:
@@ -8,12 +9,11 @@ try:
 except ImportError:  # pragma: no cover
     import cPickle as pickle
 
-import logging
-
 LOGGER = logging.getLogger(__name__)
 
 
 def _hash(data):
+    """ generate a hash from data object to be used as cache key """
     hash_algo = hashlib.new('md5')
     hash_algo.update(pickle.dumps(data))
     # prefix allows possibility of multiple applications
@@ -27,7 +27,7 @@ class BaseCache(object):
     """
 
     def set(self, key, value, timeout=300):
-        """ Set a value in the cache """
+        """ Set a value in the cache. If timeout=(None): never expires """
         raise NotImplementedError
 
     def get(self, key, default=None):
@@ -65,7 +65,8 @@ class FileCache(BaseCache):
         self._cache.close()
 
     def set(self, key, value, timeout=300):
-        self._cache.set(_hash(key), value, expire=timeout)
+        expire_time = None if timeout == 0 else timeout
+        self._cache.set(_hash(key), value, expire=expire_time)
 
     def get(self, key, default=None):
         return self._cache.get(_hash(key), default)
@@ -89,7 +90,10 @@ class DictCache(BaseCache):
         return cache_val[0]
 
     def set(self, key, value, timeout=300):
-        expire_time = None if timeout is None else timeout + time.time()
+        if timeout is None or timeout == 0:
+            expire_time = None
+        else:
+            expire_time = timeout + time.time()
         self._dict[key] = (value, expire_time)
 
     def invalidate(self, key):
@@ -133,7 +137,7 @@ class MemcachedCache(BaseCache):
         return value if value is not None else default
 
     def set(self, key, value, timeout=300):
-        expire_time = 0 if timeout is None else timeout + time.time()
+        expire_time = 0 if timeout is None else timeout
         return self._mc.set(_hash(key), value, expire_time)
 
     def invalidate(self, key):
@@ -159,6 +163,8 @@ class RedisCache(BaseCache):
         return pickle.loads(value) if value is not None else default
 
     def set(self, key, value, timeout=300):
+        if timeout is None or timeout == 0:
+            return self._r.set(_hash(key), pickle.dumps(value))
         return self._r.setex(_hash(key), pickle.dumps(value), timeout)
 
     def invalidate(self, key):

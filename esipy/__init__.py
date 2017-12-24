@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-""" Entry point of EsiPy, also contains "shortcuts" for all required objects """
+""" Entry point of EsiPy, also contains shortcuts for all required objects """
 from __future__ import absolute_import
 
 try:

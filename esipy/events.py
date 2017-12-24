@@ -1,11 +1,17 @@
 # -*- encoding: utf-8 -*-
+""" Event / Signal definition. Signals are used to hook methods
+to some defined event within EsiPy for the user to be able to do
+specific actions at some times """
 import logging
 import sys
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 class Signal(object):
+    """ Signal class. This class allows subscribers to hook to some specific
+    event and be notified when something happen """
+
     def __init__(self):
         """ Alarm constructor. """
         self.event_receivers = []
@@ -47,13 +53,13 @@ class Signal(object):
         for receiver in self.event_receivers:
             try:
                 receiver(**kwargs)
-            except Exception as err:
+            except Exception as err:  # pylint: disable=W0703
                 if not hasattr(err, '__traceback__'):
-                    logger.error(sys.exc_info()[2])
+                    LOGGER.error(sys.exc_info()[2])
                 else:
-                    logger.error(err.__traceback__)
+                    LOGGER.error(getattr(err, '__traceback__'))
 
 
 # define required alarms
-after_token_refresh = Signal()
-api_call_stats = Signal()
+AFTER_TOKEN_REFRESH = Signal()
+API_CALL_STATS = Signal()

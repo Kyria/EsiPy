@@ -1,18 +1,21 @@
 # -*- encoding: utf-8 -*-
+""" EsiPy Security definition where everything related to
+SSO auth is defined """
+
 from __future__ import absolute_import
-
-from .events import after_token_refresh
-from .exceptions import APIException
-
-from requests import Session
-from requests.utils import quote
-from six.moves.urllib.parse import urlparse
 
 import base64
 import logging
 import time
 
-logger = logging.getLogger(__name__)
+from requests import Session
+from requests.utils import quote
+from six.moves.urllib.parse import urlparse
+
+from .events import AFTER_TOKEN_REFRESH
+from .exceptions import APIException
+
+LOGGER = logging.getLogger(__name__)
 
 
 class EsiSecurity(object):
@@ -26,10 +29,7 @@ class EsiSecurity(object):
             redirect_uri,
             client_id,
             secret_key,
-            app=None,
-            sso_url="https://login.eveonline.com",
-            esi_url="https://esi.tech.ccp.is",
-            security_name="evesso"):
+            **kwargs):
         """ Init the ESI Security Object
 
         :param redirect_uri: the uri to redirect the user after login into SSO
@@ -41,7 +41,11 @@ class EsiSecurity(object):
         :param security_name: (optionnal) the name of the object holding the
         informations in the securityDefinitions, used to check authed endpoint
         """
-        self.security_name = security_name
+        app = kwargs.pop('app', None)
+        sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
+        esi_url = kwargs.pop('esi_url', "https://esi.tech.ccp.is")
+
+        self.security_name = kwargs.pop('security_name', 'evesso')
         self.redirect_uri = redirect_uri
         self.client_id = client_id
         self.secret_key = secret_key
@@ -49,11 +53,14 @@ class EsiSecurity(object):
         # we provide app object, so we don't use sso_url
         if app is not None:
             # check if the security_name exists in the securityDefinition
-            security = app.root.securityDefinitions.get(security_name, None)
+            security = app.root.securityDefinitions.get(
+                self.security_name,
+                None
+            )
             if security is None:
                 raise NameError(
                     "%s is not defined in the securityDefinitions" %
-                    security_name
+                    self.security_name
                 )
 
             self.oauth_authorize = security.authorizationUrl
@@ -136,7 +143,7 @@ class EsiSecurity(object):
         :param state: The state to pass through the auth process
         :return: the authorizationUrl with the correct parameters.
         """
-        s = [] if not scopes else scopes
+        scopes_list = [] if not scopes else scopes
 
         response_type = 'code' if not implicit else 'token'
 
@@ -145,11 +152,11 @@ class EsiSecurity(object):
             response_type,
             quote(self.redirect_uri, safe=''),
             self.client_id,
-            '&scope=%s' % '+'.join(s) if scopes else '',
+            '&scope=%s' % '+'.join(scopes_list) if scopes else '',
             '&state=%s' % state if state else ''
         )
 
-    def get_access_token_request_params(self, code):
+    def get_access_token_params(self, code):
         """ Return the param object for the post() call to get the access_token
         from the auth process (using the code)
 
@@ -163,7 +170,7 @@ class EsiSecurity(object):
             }
         )
 
-    def get_refresh_token_request_params(self):
+    def get_refresh_token_params(self):
         """ Return the param object for the post() call to get the access_token
         from the refresh_token
 
@@ -214,7 +221,7 @@ class EsiSecurity(object):
     def refresh(self):
         """ Update the auth data (tokens) using the refresh token in auth.
         """
-        request_data = self.get_refresh_token_request_params()
+        request_data = self.get_refresh_token_params()
         res = self._session.post(**request_data)
         if res.status_code != 200:
             raise APIException(
@@ -232,7 +239,7 @@ class EsiSecurity(object):
 
         :param code: the code you get from the auth process
         """
-        request_data = self.get_access_token_request_params(code)
+        request_data = self.get_access_token_params(code)
         res = self._session.post(**request_data)
         if res.status_code != 200:
             raise APIException(
@@ -273,12 +280,13 @@ class EsiSecurity(object):
 
         if self.is_token_expired():
             json_response = self.refresh()
-            after_token_refresh.send(**json_response)
+            AFTER_TOKEN_REFRESH.send(**json_response)
 
         for security in request._security:
             if self.security_name not in security:
-                logger.warning(
-                    "Missing Securities: [%s]" % ", ".join(security.keys())
+                LOGGER.warning(
+                    "Missing Securities: [%s]",
+                    ", ".join(security.keys())
                 )
                 continue
             if self.access_token is not None:

@@ -1,0 +1,6 @@
+[TYPECHECK]
+ignored-classes=
+[MASTER]
+ignore=
+[MESSAGES CONTROL]
+disable=R0902,R0903,W0212

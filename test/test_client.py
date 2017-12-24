@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# pylint: skip-file
 from __future__ import absolute_import
 
 from .mock import _all_auth_mock_

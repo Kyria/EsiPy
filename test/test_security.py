@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# pylint: skip-file
 from __future__ import absolute_import
 
 from .mock import oauth_token
@@ -173,7 +174,7 @@ class TestEsiSecurity(unittest.TestCase):
         )
 
     def test_esisecurity_get_access_token_request_params(self):
-        params = self.security.get_access_token_request_params('foo')
+        params = self.security.get_access_token_params('foo')
         self.assertEqual(
             params['headers'],
             {'Authorization': 'Basic %s' % TestEsiSecurity.BASIC_TOKEN}
@@ -192,7 +193,7 @@ class TestEsiSecurity(unittest.TestCase):
 
     def test_esisecurity_get_refresh_token_request_params(self):
         with self.assertRaises(AttributeError):
-            self.security.get_refresh_token_request_params()
+            self.security.get_refresh_token_params()
 
         self.security.update_token({
             'access_token': 'access_token',
@@ -200,7 +201,7 @@ class TestEsiSecurity(unittest.TestCase):
             'expires_in': 60
         })
 
-        params = self.security.get_refresh_token_request_params()
+        params = self.security.get_refresh_token_params()
 
         self.assertEqual(
             params['headers'],

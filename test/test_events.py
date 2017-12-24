@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# pylint: skip-file
 from esipy.events import Signal
 
 import unittest

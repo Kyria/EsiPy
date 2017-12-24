@@ -11,3 +11,4 @@ pyswagger>=0.8.31
 requests
 six
 redis
+pylint

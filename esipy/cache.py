@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+""" Cache objects for EsiPy """
 import hashlib
 import time
 
@@ -9,7 +10,15 @@ except ImportError:  # pragma: no cover
 
 import logging
 
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
+
+
+def _hash(data):
+    hash_algo = hashlib.new('md5')
+    hash_algo.update(pickle.dumps(data))
+    # prefix allows possibility of multiple applications
+    # sharing same keyspace
+    return 'esi_' + hash_algo.hexdigest()
 
 
 class BaseCache(object):
@@ -18,20 +27,16 @@ class BaseCache(object):
     """
 
     def set(self, key, value, timeout=300):
+        """ Set a value in the cache """
         raise NotImplementedError
 
     def get(self, key, default=None):
+        """ Get a value in the cache, return default if not exist """
         raise NotImplementedError
 
     def invalidate(self, key):
+        """ Invalidate a cache key """
         raise NotImplementedError
-
-    def _hash(self, data):
-        h = hashlib.new('md5')
-        h.update(pickle.dumps(data))
-        # prefix allows possibility of multiple applications
-        # sharing same keyspace
-        return 'esi_' + h.hexdigest()
 
 
 class FileCache(BaseCache):
@@ -60,13 +65,13 @@ class FileCache(BaseCache):
         self._cache.close()
 
     def set(self, key, value, timeout=300):
-        self._cache.set(self._hash(key), value, expire=timeout)
+        self._cache.set(_hash(key), value, expire=timeout)
 
     def get(self, key, default=None):
-        return self._cache.get(self._hash(key), default)
+        return self._cache.get(_hash(key), default)
 
     def invalidate(self, key):
-        self._cache.delete(self._hash(key))
+        self._cache.delete(_hash(key))
 
 
 class DictCache(BaseCache):
@@ -124,15 +129,15 @@ class MemcachedCache(BaseCache):
         self._mc = memcache_client
 
     def get(self, key, default=None):
-        value = self._mc.get(self._hash(key))
+        value = self._mc.get(_hash(key))
         return value if value is not None else default
 
     def set(self, key, value, timeout=300):
         expire_time = 0 if timeout is None else timeout + time.time()
-        return self._mc.set(self._hash(key), value, expire_time)
+        return self._mc.set(_hash(key), value, expire_time)
 
     def invalidate(self, key):
-        return self._mc.delete(self._hash(key))
+        return self._mc.delete(_hash(key))
 
 
 class RedisCache(BaseCache):
@@ -150,11 +155,11 @@ class RedisCache(BaseCache):
         self._r = redis_client
 
     def get(self, key, default=None):
-        value = self._r.get(self._hash(key))
+        value = self._r.get(_hash(key))
         return pickle.loads(value) if value is not None else default
 
     def set(self, key, value, timeout=300):
-        return self._r.setex(self._hash(key), pickle.dumps(value), timeout)
+        return self._r.setex(_hash(key), pickle.dumps(value), timeout)
 
     def invalidate(self, key):
-        return self._r.delete(self._hash(key))
+        return self._r.delete(_hash(key))

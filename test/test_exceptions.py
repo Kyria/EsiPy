@@ -1,4 +1,5 @@
 # -*- encoding: utf-8 -*-
+# pylint: skip-file
 import unittest
 
 from esipy.exceptions import APIException

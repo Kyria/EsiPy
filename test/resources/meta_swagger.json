@@ -1,0 +1,910 @@
+{
+  "host": "esi.tech.ccp.is",
+  "info": {
+    "description": "ESI specs and miscellaneous routes",
+    "title": "ESI Meta Spec",
+    "version": "0.1"
+  },
+  "parameters": {
+    "Authorization": {
+      "description": "Access token, in the format of \"Bearer <access token>\"",
+      "in": "header",
+      "name": "Authorization",
+      "type": "string"
+    },
+    "X-User-Agent": {
+      "description": "Client identifier, takes precedence over User-Agent",
+      "in": "header",
+      "name": "X-User-Agent",
+      "type": "string"
+    },
+    "datasource": {
+      "default": "tranquility",
+      "description": "The server name you would like data from",
+      "in": "query",
+      "name": "datasource",
+      "type": "string",
+      "enum": [
+        "tranquility",
+        "singularity"
+      ]
+    },
+    "token": {
+      "description": "Access token to use if unable to set a header",
+      "in": "query",
+      "name": "token",
+      "type": "string"
+    },
+    "user_agent": {
+      "description": "Client identifier, takes precedence over headers",
+      "in": "query",
+      "name": "user_agent",
+      "type": "string"
+    },
+    "version": {
+      "default": "latest",
+      "description": "The version of metrics to request. Note that alternate versions are grouped together",
+      "in": "query",
+      "name": "version",
+      "type": "string",
+      "enum": [
+        "latest",
+        "dev",
+        "legacy",
+        "meta"
+      ]
+    }
+  },
+  "paths": {
+    "/_dev/swagger.json": {
+      "get": {
+        "description": "The _dev ESI swagger specification. The underscore swagger specs do not have a basePath, giving you an easy way to generate stable clients on versioned routes.",
+        "summary": "Get _dev spec (versioned)",
+        "operationId": "get__dev_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI _dev swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI _dev swagger 2.0 spec",
+              "type": "object",
+              "title": "get__dev_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/_latest/swagger.json": {
+      "get": {
+        "description": "The _latest ESI swagger specification. The underscore swagger specs do not have a basePath, giving you an easy way to generate stable clients on versioned routes.",
+        "summary": "Get _latest spec (versioned)",
+        "operationId": "get__latest_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI _latest swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI _latest swagger 2.0 spec",
+              "type": "object",
+              "title": "get__latest_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/_legacy/swagger.json": {
+      "get": {
+        "description": "The _legacy ESI swagger specification. The underscore swagger specs do not have a basePath, giving you an easy way to generate stable clients on versioned routes.",
+        "summary": "Get _legacy spec (versioned)",
+        "operationId": "get__legacy_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI _legacy swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI _legacy swagger 2.0 spec",
+              "type": "object",
+              "title": "get__legacy_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/dev/swagger.json": {
+      "get": {
+        "description": "The dev ESI swagger specification.",
+        "summary": "Get dev swagger spec",
+        "operationId": "get_dev_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI dev swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI dev swagger 2.0 spec",
+              "type": "object",
+              "title": "get_dev_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/latest/swagger.json": {
+      "get": {
+        "description": "The latest ESI swagger specification.",
+        "summary": "Get latest swagger spec",
+        "operationId": "get_latest_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI latest swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI latest swagger 2.0 spec",
+              "type": "object",
+              "title": "get_latest_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/legacy/swagger.json": {
+      "get": {
+        "description": "The legacy ESI swagger specification.",
+        "summary": "Get legacy swagger spec",
+        "operationId": "get_legacy_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI legacy swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI legacy swagger 2.0 spec",
+              "type": "object",
+              "title": "get_legacy_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/ping": {
+      "get": {
+        "description": "Ping the ESI routers",
+        "summary": "Ping route",
+        "operationId": "get_ping",
+        "responses": {
+          "200": {
+            "description": "Ping OK",
+            "schema": {
+              "description": "OK response",
+              "type": "string",
+              "title": "get_ping_ok",
+              "enum": [
+                "ok"
+              ]
+            }
+          }
+        },
+        "tags": [
+          "Meta"
+        ],
+        "produces": [
+          "text/plain; charset=utf-8"
+        ]
+      }
+    },
+    "/status.json": {
+      "get": {
+        "description": "Provides a general health indicator per route and method",
+        "summary": "ESI health status",
+        "operationId": "get_status",
+        "parameters": [
+          {
+            "$ref": "#/parameters/version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI Status",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI Status JSON",
+              "items": {
+                "description": "Per route status",
+                "type": "object",
+                "title": "get_status_item",
+                "required": [
+                  "route",
+                  "method",
+                  "endpoint",
+                  "status",
+                  "tags"
+                ],
+                "properties": {
+                  "endpoint": {
+                    "description": "ESI Endpoint cluster advertising this route",
+                    "type": "string",
+                    "title": "get_status_endpoint"
+                  },
+                  "method": {
+                    "description": "Swagger defined method",
+                    "type": "string",
+                    "title": "get_status_method"
+                  },
+                  "route": {
+                    "description": "Swagger defined route, not including version prefix",
+                    "type": "string",
+                    "title": "get_status_route"
+                  },
+                  "status": {
+                    "description": "Vague route status. Green is good, yellow is degraded, meaning slow or potentially dropping requests. Red means most requests are not succeeding and/or are very slow (5s+) on average.",
+                    "type": "string",
+                    "title": "get_status_status",
+                    "enum": [
+                      "green",
+                      "yellow",
+                      "red"
+                    ]
+                  },
+                  "tags": {
+                    "description": "Swagger tags applicable to this route",
+                    "type": "array",
+                    "title": "get_status_tags",
+                    "items": {
+                      "description": "Swagger tag",
+                      "type": "string",
+                      "title": "get_status_tag"
+                    }
+                  }
+                }
+              },
+              "type": "array",
+              "title": "get_status_ok"
+            }
+          },
+          "404": {
+            "description": "Unsupported version",
+            "schema": {
+              "description": "Unsupported version",
+              "title": "get_status_not_found",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "description": "Unsupported version",
+                  "type": "string",
+                  "title": "get_status_not_found_error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Meta"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v1/swagger.json": {
+      "get": {
+        "description": "The v1 ESI swagger specification.",
+        "summary": "Get v1 swagger spec",
+        "operationId": "get_v1_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI v1 swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI v1 swagger 2.0 spec",
+              "type": "object",
+              "title": "get_v1_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v2/swagger.json": {
+      "get": {
+        "description": "The v2 ESI swagger specification.",
+        "summary": "Get v2 swagger spec",
+        "operationId": "get_v2_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI v2 swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI v2 swagger 2.0 spec",
+              "type": "object",
+              "title": "get_v2_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v3/swagger.json": {
+      "get": {
+        "description": "The v3 ESI swagger specification.",
+        "summary": "Get v3 swagger spec",
+        "operationId": "get_v3_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI v3 swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI v3 swagger 2.0 spec",
+              "type": "object",
+              "title": "get_v3_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/v4/swagger.json": {
+      "get": {
+        "description": "The v4 ESI swagger specification.",
+        "summary": "Get v4 swagger spec",
+        "operationId": "get_v4_swagger",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ESI v4 swagger specification",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "ESI v4 swagger 2.0 spec",
+              "type": "object",
+              "title": "get_v4_swagger_ok"
+            }
+          }
+        },
+        "tags": [
+          "Swagger"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/verify/": {
+      "get": {
+        "description": "Verify authorization tokens in ESI's auth cache",
+        "summary": "Verify access token",
+        "operationId": "get_verify",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          },
+          {
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/token"
+          },
+          {
+            "$ref": "#/parameters/Authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SSO /verify JSON response",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "SSO /verify JSON",
+              "type": "object",
+              "title": "get_verify_ok",
+              "required": [
+                "CharacterID"
+              ],
+              "properties": {
+                "CharacterID": {
+                  "description": "Token owner's character ID",
+                  "format": "int32",
+                  "type": "integer",
+                  "title": "get_verify_character_id"
+                },
+                "CharacterName": {
+                  "description": "Token owner's character name",
+                  "type": "string",
+                  "title": "get_verify_character_name"
+                },
+                "CharacterOwnerHash": {
+                  "description": "Hash of the character's owner. If the character is sold or otherwise transferred, this will change",
+                  "type": "string",
+                  "title": "get_verify_character_owner_hash"
+                },
+                "ExpiresOn": {
+                  "description": "Expiry time of the token (not RFC3339)",
+                  "type": "string",
+                  "title": "get_verify_expires_on"
+                },
+                "IntellectualProperty": {
+                  "description": "The IP which generated the token",
+                  "type": "string",
+                  "title": "get_verify_intellectual_property"
+                },
+                "Scopes": {
+                  "description": "Space separated list of scopes the token is valid for",
+                  "type": "string",
+                  "title": "get_verify_scopes"
+                },
+                "TokenType": {
+                  "description": "Type of access token",
+                  "type": "string",
+                  "title": "get_verify_token_type"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "SSO /verify JSON error",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "SSO /verify JSON",
+              "title": "get_verify_error",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "description": "Generic error returned by SSO",
+                  "type": "string",
+                  "title": "get_verify_error_error"
+                },
+                "error_description": {
+                  "description": "Detailed error description from SSO",
+                  "type": "string",
+                  "title": "get_verify_error_description"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authorization not provided",
+            "schema": {
+              "description": "Authorization not provided",
+              "title": "get_verify_unauthorized",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "description": "Authorization not provided",
+                  "type": "string",
+                  "title": "get_verify_unauthorized_error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unsupported datasource",
+            "schema": {
+              "description": "Unsupported datasource",
+              "title": "get_verify_not_found",
+              "required": [
+                "error"
+              ],
+              "properties": {
+                "error": {
+                  "description": "Unsupported datasource",
+                  "type": "string",
+                  "title": "get_verify_not_found_error"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Meta"
+        ],
+        "x-cached-seconds": 30,
+        "produces": [
+          "application/json"
+        ]
+      }
+    },
+    "/versions/": {
+      "get": {
+        "description": "List all endpoint versions",
+        "summary": "List versions",
+        "operationId": "get_versions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Version list",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "List of versions",
+              "items": {
+                "description": "Available version",
+                "type": "string",
+                "title": "get_versions_version"
+              },
+              "type": "array",
+              "title": "get_versions_ok"
+            }
+          }
+        },
+        "tags": [
+          "Meta"
+        ],
+        "x-cached-seconds": 60,
+        "produces": [
+          "application/json"
+        ]
+      }
+    }
+  },
+  "produces": [
+    "application/json",
+    "text/plain; charset=utf-8"
+  ],
+  "schemes": [
+    "https"
+  ],
+  "swagger": "2.0"
+}

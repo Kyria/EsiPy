@@ -20,7 +20,7 @@ class TestEsiApp(unittest.TestCase):
     def setUp(self, urlopen_mock):
         # I hate those mock... thx urlopen instead of requests...
         urlopen_mock.return_value = open('test/resources/meta_swagger.json')
-        self.app = EsiApp()
+        self.app = EsiApp(cache_time=None)
 
     def test_app_op_attribute(self):
         self.assertTrue(self.app.op)

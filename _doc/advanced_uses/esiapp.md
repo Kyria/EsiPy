@@ -8,6 +8,8 @@ title: EsiApp - Esi Meta Spec App
 The EsiApp object provides an easy way to play with the [ESI Meta Swagger Spec](https://esi.tech.ccp.is/ui/?version=meta).<br>
 It behave almost like the pyswagger app object, but can also return versionned swagger spec as app objects, while caching them.
 
+&nbsp;
+
 ## How to use it
 
 If you want to use it, you just need to import it and instanciate it. `EsiApp.__init__()` takes the following parameters:
@@ -24,8 +26,11 @@ app_without_cache = EsiApp(cache=None)
 app_with_5min_cache = EsiApp(cache_time=300)
 ```
 
-Now you created your `EsiApp` instance, you can now either se endpoints like the pyswagger App, using `.op` attribute then calling that endpoints with an `EsiClient`<br>
-or you can get ESI versionned endpoints using the related `operationId` as an attribute. For example [`get_v2_swagger`](https://esi.tech.ccp.is/ui/?version=meta#/Swagger/get_v2_swagger).
+&nbsp;
+
+Now you created your `EsiApp` instance, you can now either use endpoints like the pyswagger App, using `.op` attribute then calling that endpoints with an `EsiClient`.
+
+You can also get ESI versionned endpoints using the related `operationId` as an attribute. For example `get_v2_swagger` ([Link](https://esi.tech.ccp.is/ui/?version=meta#/Swagger/get_v2_swagger)).
 
 ```python
 # we use a client created in previous documentation page.
@@ -37,7 +42,6 @@ res = client.request(op)
 res.data
 # returns :
 # [u'dev', u'latest', u'legacy', u'v1', u'v2', u'v3', u'v4']
-
 
 # now we'll get the "ESI V2" swagger spec
 app_v2 = app.get_v2_swagger
@@ -59,6 +63,8 @@ print v2_op[0].url
 # returns:
 # https://esi.tech.ccp.is/v2/universe/system_kills/
 ```
+
+&nbsp;
 
 ## Force update endpoints
 In case you set versionned app to never expire, you can force them to refresh on next call. 

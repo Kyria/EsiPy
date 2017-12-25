@@ -16,8 +16,8 @@ To remove your subscription to a signal, call the `remove_receiver` method from 
 
 ## Example
 
-To have a little more details on how it work, let's take the `after_token_refresh` signal, which is triggered when the token is refreshed while the app is doing a `EsiClient.request()` call.<br>
-Description of this signal is in the [next section of this page](#after_token_refresh).
+To have a little more details on how it work, let's take the `AFTER_TOKEN_REFRESH` signal, which is triggered when the token is refreshed while the app is doing a `EsiClient.request()` call.<br>
+Description of this signal is in the [next section of this page](#AFTER_TOKEN_REFRESH).
 
 ```python
 # first we reate a function that'll wait for the signal parameters
@@ -28,8 +28,8 @@ def after_token_refresh_hook(access_token, refresh_token, expires_in, **kwargs):
 	print "Expires in %d" % expires_in
 
 # now we hook to the signal
-from esipy.event import after_token_refresh
-after_token_refresh.add_receiver(after_token_refresh_hook)
+from esipy.event import AFTER_TOKEN_REFRESH
+AFTER_TOKEN_REFRESH.add_receiver(after_token_refresh_hook)
 
 # let's say you have a security object initialized and a client (see [SSO Authentification])
 # you wait for 20minutes, the token to expires then you do a request (any with authentification required)

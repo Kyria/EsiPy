@@ -13,11 +13,15 @@ class EsiApp(object):
         """ Constructor.
 
         :param: cache if specified, use that cache, else use DictCache
-        :param: min_cache_time is the minimum cache time for versions
+        :param: cache_time is the minimum cache time for versions
         endpoints. If set to 0, never expires". Default 86400sec (1day)
         """
-        min_cache_time = kwargs.pop('min_cache_time', 86400)
-        self.expire = None if min_cache_time == 0 else min_cache_time
+        cache_time = kwargs.pop('cache_time', 86400)
+        if cache_time == 0 or cache_time is None:
+            self.expire = None
+        else:
+            self.expire = cache_time if cache_time > 0 else 86400
+
         self.cached_version = []
 
         cache = kwargs.pop('cache', False)

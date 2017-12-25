@@ -48,7 +48,7 @@ Expires in 1200
 
 ## List of signals
 
-### __after_token_refresh__
+### __AFTER_TOKEN_REFRESH__
 
 This triggered with a token update while a `EsiClient.request()` is done. This is *not* triggered if the user manually call `EsiSecurity.update()`.
 
@@ -60,7 +60,7 @@ expires_in | int | The token validity time in seconds
 token_type | String | The token type returned
 **kwargs | Dict | Any other values CCP may add in the future and not yet in this doc
 
-### __api_call_stats__
+### __API_CALL_STATS__
 
 This signal is triggered after each requests done. <br>
 The only purpose of this request is to monitor api calls.

@@ -94,6 +94,7 @@ class YourCache(BaseCache):
 
     def set(self, key, value, timeout=300):
         # do something and store the value
+        # timeout = 0 or None make the data never expire
 
     def get(self, key, default=None):
         # return the value or invalidate and return default

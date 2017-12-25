@@ -20,7 +20,9 @@ class EsiApp(object):
         self.expire = None if min_cache_time == 0 else min_cache_time
         self.cached_version = []
 
-        self.cache = check_cache(kwargs.pop('cache', False))
+        cache = kwargs.pop('cache', False)
+        self.caching = True if cache is not None else False
+        self.cache = check_cache(cache)
         self.app = App.create('https://esi.tech.ccp.is/swagger.json')
 
     def __getattr__(self, name):
@@ -40,14 +42,15 @@ class EsiApp(object):
 
         # if the endpoint is a swagger spec
         if 'swagger.json' in op_attr.url:
-            # need some caching here
             key = 'https:%s' % op_attr.url
             app = self.cache.get('https:%s' % op_attr.url, None)
 
             if app is None:
                 app = App.create(key)
-                self.cache.set(key, app, self.expire)
-                self.cached_version.append(key)
+
+                if self.caching:
+                    self.cache.set(key, app, self.expire)
+                    self.cached_version.append(key)
 
             return app
         else:

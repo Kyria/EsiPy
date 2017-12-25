@@ -96,6 +96,13 @@ class TestDictCache(BaseTest):
         self.assertIsNone(self.c.get(self.ex_cpx[0]))
         self.assertNotIn(self.ex_cpx[0], self.c._dict)
 
+        self.c.set('never', 'expire', 0)
+        self.c.set('nevertoo', 'expire', None)
+        self.assertEqual(self.c.get('never'), 'expire')
+        self.assertEqual(self.c.get('nevertoo'), 'expire')
+        self.assertIsNone(self.c._dict['never'][1])
+        self.assertIsNone(self.c._dict['nevertoo'][1])
+
 
 class TestDummyCache(BaseTest):
     """ DummyCache test class. """
@@ -135,11 +142,15 @@ class TestFileCache(BaseTest):
         self.check_complex(self.c.get(self.ex_cpx[0]))
 
         self.c.set('expired', 'baz', -1)
+        self.c.set('never', 'foo', 0)
+        self.c.set('nevertoo', 'bar', None)
         self.assertEqual(
             self.c.get('expired', 'default_because_expired'),
             'default_because_expired'
         )
         self.assertEqual(self.c.get('expired'), None)
+        self.assertEqual(self.c.get('never'), 'foo')
+        self.assertEqual(self.c.get('nevertoo'), 'bar')
 
     def test_file_cache_invalidate(self):
         self.c.set('key', 'bar')
@@ -167,7 +178,11 @@ class TestMemcachedCache(BaseTest):
         self.check_complex(self.c.get(self.ex_cpx[0]))
 
         self.c.set('expired', 'baz', -1)
+        self.c.set('never', 'foo', 0)
+        self.c.set('nevertoo', 'bar', None)
         self.assertEqual(self.c.get('expired'), None)
+        self.assertEqual(self.c.get('never'), 'foo')
+        self.assertEqual(self.c.get('nevertoo'), 'bar')
 
     def test_memcached_invalidate(self):
         self.c.set(*self.ex_str)
@@ -196,8 +211,12 @@ class TestRedisCache(BaseTest):
         self.check_complex(self.c.get(self.ex_cpx[0]))
 
         self.c.set('expired', 'baz', 1)
+        self.c.set('never', 'foo', 0)
+        self.c.set('nevertoo', 'bar', None)
         time.sleep(2)
         self.assertEqual(self.c.get('expired'), None)
+        self.assertEqual(self.c.get('never'), 'foo')
+        self.assertEqual(self.c.get('nevertoo'), 'bar')
 
     def test_redis_invalidate(self):
         self.c.set(*self.ex_str)

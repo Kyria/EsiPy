@@ -28,7 +28,7 @@ def after_token_refresh_hook(access_token, refresh_token, expires_in, **kwargs):
 	print "Expires in %d" % expires_in
 
 # now we hook to the signal
-from esipy.event import AFTER_TOKEN_REFRESH
+from esipy.events import AFTER_TOKEN_REFRESH
 AFTER_TOKEN_REFRESH.add_receiver(after_token_refresh_hook)
 
 # let's say you have a security object initialized and a client (see [SSO Authentification])

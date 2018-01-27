@@ -269,7 +269,8 @@ class EsiClient(BaseClient):
             now = (datetime.utcnow() - epoch).total_seconds()
             cache_timeout = int(expire) - int(now)
 
-            # Occasionally CCP swagger will return an outdated expire - warn and skip cache
+            # Occasionally CCP swagger will return an outdated expire
+            # - warn and skip cache
             if cache_timeout > 0:
                 self.cache.set(
                     cache_key,
@@ -282,6 +283,7 @@ class EsiClient(BaseClient):
                     cache_timeout,
                 )
             else:
-                LOGGER.warning("[%s] returned expired result: %s", res.url, res.headers)
+                LOGGER.warning(
+                    "[%s] returned expired result: %s", res.url,
+                    res.headers)
                 warnings.warn("[%s] returned expired result" % res.url)
-

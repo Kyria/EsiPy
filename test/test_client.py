@@ -248,15 +248,10 @@ class TestEsiPy(unittest.TestCase):
         self.assertEqual(send_function.count, 5)
 
     def test_esipy_expired_response(self):
-        operation = self.app.op['get_incursions']()
+        operation = self.app.op['get_incursions']
 
         with httmock.HTTMock(public_incursion_expired):
-            warnings.simplefilter('ignore')
-            incursions = self.client_no_auth.request(operation)
-            self.assertEqual(incursions.status, 200)
-
-            warnings.resetwarnings()
             warnings.filterwarnings('error', '.*returned expired result')
 
             with self.assertRaises(UserWarning):
-                incursions = self.client_no_auth.request(operation)
+                self.client_no_auth.request(operation())

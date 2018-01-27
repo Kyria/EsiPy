@@ -255,6 +255,7 @@ class TestEsiPy(unittest.TestCase):
             incursions = self.client_no_auth.request(operation)
             self.assertEqual(incursions.status, 200)
 
+            warnings.resetwarnings()
             warnings.filterwarnings('error', '.*returned expired result')
 
             with self.assertRaises(UserWarning):

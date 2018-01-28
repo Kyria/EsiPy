@@ -255,3 +255,8 @@ class TestEsiPy(unittest.TestCase):
 
             with self.assertRaises(UserWarning):
                 self.client_no_auth.request(operation())
+
+            warnings.resetwarnings()
+            warnings.simplefilter('ignore')
+            incursions = self.client_no_auth.request(operation())
+            self.assertEquals(incursions.status, 200)

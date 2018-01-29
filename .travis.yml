@@ -18,6 +18,7 @@ install:
 
 script:
   - flake8 esipy
+  - flake8 test
   - coverage run setup.py test
 
 after_success: coveralls

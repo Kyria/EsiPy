@@ -15,6 +15,15 @@ def make_expire_time_str():
     return date.strftime('%a, %d %b %Y %H:%M:%S GMT')
 
 
+def make_expired_time_str():
+    """ Generate an expired date string for the Expires header
+    RFC 7231 format (always GMT datetime).
+    """
+    date = datetime.datetime.utcnow()
+    date -= datetime.timedelta(days=1)
+    return date.strftime('%a, %d %b %Y %H:%M:%S GMT')
+
+
 @httmock.urlmatch(
     scheme="https",
     netloc=r"login\.eveonline\.com$",
@@ -228,6 +237,36 @@ def public_incursion_server_error(url, request):
 
 
 public_incursion_server_error.count = 0
+
+
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"esi\.tech\.ccp\.is$",
+    path=r"^/latest/incursions/$"
+)
+def public_incursion_expired(url, request):
+    """ Mock endpoint for incursion.
+    Public endpoint returning Expires value in the past
+    """
+    return httmock.response(
+        headers={'Expires': make_expired_time_str()},
+        status_code=200,
+        content=[
+            {
+                "type": "Incursion",
+                "state": "mobilizing",
+                "staging_solar_system_id": 30003893,
+                "constellation_id": 20000568,
+                "infested_solar_systems": [
+                    30003888,
+                ],
+                "has_boss": True,
+                "faction_id": 500019,
+                "influence": 1
+            }
+        ]
+    )
+
 
 _all_auth_mock_ = [
     oauth_token,

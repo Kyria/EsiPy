@@ -8,6 +8,7 @@ from .mock import public_incursion_no_expires
 from .mock import public_incursion_no_expires_second
 from .mock import public_incursion_server_error
 from .mock import public_incursion_warning
+from .mock import public_incursion_expired
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -245,3 +246,17 @@ class TestEsiPy(unittest.TestCase):
 
         self.assertEqual(incursions.status, 500)
         self.assertEqual(send_function.count, 5)
+
+    def test_esipy_expired_response(self):
+        operation = self.app.op['get_incursions']
+
+        with httmock.HTTMock(public_incursion_expired):
+            warnings.filterwarnings('error', '.*returned expired result')
+
+            with self.assertRaises(UserWarning):
+                self.client_no_auth.request(operation())
+
+            warnings.resetwarnings()
+            warnings.simplefilter('ignore')
+            incursions = self.client_no_auth.request(operation())
+            self.assertEquals(incursions.status, 200)

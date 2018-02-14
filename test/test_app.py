@@ -16,6 +16,8 @@ pyswagger_logger.setLevel(logging.ERROR)
 
 class TestEsiApp(unittest.TestCase):
 
+    ESI_V1_CACHE_KEY = 'esipy://esi.tech.ccp.is/v1/swagger.json'
+
     @mock.patch('six.moves.urllib.request.urlopen')
     def setUp(self, urlopen_mock):
         # I hate those mock... thx urlopen instead of requests...
@@ -39,18 +41,12 @@ class TestEsiApp(unittest.TestCase):
     @mock.patch('six.moves.urllib.request.urlopen')
     def test_app_getattr_and_cache(self, urlopen_mock):
         urlopen_mock.return_value = open('test/resources/swagger.json')
-        self.assertEqual(self.app.cached_version, ['meta'])
+        self.assertEqual(self.app.cached_version, [EsiApp.ESI_META_CACHE_KEY])
         appv1 = self.app.get_v1_swagger
 
         self.assertTrue(isinstance(appv1, App))
-        self.assertIn(
-            'https://esi.tech.ccp.is/v1/swagger.json',
-            self.app.cached_version,
-        )
-        self.assertEqual(
-            self.app.cache.get('https://esi.tech.ccp.is/v1/swagger.json'),
-            appv1
-        )
+        self.assertIn(self.ESI_V1_CACHE_KEY, self.app.cached_version)
+        self.assertEqual(self.app.cache.get(self.ESI_V1_CACHE_KEY), appv1)
 
         urlopen_mock.return_value = open('test/resources/meta_swagger.json')
         appv1_bis = self.app.get_v1_swagger
@@ -58,12 +54,9 @@ class TestEsiApp(unittest.TestCase):
 
         urlopen_mock.return_value = open('test/resources/meta_swagger.json')
         self.app.force_update()
-        self.assertEqual(self.app.cached_version, ['meta'])
+        self.assertEqual(self.app.cached_version, [EsiApp.ESI_META_CACHE_KEY])
         self.assertEqual(
-            self.app.cache.get(
-                'https://esi.tech.ccp.is/v1/swagger.json',
-                None
-            ),
+            self.app.cache.get(self.ESI_V1_CACHE_KEY, None),
             None
         )
 
@@ -79,9 +72,6 @@ class TestEsiApp(unittest.TestCase):
         self.assertTrue(isinstance(appv1, App))
         self.assertFalse(app_nocache.cached_version)
         self.assertEqual(
-            app_nocache.cache.get(
-                'https://esi.tech.ccp.is/v1/swagger.json',
-                None
-            ),
+            app_nocache.cache.get(self.ESI_V1_CACHE_KEY, None),
             None
         )

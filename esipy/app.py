@@ -10,6 +10,7 @@ class EsiApp(object):
     API, not to have to deal with all ESI versions manually / meta """
 
     ESI_META_URL = 'https://esi.tech.ccp.is/swagger.json'
+    ESI_META_CACHE_KEY = 'esipy:meta_swagger_url'
 
     def __init__(self, **kwargs):
         """ Constructor.
@@ -29,7 +30,10 @@ class EsiApp(object):
         cache = kwargs.pop('cache', False)
         self.caching = True if cache is not None else False
         self.cache = check_cache(cache)
-        self.app = self.__get_or_create_app(self.ESI_META_URL, 'meta')
+        self.app = self.__get_or_create_app(
+            self.ESI_META_URL,
+            self.ESI_META_CACHE_KEY
+        )
 
     def __get_or_create_app(self, app_url, cache_key=None):
         """ Get the app from cache or generate a new one if required """
@@ -63,7 +67,8 @@ class EsiApp(object):
         # if the endpoint is a swagger spec
         if 'swagger.json' in op_attr.url:
             spec_url = 'https:%s' % op_attr.url
-            return self.__get_or_create_app(spec_url)
+            cache_key = 'esipy:%s' % op_attr.url
+            return self.__get_or_create_app(spec_url, cache_key)
         else:
             raise AttributeError('%s is not a swagger endpoint' % name)
 
@@ -72,4 +77,7 @@ class EsiApp(object):
         for key in self.cached_version:
             self.cache.invalidate(key)
         self.cached_version = []
-        self.app = self.__get_or_create_app(self.ESI_META_URL, 'meta')
+        self.app = self.__get_or_create_app(
+            self.ESI_META_URL,
+            self.ESI_META_CACHE_KEY
+        )

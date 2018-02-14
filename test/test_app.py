@@ -39,13 +39,13 @@ class TestEsiApp(unittest.TestCase):
     @mock.patch('six.moves.urllib.request.urlopen')
     def test_app_getattr_and_cache(self, urlopen_mock):
         urlopen_mock.return_value = open('test/resources/swagger.json')
-        self.assertFalse(self.app.cached_version)
+        self.assertEqual(self.app.cached_version, ['meta'])
         appv1 = self.app.get_v1_swagger
 
         self.assertTrue(isinstance(appv1, App))
-        self.assertEqual(
-            self.app.cached_version[0],
-            'https://esi.tech.ccp.is/v1/swagger.json'
+        self.assertIn(
+            'https://esi.tech.ccp.is/v1/swagger.json',
+            self.app.cached_version,
         )
         self.assertEqual(
             self.app.cache.get('https://esi.tech.ccp.is/v1/swagger.json'),
@@ -58,7 +58,7 @@ class TestEsiApp(unittest.TestCase):
 
         urlopen_mock.return_value = open('test/resources/meta_swagger.json')
         self.app.force_update()
-        self.assertFalse(self.app.cached_version)
+        self.assertEqual(self.app.cached_version, ['meta'])
         self.assertEqual(
             self.app.cache.get(
                 'https://esi.tech.ccp.is/v1/swagger.json',

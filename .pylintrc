@@ -1,5 +1,6 @@
 [TYPECHECK]
 ignored-classes=
+ignored-modules=six.moves
 [MASTER]
 ignore=
 [MESSAGES CONTROL]

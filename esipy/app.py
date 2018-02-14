@@ -9,6 +9,8 @@ class EsiApp(object):
     """ EsiApp is an app object that'll allows us to play with ESI Meta
     API, not to have to deal with all ESI versions manually / meta """
 
+    ESI_META_URL = 'https://esi.tech.ccp.is/swagger.json'
+
     def __init__(self, **kwargs):
         """ Constructor.
 
@@ -27,7 +29,21 @@ class EsiApp(object):
         cache = kwargs.pop('cache', False)
         self.caching = True if cache is not None else False
         self.cache = check_cache(cache)
-        self.app = App.create('https://esi.tech.ccp.is/swagger.json')
+        self.app = self.__get_or_create_app(self.ESI_META_URL, 'meta')
+
+    def __get_or_create_app(self, app_url, cache_key=None):
+        """ Get the app from cache or generate a new one if required """
+        if cache_key is None:
+            cache_key = app_url
+        app = self.cache.get(cache_key, None)
+
+        if app is None:
+            app = App.create(app_url)
+            if self.caching:
+                self.cache.set(cache_key, app, self.expire)
+                self.cached_version.append(cache_key)
+
+        return app
 
     def __getattr__(self, name):
         """ Return the request object depending on its nature.
@@ -46,23 +62,14 @@ class EsiApp(object):
 
         # if the endpoint is a swagger spec
         if 'swagger.json' in op_attr.url:
-            key = 'https:%s' % op_attr.url
-            app = self.cache.get('https:%s' % op_attr.url, None)
-
-            if app is None:
-                app = App.create(key)
-
-                if self.caching:
-                    self.cache.set(key, app, self.expire)
-                    self.cached_version.append(key)
-
-            return app
+            spec_url = 'https:%s' % op_attr.url
+            return self.__get_or_create_app(spec_url)
         else:
             raise AttributeError('%s is not a swagger endpoint' % name)
 
     def force_update(self):
         """ update all endpoints by invalidating cache or reloading data """
-        self.app = App.create('https://esi.tech.ccp.is/swagger.json')
         for key in self.cached_version:
             self.cache.invalidate(key)
         self.cached_version = []
+        self.app = self.__get_or_create_app(self.ESI_META_URL, 'meta')

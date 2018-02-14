@@ -14,4 +14,4 @@ It also add more features to the client:  <br>
 - Auth processes / headers <br>
 - Signals
 
-EsiPy support multiple version of CPython (`2.7`, `3.3`, `3.4`, `3.5`), `PyPy2` and `PyPy3`.
+EsiPy support multiple version of CPython (`2.7`, `3.3`, `3.4`, `3.5`, `3.6`).

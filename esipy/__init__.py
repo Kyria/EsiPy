@@ -11,4 +11,4 @@ except ImportError:  # pragma: no cover
             # Not installed or in install (not yet installed) so ignore
     pass
 
-__version__ = '0.3.0'
+__version__ = '0.3.1'

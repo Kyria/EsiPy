@@ -37,10 +37,8 @@ class EsiApp(object):
             self.esi_meta_cache_key
         )
 
-    def __get_or_create_app(self, app_url, cache_key=None):
+    def __get_or_create_app(self, app_url, cache_key):
         """ Get the app from cache or generate a new one if required """
-        if cache_key is None:
-            cache_key = app_url
         app = self.cache.get(cache_key, None)
 
         if app is None:

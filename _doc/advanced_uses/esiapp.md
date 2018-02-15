@@ -18,6 +18,7 @@ Parameter | Type | Description
 --- | --- | ---
 cache | BaseCache | [Default: DictCache instance] The cache instance you want to use, just like EsiClient
 cache_time | int | [Default: 86400] The number of seconds you want to keep versionned endpoint cached. `0` or `None` mean never expire.
+cache_prefix | String | [Default: esipy] the cache key prefix used within EsiApp. 
 
 ```python
 from esipy import EsiApp
@@ -66,7 +67,23 @@ print v2_op[0].url
 
 &nbsp;
 
-## Force update endpoints
-In case you set versionned app to never expire, you can force them to refresh on next call. 
+## Clear cache for EsiApp
+In case you set versionned app to never expire, you can invalidate so they will update on next call. 
 
-To do this, you just need to call `EsiApp.force_update()`. This will update the Meta Spec within the `EsiApp` object, but also invalidate all cached data, to make sure they will update next time you use them.
+To do this, you just need to call `EsiApp.clear_cached_endpoints()`. 
+
+This will invalidate all cached data using the prefix `cache_prefix` defined when you initialized `EsiApp`. In case you want to invalidate older cached data, or specific data with another prefix, `EsiApp.clear_cached_endpoints()` also accept an argument `prefix` that will enforce the use of a specific cache_prefix instead of using the normal.
+
+```python
+app = EsiApp(cache_prefix="foo_v2")
+# all cache key will be prefixed with foo_v2.
+
+app.clear_cached_endpoints()
+# this will clear all cached data using "foo_v2" as prefix.
+
+# now let's say in another version of your app you had a "foo_v1", you can invalidate them (to free space)
+# by using the following code (instead of manually looking for them within your cache or something): 
+
+app.clear_cached_endpoints(prefix='foo_v1')
+# this will clear all cached data using "foo_v1" as prefix, no matter what you defined in "cache_prefix".
+```

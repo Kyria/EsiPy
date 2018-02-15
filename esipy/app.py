@@ -74,6 +74,8 @@ class EsiApp(object):
             raise AttributeError('%s is not a swagger endpoint' % name)
 
     def __getattribute__(self, name):
+        """ Get attribute. If attribute is app, and app is None, create it
+        again from cache / by querying ESI """
         attr = super(EsiApp, self).__getattribute__(name)
         if name == 'app' and attr is None:
             attr = self.__get_or_create_app(
@@ -90,10 +92,11 @@ class EsiApp(object):
         invalidate each of them. Doing it this way will prevent the
         app not finding keys as the user may change its prefixes
         Meta endpoint will be updated upon next call.
+        :param: prefix the prefix for the cache key (default is cache_prefix)
         """
         prefix = prefix if prefix is not None else self.cache_prefix
         for endpoint in self.app.op.values():
             cache_key = '%s:app:%s' % (prefix, endpoint.url)
             self.cache.invalidate(cache_key)
-        self.cache.invalidate(self.esi_meta_cache_key)
+        self.cache.invalidate('%s:app:meta_swagger_url' % self.cache_prefix)
         self.app = None

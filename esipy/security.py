@@ -89,7 +89,10 @@ class EsiSecurity(object):
         # use ESI url for verify, since it's better for caching
         if esi_url is None or esi_url == "":
             raise AttributeError("esi_url cannot be None or empty")
-        self.oauth_verify = '%s/verify/?datasource=%s' % (esi_url, esi_datasource)
+        self.oauth_verify = '%s/verify/?datasource=%s' % (
+            esi_url,
+            esi_datasource
+        )
 
         # session request stuff
         self._session = Session()

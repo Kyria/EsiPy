@@ -40,10 +40,13 @@ class EsiSecurity(object):
         :param app: (optionnal) the pyswagger app object
         :param security_name: (optionnal) the name of the object holding the
         informations in the securityDefinitions, used to check authed endpoint
+        :param esi_datasource: (optional) The ESI datasource used to validate
+        SSO authentication. Defaults to tranquility
         """
         app = kwargs.pop('app', None)
         sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
         esi_url = kwargs.pop('esi_url', "https://esi.tech.ccp.is")
+	esi_datasource = kwargs.pop('esi_datasource', "tranquility")
 
         self.security_name = kwargs.pop('security_name', 'evesso')
         self.redirect_uri = redirect_uri
@@ -86,7 +89,7 @@ class EsiSecurity(object):
         # use ESI url for verify, since it's better for caching
         if esi_url is None or esi_url == "":
             raise AttributeError("esi_url cannot be None or empty")
-        self.oauth_verify = '%s/verify/' % esi_url
+	self.oauth_verify = '%s/verify/?datasource=%s' % (esi_url, esi_datasource)
 
         # session request stuff
         self._session = Session()

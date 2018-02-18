@@ -46,7 +46,7 @@ class EsiSecurity(object):
         app = kwargs.pop('app', None)
         sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
         esi_url = kwargs.pop('esi_url', "https://esi.tech.ccp.is")
-	esi_datasource = kwargs.pop('esi_datasource', "tranquility")
+        esi_datasource = kwargs.pop('esi_datasource', "tranquility")
 
         self.security_name = kwargs.pop('security_name', 'evesso')
         self.redirect_uri = redirect_uri
@@ -89,7 +89,7 @@ class EsiSecurity(object):
         # use ESI url for verify, since it's better for caching
         if esi_url is None or esi_url == "":
             raise AttributeError("esi_url cannot be None or empty")
-	self.oauth_verify = '%s/verify/?datasource=%s' % (esi_url, esi_datasource)
+        self.oauth_verify = '%s/verify/?datasource=%s' % (esi_url, esi_datasource)
 
         # session request stuff
         self._session = Session()

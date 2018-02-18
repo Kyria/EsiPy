@@ -26,7 +26,7 @@ pyswagger_logger.setLevel(logging.ERROR)
 class TestEsiSecurity(unittest.TestCase):
     CALLBACK_URI = "https://foo.bar/baz/callback"
     LOGIN_EVE = "https://login.eveonline.com"
-    OAUTH_VERIFY = "https://esi.tech.ccp.is/verify/"
+    OAUTH_VERIFY = "https://esi.tech.ccp.is/verify/?datasource=tranquility"
     OAUTH_TOKEN = "%s/oauth/token" % LOGIN_EVE
     OAUTH_AUTHORIZE = "%s/oauth/authorize" % LOGIN_EVE
     CLIENT_ID = 'foo'
@@ -114,12 +114,13 @@ class TestEsiSecurity(unittest.TestCase):
             client_id=TestEsiSecurity.CLIENT_ID,
             secret_key=TestEsiSecurity.SECRET_KEY,
             sso_url='foo.com',
-            esi_url='bar.baz'
+            esi_url='bar.baz',
+            esi_datasource='singularity'
         )
 
         self.assertEqual(
             security.oauth_verify,
-            "bar.baz/verify/"
+            "bar.baz/verify/?datasource=singularity"
         )
         self.assertEqual(
             security.oauth_token,

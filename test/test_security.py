@@ -103,6 +103,18 @@ class TestEsiSecurity(unittest.TestCase):
 
     def test_esisecurity_other_init(self):
         """ test security init without app and with urls """
+
+        warnings.simplefilter('error')
+        # trigger user-agent header warning
+        with self.assertRaises(UserWarning):
+            EsiSecurity(
+                redirect_uri=TestEsiSecurity.CALLBACK_URI,
+                client_id=TestEsiSecurity.CLIENT_ID,
+                secret_key=TestEsiSecurity.SECRET_KEY,
+                sso_url=""
+            )
+        warnings.simplefilter('ignore')
+
         with self.assertRaises(AttributeError):
             EsiSecurity(
                 redirect_uri=TestEsiSecurity.CALLBACK_URI,

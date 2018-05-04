@@ -166,6 +166,13 @@ class TestEsiPy(unittest.TestCase):
             self.assertEqual(incursions.data[0].state, 'mobilizing')
 
     def test_client_warning_header(self):
+        warnings.simplefilter('error')
+
+        # trigger user-agent header warning
+        with self.assertRaises(UserWarning):
+            EsiClient()
+
+        # deprecated warning
         with httmock.HTTMock(public_incursion_warning):
             warnings.simplefilter('error')
             incursion_operation = self.app.op['get_incursions']

@@ -9,8 +9,6 @@ class EsiApp(object):
     """ EsiApp is an app object that'll allows us to play with ESI Meta
     API, not to have to deal with all ESI versions manually / meta """
 
-    ESI_META_URL = 'https://esi.tech.ccp.is/swagger.json'
-
     def __init__(self, **kwargs):
         """ Constructor.
 
@@ -19,6 +17,10 @@ class EsiApp(object):
         endpoints. If set to 0, never expires". Default 86400sec (1day)
         :param: cache_prefix the prefix used to all cache key for esiapp
         """
+        self.meta_url = kwargs.pop(
+            'meta_url',
+            'https://esi.evetech.net/swagger.json'
+        )
         cache_time = kwargs.pop('cache_time', 86400)
         if cache_time == 0 or cache_time is None:
             self.expire = None
@@ -33,7 +35,7 @@ class EsiApp(object):
         self.cache = check_cache(cache)
 
         self.app = self.__get_or_create_app(
-            self.ESI_META_URL,
+            self.meta_url,
             self.esi_meta_cache_key
         )
 
@@ -77,7 +79,7 @@ class EsiApp(object):
         attr = super(EsiApp, self).__getattribute__(name)
         if name == 'app' and attr is None:
             attr = self.__get_or_create_app(
-                self.ESI_META_URL,
+                self.meta_url,
                 self.esi_meta_cache_key
             )
             self.app = attr

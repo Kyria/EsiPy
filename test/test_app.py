@@ -17,7 +17,7 @@ pyswagger_logger.setLevel(logging.ERROR)
 class TestEsiApp(unittest.TestCase):
 
     ESI_CACHE_PREFIX = 'esipy_test'
-    ESI_V1_CACHE_KEY = '%s:app://esi.tech.ccp.is/v1/swagger.json' % (
+    ESI_V1_CACHE_KEY = '%s:app://esi.evetech.net/v1/swagger.json' % (
         ESI_CACHE_PREFIX
     )
 
@@ -31,7 +31,7 @@ class TestEsiApp(unittest.TestCase):
         self.assertTrue(self.app.op)
         self.assertEqual(
             self.app.op['verify'].url,
-            '//esi.tech.ccp.is/verify/'
+            '//esi.evetech.net/verify/'
         )
 
     def test_app_getattr_fail(self):

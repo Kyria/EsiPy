@@ -7,6 +7,7 @@ from __future__ import absolute_import
 import base64
 import logging
 import time
+import warnings
 
 from requests import Session
 from requests.utils import quote
@@ -42,10 +43,12 @@ class EsiSecurity(object):
         informations in the securityDefinitions, used to check authed endpoint
         :param esi_datasource: (optional) The ESI datasource used to validate
         SSO authentication. Defaults to tranquility
+        :param headers: (optional) additional headers to add to the requests
+        done here
         """
         app = kwargs.pop('app', None)
         sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
-        esi_url = kwargs.pop('esi_url', "https://esi.tech.ccp.is")
+        esi_url = kwargs.pop('esi_url', "https://esi.evetech.net")
         esi_datasource = kwargs.pop('esi_datasource', "tranquility")
 
         self.security_name = kwargs.pop('security_name', 'evesso')
@@ -96,13 +99,27 @@ class EsiSecurity(object):
 
         # session request stuff
         self._session = Session()
-        self._session.headers.update({
-            'Accept': 'application/json',
-            'User-Agent': (
-                'EsiPy/Security/ - '
-                'https://github.com/Kyria/EsiPy'
+
+        headers = kwargs.pop('headers', {})
+        if 'User-Agent' not in headers:
+            warning_message = (
+                "Defining a 'User-Agent' header is a"
+                " good practice, and allows CCP to contact you if required."
+                " To do this, simply add the following when creating"
+                " the client: headers={'User-Agent':'something'}."
             )
-        })
+            LOGGER.warning(warning_message)
+            warnings.warn(warning_message)
+
+            self._session.headers.update({
+                'User-Agent': (
+                    'EsiPy/Security/ - '
+                    'https://github.com/Kyria/EsiPy - '
+                    'ClientID: %s' % self.client_id
+                )
+            })
+        self._session.headers.update({"Accept": "application/json"})
+        self._session.headers.update(headers)
 
         # token data
         self.refresh_token = None

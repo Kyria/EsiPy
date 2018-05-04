@@ -4,11 +4,11 @@ from __future__ import absolute_import
 
 from .mock import _all_auth_mock_
 from .mock import public_incursion
+from .mock import public_incursion_expired
 from .mock import public_incursion_no_expires
 from .mock import public_incursion_no_expires_second
 from .mock import public_incursion_server_error
 from .mock import public_incursion_warning
-from .mock import public_incursion_expired
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -48,7 +48,7 @@ class TestEsiPy(unittest.TestCase):
         urlopen_mock.return_value = open('test/resources/swagger.json')
 
         self.app = App.create(
-            'https://esi.tech.ccp.is/latest/swagger.json'
+            'https://esi.evetech.net/latest/swagger.json'
         )
 
         self.security = EsiSecurity(

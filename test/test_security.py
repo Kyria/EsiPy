@@ -26,7 +26,7 @@ pyswagger_logger.setLevel(logging.ERROR)
 class TestEsiSecurity(unittest.TestCase):
     CALLBACK_URI = "https://foo.bar/baz/callback"
     LOGIN_EVE = "https://login.eveonline.com"
-    OAUTH_VERIFY = "https://esi.tech.ccp.is/verify/?datasource=tranquility"
+    OAUTH_VERIFY = "https://esi.evetech.net/verify/?datasource=tranquility"
     OAUTH_TOKEN = "%s/oauth/token" % LOGIN_EVE
     OAUTH_AUTHORIZE = "%s/oauth/authorize" % LOGIN_EVE
     CLIENT_ID = 'foo'
@@ -40,7 +40,7 @@ class TestEsiSecurity(unittest.TestCase):
         urlopen_mock.return_value = open('test/resources/swagger.json')
 
         self.app = App.create(
-            'https://esi.tech.ccp.is/latest/swagger.json'
+            'https://esi.evetech.net/latest/swagger.json'
         )
 
         self.security = EsiSecurity(

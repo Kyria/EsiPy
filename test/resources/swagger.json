@@ -1,6 +1,6 @@
 {
   "basePath": "/latest",
-  "host": "esi.tech.ccp.is",
+  "host": "esi.evetech.net",
   "info": {
     "description": "An OpenAPI for EVE Online",
     "title": "EVE Swagger Interface",

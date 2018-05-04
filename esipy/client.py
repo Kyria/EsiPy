@@ -72,6 +72,15 @@ class EsiClient(BaseClient):
         # check for specified headers and update session.headers
         headers = kwargs.pop('headers', {})
         if 'User-Agent' not in headers:
+            warning_message = (
+                "Defining a 'User-Agent' header is a"
+                " good practice, and allows CCP to contact you if required."
+                " To do this, simply add the following when creating"
+                " the client: headers={'User-Agent':'something'}."
+            )
+            LOGGER.warning(warning_message)
+            warnings.warn(warning_message)
+
             headers['User-Agent'] = (
                 'EsiPy/Client - '
                 'https://github.com/Kyria/EsiPy'

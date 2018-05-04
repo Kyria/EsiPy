@@ -58,7 +58,7 @@ def oauth_token(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/verify/$"
 )
 def oauth_verify(url, request):
@@ -74,7 +74,7 @@ def oauth_verify(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/verify/$"
 )
 def oauth_verify_fail(url, request):
@@ -86,7 +86,7 @@ def oauth_verify_fail(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion(url, request):
@@ -115,7 +115,7 @@ def public_incursion(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion_no_expires(url, request):
@@ -143,7 +143,7 @@ def public_incursion_no_expires(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion_no_expires_second(url, request):
@@ -171,7 +171,7 @@ def public_incursion_no_expires_second(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/characters/(\d+)/location/$"
 )
 def auth_character_location(url, request):
@@ -190,7 +190,7 @@ def auth_character_location(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion_warning(url, request):
@@ -219,7 +219,7 @@ def public_incursion_warning(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion_server_error(url, request):
@@ -241,7 +241,7 @@ public_incursion_server_error.count = 0
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.tech\.ccp\.is$",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion_expired(url, request):

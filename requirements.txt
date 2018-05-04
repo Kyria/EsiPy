@@ -12,3 +12,4 @@ requests
 six
 redis
 pylint
+pytz

@@ -166,7 +166,7 @@ class TestEsiPy(unittest.TestCase):
             self.assertEqual(incursions.data[0].state, 'mobilizing')
 
     def test_client_warning_header(self):
-
+        warnings.resetwarnings()
         # trigger user-agent header warning
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')

@@ -104,6 +104,7 @@ class TestEsiSecurity(unittest.TestCase):
     def test_esisecurity_other_init(self):
         """ test security init without app and with urls """
 
+        warnings.resetwarnings()
         # trigger user-agent header warning
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter('always')
@@ -117,6 +118,7 @@ class TestEsiSecurity(unittest.TestCase):
             )
             self.assertEqual(len(w), 1)
 
+        warnings.resetwarnings()
         warnings.simplefilter('ignore')
 
         with self.assertRaises(AttributeError):

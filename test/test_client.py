@@ -46,6 +46,7 @@ class TestEsiPy(unittest.TestCase):
     def setUp(self, urlopen_mock):
         # I hate those mock... thx urlopen instead of requests...
         urlopen_mock.return_value = open('test/resources/swagger.json')
+        warnings.simplefilter('ignore')
 
         self.app = App.create(
             'https://esi.evetech.net/latest/swagger.json'

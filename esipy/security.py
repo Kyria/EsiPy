@@ -250,7 +250,9 @@ class EsiSecurity(object):
             raise APIException(
                 request_data['url'],
                 res.status_code,
-                res.json()
+                json_response=res.json(),
+                request_param=request_data,
+                response_header=res.headers
             )
         json_res = res.json()
         self.update_token(json_res)
@@ -268,7 +270,9 @@ class EsiSecurity(object):
             raise APIException(
                 request_data['url'],
                 res.status_code,
-                res.json()
+                json_response=res.json(),
+                request_param=request_data,
+                response_header=res.headers
             )
         json_res = res.json()
         self.update_token(json_res)
@@ -287,7 +291,9 @@ class EsiSecurity(object):
             raise APIException(
                 self.oauth_verify,
                 res.status_code,
-                res.json()
+                json_response=res.json(),
+                request_param=self.__get_oauth_header(),
+                response_header=res.headers
             )
         return res.json()
 

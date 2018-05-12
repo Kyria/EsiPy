@@ -23,6 +23,7 @@ from requests.adapters import HTTPAdapter
 from .events import API_CALL_STATS
 from .utils import make_cache_key
 from .utils import check_cache
+from .exceptions import APIException
 
 
 LOGGER = logging.getLogger(__name__)
@@ -39,11 +40,6 @@ class EsiClient(BaseClient):
     also add some features like auto retry, parallel calls... """
 
     __schemes__ = set(['https'])
-
-    __image_server__ = {
-        'singularity': 'https://image.testeveonline.com/',
-        'tranquility': 'https://imageserver.eveonline.com/',
-    }
 
     def __init__(self, security=None, retry_requests=False, **kwargs):
         """ Init the ESI client object
@@ -107,7 +103,11 @@ class EsiClient(BaseClient):
         Do not use the _retry parameter, use the same params as _request
 
         Used when ESIClient is initialized with retry_requests=True
+        if raise_on_error is True, this will only raise exception after
+        all retry have been done
+
         """
+        raise_on_error = kwargs.pop('raise_on_error', False)
 
         if _retry:
             # backoff delay loop in seconds: 0.01, 0.16, 0.81, 2.56, 6.25
@@ -121,7 +121,7 @@ class EsiClient(BaseClient):
                 LOGGER.warning(
                     "[failure #%d] %s %d: %r",
                     _retry,
-                    res._Response__path,
+                    req_and_resp[0].url,
                     res.status,
                     res.data,
                 )
@@ -130,6 +130,15 @@ class EsiClient(BaseClient):
                     _retry=_retry,
                     **kwargs
                 )
+
+        if res.status >= 400 and raise_on_error:
+            raise APIException(
+                req_and_resp[0].url,
+                res.status,
+                json_response=res.data,
+                request_param=req_and_resp[0].query,
+                response_header=res.headers
+            )
 
         return res
 
@@ -165,7 +174,7 @@ class EsiClient(BaseClient):
 
         return results
 
-    def _request(self, req_and_resp, raw_body_only=None, opt=None):
+    def _request(self, req_and_resp, **kwargs):
         """ Take a request_and_response object from pyswagger.App and
         check auth, token, headers, prepare the actual request and fill the
         response
@@ -179,12 +188,14 @@ class EsiClient(BaseClient):
         :param raw_body_only: define if we want the body to be parsed as object
                               instead of staying a raw dict. [Default: False]
         :param opt: options, see pyswagger/blob/master/pyswagger/io.py#L144
+        :param raise_on_error: boolean to raise an error if HTTP Code >= 400
 
         :return: the final response.
         """
 
-        if opt is None:
-            opt = {}
+        raise_on_error = kwargs.pop('raise_on_error', False)
+        opt = kwargs.pop('opt', {})
+        raw_body_only = kwargs.pop('raw_body_only', self.raw_body_only)
 
         # reset the request and response to reuse existing req_and_resp
         base_request, base_response = req_and_resp
@@ -252,11 +263,7 @@ class EsiClient(BaseClient):
             if res.status_code == 200:
                 self.__cache_response(cache_key, res)
 
-        if raw_body_only is None:
-            response.raw_body_only = self.raw_body_only
-        else:
-            response.raw_body_only = raw_body_only
-
+        response.raw_body_only = raw_body_only
         response.apply_with(
             status=res.status_code,
             header=res.headers,
@@ -268,6 +275,15 @@ class EsiClient(BaseClient):
             # logging to see it (at least once)
             LOGGER.warning("[%s] %s", res.url, res.headers['warning'])
             warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
+
+        if res.status >= 400 and raise_on_error:
+            raise APIException(
+                request.url,
+                res.status,
+                json_response=res.data,
+                request_param=request.query,
+                response_header=res.headers
+            )
 
         return response
 

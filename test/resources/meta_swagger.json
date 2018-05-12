@@ -901,7 +901,8 @@
   },
   "produces": [
     "application/json",
-    "text/plain; charset=utf-8"
+    "text/plain; charset=utf-8",
+    "text/html; charset=utf-8"
   ],
   "schemes": [
     "https"

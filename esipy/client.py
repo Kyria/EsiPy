@@ -128,6 +128,7 @@ class EsiClient(BaseClient):
                 return self._retry_request(
                     req_and_resp,
                     _retry=_retry,
+                    raise_on_error=raise_on_error,
                     **kwargs
                 )
 
@@ -137,7 +138,7 @@ class EsiClient(BaseClient):
                 res.status,
                 json_response=res.data,
                 request_param=req_and_resp[0].query,
-                response_header=res.headers
+                response_header=res.header
             )
 
         return res
@@ -284,7 +285,7 @@ class EsiClient(BaseClient):
                 res.status_code,
                 json_response=response.data,
                 request_param=request.query,
-                response_header=res.headers
+                response_header=response.header
             )
 
         return response

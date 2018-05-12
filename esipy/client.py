@@ -142,8 +142,7 @@ class EsiClient(BaseClient):
 
         return res
 
-    def multi_request(self, reqs_and_resps, raw_body_only=None, opt=None,
-                      threads=20):
+    def multi_request(self, reqs_and_resps, threads=20, **kwargs):
         """Use a threadpool to send multiple requests in parallel.
 
         :param reqs_and_resps: iterable of req_and_resp tuples
@@ -154,6 +153,8 @@ class EsiClient(BaseClient):
         :return: a list of [(pyswagger.io.Request, pyswagger.io.Response), ...]
         """
 
+        opt = kwargs.pop('opt', {})
+        raw_body_only = kwargs.pop('raw_body_only', self.raw_body_only)
         # you shouldnt need more than 100, 20 is probably fine in most cases
         threads = max(min(threads, 100), 1)
 
@@ -193,9 +194,7 @@ class EsiClient(BaseClient):
         :return: the final response.
         """
 
-        raise_on_error = kwargs.pop('raise_on_error', False)
         opt = kwargs.pop('opt', {})
-        raw_body_only = kwargs.pop('raw_body_only', self.raw_body_only)
 
         # reset the request and response to reuse existing req_and_resp
         base_request, base_response = req_and_resp
@@ -263,7 +262,10 @@ class EsiClient(BaseClient):
             if res.status_code == 200:
                 self.__cache_response(cache_key, res)
 
-        response.raw_body_only = raw_body_only
+        response.raw_body_only = kwargs.pop(
+            'raw_body_only',
+            self.raw_body_only
+        )
         response.apply_with(
             status=res.status_code,
             header=res.headers,
@@ -276,7 +278,7 @@ class EsiClient(BaseClient):
             LOGGER.warning("[%s] %s", res.url, res.headers['warning'])
             warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
 
-        if res.status_code >= 400 and raise_on_error:
+        if res.status_code >= 400 and kwargs.pop('raise_on_error', False):
             raise APIException(
                 request.url,
                 res.status_code,

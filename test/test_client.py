@@ -15,7 +15,7 @@ from esipy import EsiSecurity
 from esipy.cache import BaseCache
 from esipy.cache import DictCache
 from esipy.cache import DummyCache
-from esipy.exceptions import ApiException
+from esipy.exceptions import APIException
 
 from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError
@@ -255,11 +255,11 @@ class TestEsiPy(unittest.TestCase):
 
         with httmock.HTTMock(public_incursion_server_error):
             # try with retries
-            with self.assertRaises(ApiException):
+            with self.assertRaises(APIException):
                 self.client_no_auth.request(operation, raise_on_error=True)
 
             # try without retries
-            with self.assertRaises(ApiException):
+            with self.assertRaises(APIException):
                 self.client.request(operation, raise_on_error=True)
 
     def test_esipy_expired_response(self):

@@ -26,8 +26,8 @@ class TestApiException(unittest.TestCase):
         self.assertEqual(e.url, TestApiException.URL)
         self.assertIn(TestApiException.STATUS_CODE_STR, str(e))
         self.assertIn(TestApiException.ERROR_RESPONSE['error'], str(e))
-        self.assertEqual(e.request_param, {})
-        self.assertEqual(e.response_header, {})
+        self.assertEqual(e.request_param, TestApiException.PARAMS)
+        self.assertEqual(e.response_header, TestApiException.HEADERS)
 
     def test_api_exception_message(self):
         e = APIException(

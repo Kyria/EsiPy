@@ -42,9 +42,11 @@ class EsiSecurity(object):
         :param security_name: (optionnal) the name of the object holding the
         informations in the securityDefinitions, used to check authed endpoint
         :param esi_datasource: (optional) The ESI datasource used to validate
-        SSO authentication. Defaults to tranquility
+            SSO authentication. Defaults to tranquility
         :param headers: (optional) additional headers to add to the requests
-        done here
+            done here
+        :param signal_token_updated: (optional) allow to define a specific
+            signal to use, instead of using the global AFTER_TOKEN_REFRESH
         """
         app = kwargs.pop('app', None)
         sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
@@ -125,6 +127,12 @@ class EsiSecurity(object):
         self.refresh_token = None
         self.access_token = None
         self.token_expiry = None
+
+        # other stuff
+        self.signal_token_updated = kwargs.pop(
+            'signal_token_updated',
+            AFTER_TOKEN_REFRESH
+        )
 
     def __get_token_auth_header(self):
         """ Return the Basic Authorization header required to get the tokens
@@ -309,7 +317,7 @@ class EsiSecurity(object):
 
         if self.is_token_expired():
             json_response = self.refresh()
-            AFTER_TOKEN_REFRESH.send(**json_response)
+            self.signal_token_updated.send(**json_response)
 
         for security in request._security:
             if self.security_name not in security:

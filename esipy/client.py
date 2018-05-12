@@ -50,6 +50,8 @@ class EsiClient(BaseClient):
         :param transport_adapter: (optional) an HTTPAdapter object / implement
         :param cache: (optional) esipy.cache.BaseCache cache implementation.
         :param raw_body_only: (optional) default value [False] for all requests
+        :param signal_api_call_stats: (optional) allow to define a specific
+            signal to use, instead of using the global API_CALL_STATS
         :param timeout: (optional) default value [None=No timeout]
         timeout in seconds for requests
 
@@ -94,6 +96,12 @@ class EsiClient(BaseClient):
 
         # initiate the cache object
         self.cache = check_cache(kwargs.pop('cache', False))
+
+        # other
+        self.signal_api_call_stats = kwargs.pop(
+            'signal_api_call_stats',
+            API_CALL_STATS
+        )
 
         self.timeout = kwargs.pop('timeout', None)
 
@@ -253,7 +261,7 @@ class EsiClient(BaseClient):
                 )
 
             # event for api call stats
-            API_CALL_STATS.send(
+            self.signal_api_call_stats.send(
                 url=res.url,
                 status_code=res.status_code,
                 elapsed_time=time.time() - start_api_call,

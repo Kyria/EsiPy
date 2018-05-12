@@ -43,7 +43,7 @@ from esipy import EsiClient
 # basic client, for public endpoints only
 client = EsiClient(
     retry_requests=True,  # set to retry on http 5xx error (default False)
-    header={'User-Agent': 'Something CCP can use to contact you and that define your app'},
+    headers={'User-Agent': 'Something CCP can use to contact you and that define your app'},
     raw_body_only=False,  # default False, set to True to never parse response and only return raw JSON string content.
 )
 ```

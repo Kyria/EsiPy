@@ -276,11 +276,11 @@ class EsiClient(BaseClient):
             LOGGER.warning("[%s] %s", res.url, res.headers['warning'])
             warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
 
-        if res.status >= 400 and raise_on_error:
+        if res.status_code >= 400 and raise_on_error:
             raise APIException(
                 request.url,
-                res.status,
-                json_response=res.data,
+                res.status_code,
+                json_response=response.data,
                 request_param=request.query,
                 response_header=res.headers
             )

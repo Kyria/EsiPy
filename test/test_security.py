@@ -35,6 +35,7 @@ class TestEsiSecurity(unittest.TestCase):
     SECRET_KEY = 'bar'
     BASIC_TOKEN = six.u('Zm9vOmJhcg==')
     SECURITY_NAME = 'evesso'
+    TOKEN_IDENTIFIER = 'ESIPY_TEST_TOKEN'
 
     @mock.patch('six.moves.urllib.request.urlopen')
     def setUp(self, urlopen_mock):
@@ -53,7 +54,8 @@ class TestEsiSecurity(unittest.TestCase):
             redirect_uri=TestEsiSecurity.CALLBACK_URI,
             client_id=TestEsiSecurity.CLIENT_ID,
             secret_key=TestEsiSecurity.SECRET_KEY,
-            signal_token_updated=self.custom_refresh_token_signal
+            signal_token_updated=self.custom_refresh_token_signal,
+            token_identifier=TestEsiSecurity.TOKEN_IDENTIFIER
         )
 
     def test_esisecurity_init_with_app(self):
@@ -104,6 +106,10 @@ class TestEsiSecurity(unittest.TestCase):
             self.security.oauth_authorize,
             TestEsiSecurity.OAUTH_AUTHORIZE
         )
+        self.assertEqual(
+            self.security.token_identifier,
+            TestEsiSecurity.TOKEN_IDENTIFIER
+        )
 
     def test_esisecurity_other_init(self):
         """ test security init without app and with urls """
@@ -135,6 +141,10 @@ class TestEsiSecurity(unittest.TestCase):
         self.assertEqual(
             security.oauth_authorize,
             "foo.com/oauth/authorize"
+        )
+        self.assertEqual(
+            security.token_identifier,
+            None
         )
 
     def test_esisecurity_update_token(self):

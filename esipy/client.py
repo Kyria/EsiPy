@@ -54,6 +54,7 @@ class EsiClient(BaseClient):
         :param transport_adapter: (optional) an HTTPAdapter object / implement
         :param cache: (optional) esipy.cache.BaseCache cache implementation.
         :param raw_body_only: (optional) default value [False] for all requests
+        :param timeout: (optional) default value [10] timeout in seconds for requests
 
         """
         super(EsiClient, self).__init__(security)
@@ -96,6 +97,8 @@ class EsiClient(BaseClient):
 
         # initiate the cache object
         self.cache = check_cache(kwargs.pop('cache', False))
+
+        self.timeout = kwargs.pop('timeout', 10)
 
     def _retry_request(self, req_and_resp, _retry=0, **kwargs):
         """Uses self._request in a sane retry loop (for 5xx level errors).
@@ -223,7 +226,8 @@ class EsiClient(BaseClient):
             try:
                 res = self._session.send(
                     prepared_request,
-                    stream=True
+                    stream=True,
+                    timeout=self.timeout
                 )
 
             except (RequestsConnectionError, Timeout) as exc:

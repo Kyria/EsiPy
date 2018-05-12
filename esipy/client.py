@@ -54,7 +54,8 @@ class EsiClient(BaseClient):
         :param transport_adapter: (optional) an HTTPAdapter object / implement
         :param cache: (optional) esipy.cache.BaseCache cache implementation.
         :param raw_body_only: (optional) default value [False] for all requests
-        :param timeout: (optional) default value [None=No timeout] timeout in seconds for requests
+        :param timeout: (optional) default value [None=No timeout]
+        timeout in seconds for requests
 
         """
         super(EsiClient, self).__init__(security)

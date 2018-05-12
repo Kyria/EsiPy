@@ -15,6 +15,7 @@ from esipy import EsiSecurity
 from esipy.cache import BaseCache
 from esipy.cache import DictCache
 from esipy.cache import DummyCache
+from esipy.exceptions import ApiException
 
 from requests.adapters import HTTPAdapter
 from requests.exceptions import ConnectionError
@@ -248,6 +249,18 @@ class TestEsiPy(unittest.TestCase):
 
         self.assertEqual(incursions.status, 500)
         self.assertEqual(send_function.count, 5)
+
+    def test_esipy_raise_on_error(self):
+        operation = self.app.op['get_incursions']()
+
+        with httmock.HTTMock(public_incursion_server_error):
+            # try with retries
+            with self.assertRaises(ApiException):
+                self.client_no_auth.request(operation, raise_on_error=True)
+
+            # try without retries
+            with self.assertRaises(ApiException):
+                self.client.request(operation, raise_on_error=True)
 
     def test_esipy_expired_response(self):
         operation = self.app.op['get_incursions']

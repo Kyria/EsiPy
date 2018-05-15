@@ -253,6 +253,45 @@ class EsiClient(BaseClient):
 
         return response
 
+    def head(self, req_and_resp, **kwargs):
+        """ Take a request_and_response object from pyswagger.App, check 
+        and prepare everything to make a valid HEAD request
+
+        :param req_and_resp: the request and response object from pyswagger.App
+        :param opt: options, see pyswagger/blob/master/pyswagger/io.py#L144
+        :param raise_on_error: boolean to raise an error if HTTP Code >= 400
+
+        :return: the final response.
+        """
+
+        opt = kwargs.pop('opt', {})
+
+        # reset the request and response to reuse existing req_and_resp
+        req_and_resp[0].reset()
+        req_and_resp[1].reset()
+
+        # required because of inheritance
+        request, response = super(EsiClient, self).request(req_and_resp, opt)
+
+        res = self.__make_request(request, opt, method='HEAD')
+
+        if 'warning' in res.headers:
+            # send in logger and warnings, so the user doesn't have to use
+            # logging to see it (at least once)
+            LOGGER.warning("[%s] %s", res.url, res.headers['warning'])
+            warnings.warn("[%s] %s" % (res.url, res.headers['warning']))
+
+        if res.status_code >= 400 and kwargs.pop('raise_on_error', False):
+            raise APIException(
+                request.url,
+                res.status_code,
+                json_response=response.data,
+                request_param=request.query,
+                response_header=response.header
+            )
+
+        return response
+
     def __cache_response(self, cache_key, res):
         if 'expires' in res.headers:
             # this date is ALWAYS in UTC (RFC 7231)

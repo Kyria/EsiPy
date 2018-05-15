@@ -9,7 +9,7 @@ install_requirements = [
     "pyswagger >= 0.8.31",
     "six",
     "pytz",
-    "futures",
+    'futures; python_version == "2.7"',
 ]
 
 # test requirements

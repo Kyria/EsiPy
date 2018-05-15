@@ -9,7 +9,6 @@ install_requirements = [
     "pyswagger >= 0.8.31",
     "six",
     "pytz",
-    'futures; python_version == "2.7"',
 ]
 
 # test requirements
@@ -38,6 +37,9 @@ setup(
     description='Swagger Client for the ESI API for EVE Online',
     long_description=readme,
     install_requires=install_requirements,
+    extras_require={
+        ':python_version == "2.7"': ['futures']
+    },
     tests_require=test_requirements,
     test_suite='nose.collector',
     classifiers=[

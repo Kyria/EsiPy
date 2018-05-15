@@ -357,7 +357,7 @@ class EsiClient(BaseClient):
         try:
             res = self._session.send(
                 prepared_request,
-
+                timeout=self.timeout,
             )
 
         except (RequestsConnectionError, Timeout) as exc:

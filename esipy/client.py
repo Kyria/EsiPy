@@ -255,7 +255,7 @@ class EsiClient(BaseClient):
         return response
 
     def head(self, req_and_resp, **kwargs):
-        """ Take a request_and_response object from pyswagger.App, check 
+        """ Take a request_and_response object from pyswagger.App, check
         and prepare everything to make a valid HEAD request
 
         :param req_and_resp: the request and response object from pyswagger.App
@@ -330,7 +330,7 @@ class EsiClient(BaseClient):
                 warnings.warn("[%s] returned expired result" % res.url)
 
     def __make_request(self, request, opt, method=None):
-        """ prepare the request and do it, then return the response 
+        """ prepare the request and do it, then return the response
 
         :param request: the pyswagger.io.Request object to prepare the request
         :param opt: options, see pyswagger/blob/master/pyswagger/io.py#L144

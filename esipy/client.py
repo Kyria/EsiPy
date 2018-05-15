@@ -206,15 +206,11 @@ class EsiClient(BaseClient):
         opt = kwargs.pop('opt', {})
 
         # reset the request and response to reuse existing req_and_resp
-        base_request, base_response = req_and_resp
-        base_request.reset()
-        base_response.reset()
+        req_and_resp[0].reset()
+        req_and_resp[1].reset()
 
         # required because of inheritance
-        request, response = super(EsiClient, self).request(
-            (base_request, base_response),
-            opt
-        )
+        request, response = super(EsiClient, self).request(req_and_resp, opt)
 
         # check cache here so we have all headers, formed url and params
         cache_key = make_cache_key(request)
@@ -224,53 +220,12 @@ class EsiClient(BaseClient):
             res = cached_response
 
         else:
-            # apply request-related options before preparation.
-            request.prepare(
-                scheme=self.prepare_schemes(request).pop(),
-                handle_files=False
-            )
-            request._patch(opt)
-
-            # prepare the request and make it.
-            prepared_request = self._session.prepare_request(
-                Request(
-                    method=request.method.upper(),
-                    url=request.url,
-                    params=request.query,
-                    data=request.data,
-                    headers=request.header
-                )
-            )
-            start_api_call = time.time()
-
-            try:
-                res = self._session.send(
-                    prepared_request,
-                    stream=True,
-                    timeout=self.timeout
-                )
-
-            except (RequestsConnectionError, Timeout) as exc:
-                # timeout issue, generate a fake response to finish the process
-                # as a normal error 500
-                res = CachedResponse(
-                    status_code=500,
-                    headers={},
-                    content=('{"error": "%s"}' % str(exc)).encode('latin-1'),
-                    url=prepared_request.url
-                )
-
-            # event for api call stats
-            self.signal_api_call_stats.send(
-                url=res.url,
-                status_code=res.status_code,
-                elapsed_time=time.time() - start_api_call,
-                message=res.content if res.status_code != 200 else None
-            )
+            res = self.__make_request(request, opt)
 
             if res.status_code == 200:
                 self.__cache_response(cache_key, res)
 
+        # generate the Response object from requests response
         response.raw_body_only = kwargs.pop(
             'raw_body_only',
             self.raw_body_only
@@ -328,3 +283,60 @@ class EsiClient(BaseClient):
                     "[%s] returned expired result: %s", res.url,
                     res.headers)
                 warnings.warn("[%s] returned expired result" % res.url)
+
+    def __make_request(self, request, opt, method=None):
+        """ prepare the request and do it, then return the response 
+
+        :param request: the pyswagger.io.Request object to prepare the request
+        :param opt: options, see pyswagger/blob/master/pyswagger/io.py#L144
+        :param method: [default:None] allows to force the method, especially
+            useful if you want to make a HEAD request.
+            Default value will use endpoint method
+
+        """
+
+        # apply request-related options before preparation.
+        request.prepare(
+            scheme=self.prepare_schemes(request).pop(),
+            handle_files=False
+        )
+        request._patch(opt)
+
+        # prepare the request and make it.
+        method = method or request.method.upper()
+        prepared_request = self._session.prepare_request(
+            Request(
+                method=method,
+                url=request.url,
+                params=request.query,
+                data=request.data,
+                headers=request.header
+            )
+        )
+        start_api_call = time.time()
+
+        try:
+            res = self._session.send(
+                prepared_request,
+
+            )
+
+        except (RequestsConnectionError, Timeout) as exc:
+            # timeout issue, generate a fake response to finish the process
+            # as a normal error 500
+            res = CachedResponse(
+                status_code=500,
+                headers={},
+                content=('{"error": "%s"}' % str(exc)).encode('latin-1'),
+                url=prepared_request.url
+            )
+
+        # event for api call stats
+        self.signal_api_call_stats.send(
+            url=res.url,
+            status_code=res.status_code,
+            elapsed_time=time.time() - start_api_call,
+            message=res.content if res.status_code != 200 else None
+        )
+
+        return res

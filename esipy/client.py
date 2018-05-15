@@ -40,6 +40,7 @@ class EsiClient(BaseClient):
     also add some features like auto retry, parallel calls... """
 
     __schemes__ = set(['https'])
+    __uncached_methods__ = ['POST', 'PUT', 'DELETE', 'HEAD']
 
     def __init__(self, security=None, retry_requests=False, **kwargs):
         """ Init the ESI client object
@@ -223,7 +224,7 @@ class EsiClient(BaseClient):
             res = self.__make_request(request, opt)
 
             if res.status_code == 200:
-                self.__cache_response(cache_key, res)
+                self.__cache_response(cache_key, res, request.method.upper())
 
         # generate the Response object from requests response
         response.raw_body_only = kwargs.pop(
@@ -292,8 +293,13 @@ class EsiClient(BaseClient):
 
         return response
 
-    def __cache_response(self, cache_key, res):
-        if 'expires' in res.headers:
+    def __cache_response(self, cache_key, res, method):
+        """ cache the response
+
+        if method is one of self.__uncached_method__, don't cache anything
+        """
+        if ('expires' in res.headers
+                and method not in self.__uncached_methods__):
             # this date is ALWAYS in UTC (RFC 7231)
             epoch = datetime(1970, 1, 1)
             expire = (

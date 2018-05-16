@@ -275,3 +275,21 @@ class TestEsiPy(unittest.TestCase):
             warnings.simplefilter('ignore')
             incursions = self.client_no_auth.request(operation())
             self.assertEquals(incursions.status, 200)
+
+    def test_esipy_uncached_method(self):
+        operation = self.app.op['get_incursions']()
+
+        self.assertEqual(self.cache._dict, {})
+        with httmock.HTTMock(public_incursion):
+            res = self.client.request(operation, method='POST')
+            self.assertEqual(res.data[0].faction_id, 500019)
+
+        self.assertEqual(self.cache._dict, {})
+
+    def test_esipy_head_request(self):
+        operation = self.app.op['get_incursions']()
+
+        with httmock.HTTMock(public_incursion):
+            res = self.client.head(operation)
+            self.assertIsNone(res.data)
+            self.assertIn('Expires', res.header)

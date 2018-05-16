@@ -311,8 +311,8 @@ class EsiClient(BaseClient):
             cache_timeout = int(expire) - int(now)
 
             # Occasionally CCP swagger will return an outdated expire
-            # - warn and skip cache
-            if cache_timeout > 0:
+            # warn and skip cache if timeout is <0
+            if cache_timeout >= 0:
                 self.cache.set(
                     cache_key,
                     CachedResponse(

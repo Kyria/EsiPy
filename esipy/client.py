@@ -276,6 +276,12 @@ class EsiClient(BaseClient):
 
         res = self.__make_request(request, opt, method='HEAD')
 
+        response.apply_with(
+            status=res.status_code,
+            header=res.headers,
+            raw=None,
+        )
+
         if 'warning' in res.headers:
             # send in logger and warnings, so the user doesn't have to use
             # logging to see it (at least once)

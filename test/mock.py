@@ -201,11 +201,12 @@ def post_universe_id(url, request):
         headers={'Expires': make_expire_time_str()},
         status_code=200,
         content={
-            {
-                'characters': [
-                    {'id': 123456789, 'name': 'Foo'}
-                ]
-            }
+            "characters": [
+                {
+                    "id": 123456789,
+                    "name": "Foo"
+                }
+            ]
         }
     )
 

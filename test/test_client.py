@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 from .mock import _all_auth_mock_
+from .mock import post_universe_id
 from .mock import public_incursion
 from .mock import public_incursion_expired
 from .mock import public_incursion_no_expires
@@ -277,12 +278,12 @@ class TestEsiPy(unittest.TestCase):
             self.assertEquals(incursions.status, 200)
 
     def test_esipy_uncached_method(self):
-        operation = self.app.op['get_incursions']()
+        operation = self.app.op['post_universe_ids'](names=['Foo'])
 
         self.assertEqual(self.cache._dict, {})
-        with httmock.HTTMock(public_incursion):
-            res = self.client.request(operation, method='POST')
-            self.assertEqual(res.data[0].faction_id, 500019)
+        with httmock.HTTMock(post_universe_id):
+            res = self.client.request(operation)
+            self.assertEqual(res.data.characters[0].id, 123456789)
 
         self.assertEqual(self.cache._dict, {})
 

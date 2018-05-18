@@ -191,6 +191,28 @@ def auth_character_location(url, request):
 @httmock.urlmatch(
     scheme="https",
     netloc=r"esi\.evetech\.net$",
+    path=r"^/universe/ids/$"
+)
+def post_universe_id(url, request):
+    """ Mock endpoint for character location.
+    Authed endpoint that check for auth
+    """
+    return httmock.response(
+        headers={'Expires': make_expire_time_str()},
+        status_code=200,
+        content={
+            {
+                'characters': [
+                    {'id': 123456789, 'name': 'Foo'}
+                ]
+            }
+        }
+    )
+
+
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/incursions/$"
 )
 def public_incursion_warning(url, request):

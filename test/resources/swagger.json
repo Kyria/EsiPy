@@ -7,6 +7,389 @@
     "version": "0.2.6.dev1"
   },
   "paths": {
+    "/universe/ids/": {
+      "post": {
+        "description": "Resolve a set of names to IDs in the following categories: agents, alliances, characters, constellations, corporations factions, inventory_types, regions, stations, and systems. Only exact matches will be returned. All names searched for are cached for 12 hours.\n\n---\nAlternate route: `/dev/universe/ids/`\n\nAlternate route: `/legacy/universe/ids/`\n\nAlternate route: `/v1/universe/ids/`\n",
+        "operationId": "post_universe_ids",
+        "parameters": [
+          {
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/language"
+          },
+          {
+            "description": "The names to resolve",
+            "in": "body",
+            "name": "names",
+            "required": true,
+            "schema": {
+              "description": "names array",
+              "example": [
+                "CCP Zoetrope"
+              ],
+              "items": {
+                "description": "name string",
+                "maxLength": 100,
+                "minLength": 1,
+                "title": "post_universe_ids_name",
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "minItems": 1,
+              "title": "post_universe_ids_names",
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of id/name associations for a set of names divided by category. Any name passed in that did not have a match will be ommitted.",
+            "examples": {
+              "application/json": {
+                "characters": [
+                  {
+                    "id": 95465499,
+                    "name": "CCP Bartender"
+                  },
+                  {
+                    "id": 2112625428,
+                    "name": "CCP Zoetrope"
+                  }
+                ],
+                "systems": [
+                  {
+                    "id": 30000142,
+                    "name": "Jita"
+                  }
+                ]
+              }
+            },
+            "headers": {
+              "Content-Language": {
+                "description": "The language used in the response",
+                "enum": [
+                  "de",
+                  "en-us",
+                  "fr",
+                  "ja",
+                  "ru",
+                  "zh"
+                ],
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "200 ok object",
+              "properties": {
+                "agents": {
+                  "description": "agents array",
+                  "items": {
+                    "description": "agent object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_agent",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_agents",
+                  "type": "array"
+                },
+                "alliances": {
+                  "description": "alliances array",
+                  "items": {
+                    "description": "alliance object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_alliance",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_alliances",
+                  "type": "array"
+                },
+                "characters": {
+                  "description": "characters array",
+                  "items": {
+                    "description": "character object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_character",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_characters",
+                  "type": "array"
+                },
+                "constellations": {
+                  "description": "constellations array",
+                  "items": {
+                    "description": "constellation object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_constellation",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_constellations",
+                  "type": "array"
+                },
+                "corporations": {
+                  "description": "corporations array",
+                  "items": {
+                    "description": "corporation object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_corporation",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_corporations",
+                  "type": "array"
+                },
+                "factions": {
+                  "description": "factions array",
+                  "items": {
+                    "description": "faction object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_faction",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_factions",
+                  "type": "array"
+                },
+                "inventory_types": {
+                  "description": "inventory_types array",
+                  "items": {
+                    "description": "inventory_type object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_inventory_type",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_inventory_types",
+                  "type": "array"
+                },
+                "regions": {
+                  "description": "regions array",
+                  "items": {
+                    "description": "region object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_region",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_regions",
+                  "type": "array"
+                },
+                "stations": {
+                  "description": "stations array",
+                  "items": {
+                    "description": "station object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_station",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_stations",
+                  "type": "array"
+                },
+                "systems": {
+                  "description": "systems array",
+                  "items": {
+                    "description": "system object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_system",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_systems",
+                  "type": "array"
+                }
+              },
+              "title": "post_universe_ids_ok",
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "examples": {
+              "application/json": {
+                "error": "Bad request message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_request"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "examples": {
+              "application/json": {
+                "error": "Internal server error message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/internal_server_error"
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "examples": {
+              "application/json": {
+                "error": "Bad gateway message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_gateway"
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "examples": {
+              "application/json": {
+                "error": "Service unavailable message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/service_unavailable"
+            }
+          }
+        },
+        "summary": "Bulk names to IDs",
+        "tags": [
+          "Universe"
+        ],
+        "x-alternate-versions": [
+          "dev",
+          "legacy",
+          "v1"
+        ]
+      }
+    },
     "/characters/{character_id}/location/": {
       "get": {
         "description": "Information about the characters current location. Returns the current solar system id, and also the current station or structure ID if applicable.\n\n---\n\nAlternate route: `/v1/characters/{character_id}/location/`\n\nAlternate route: `/legacy/characters/{character_id}/location/`\n\nAlternate route: `/dev/characters/{character_id}/location/`\n\n\n---\n\nThis route is cached for up to 5 seconds",

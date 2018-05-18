@@ -191,7 +191,7 @@ def auth_character_location(url, request):
 @httmock.urlmatch(
     scheme="https",
     netloc=r"esi\.evetech\.net$",
-    path=r"^/universe/ids/$"
+    path=r"^/latest/universe/ids/$"
 )
 def post_universe_id(url, request):
     """ Mock endpoint for character location.

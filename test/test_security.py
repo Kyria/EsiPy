@@ -59,7 +59,6 @@ class TestEsiSecurity(unittest.TestCase):
         )
 
     def test_esisecurity_init_with_app(self):
-        """ test security init with app and URL"""
         with self.assertRaises(NameError):
             EsiSecurity(
                 app=self.app,
@@ -112,7 +111,6 @@ class TestEsiSecurity(unittest.TestCase):
         )
 
     def test_esisecurity_other_init(self):
-        """ test security init without app and with urls """
         with self.assertRaises(AttributeError):
             EsiSecurity(
                 redirect_uri=TestEsiSecurity.CALLBACK_URI,

@@ -34,14 +34,20 @@ class TestEsiApp(unittest.TestCase):
         # I hate those mock... thx urlopen instead of requests...
         urlopen_mock.return_value = open(TestEsiApp.ESI_META_SWAGGER)
         with httmock.HTTMock(*_swagger_spec_mock_):
-            self.app = EsiApp(cache_time=0, cache_prefix='esipy_test')
+            self.app = EsiApp(cache_prefix='esipy_test')
 
-    def test_app_op_attribute(self):
+    @mock.patch('six.moves.urllib.request.urlopen')
+    def test_app_op_attribute(self, urlopen_mock):
         self.assertTrue(self.app.op)
         self.assertEqual(
             self.app.op['verify'].url,
             '//esi.evetech.net/verify/'
         )
+
+        urlopen_mock.return_value = open(TestEsiApp.ESI_META_SWAGGER)
+        with httmock.HTTMock(*_swagger_spec_mock_):
+            app = EsiApp(cache_prefix='esipy_test', cache_time=-1)
+            self.assertEqual(app.expire, 86400)
 
     def test_app_getattr_fail(self):
         with self.assertRaises(AttributeError):
@@ -51,7 +57,20 @@ class TestEsiApp(unittest.TestCase):
             self.app.verify
 
     @mock.patch('six.moves.urllib.request.urlopen')
-    def test_app_getattr_and_permcache(self, urlopen_mock):
+    def test_app_invalid_cache_value(self, urlopen_mock):
+        cache = DictCache()
+        cache.set(self.app.esi_meta_cache_key, 'somerandomvalue')
+        urlopen_mock.return_value = open(TestEsiApp.ESI_META_SWAGGER)
+        with httmock.HTTMock(*_swagger_spec_mock_):
+            EsiApp(cache_prefix='esipy_test', cache=cache)
+
+        self.assertNotEqual(
+            cache.get(self.app.esi_meta_cache_key),
+            'somerandomvalue'
+        )
+
+    @mock.patch('six.moves.urllib.request.urlopen')
+    def test_app_getattr_and_cache(self, urlopen_mock):
         with httmock.HTTMock(*_swagger_spec_mock_):
             urlopen_mock.return_value = open(TestEsiApp.ESI_V1_SWAGGER)
             self.assertIsNotNone(
@@ -130,6 +149,22 @@ class TestEsiApp(unittest.TestCase):
                 cache_time=None, cache=cache, cache_prefix='esipy_test')
             self.assertEqual(cached_app, esiapp.app)
             urlopen_mock.return_value.close()
+
+    @mock.patch('six.moves.urllib.request.urlopen')
+    def test_app_expired_header_no_etag(self, urlopen_mock):
+        cache = DictCache()
+        with httmock.HTTMock(*_swagger_spec_mock_):
+            urlopen_mock.return_value = open(TestEsiApp.ESI_META_SWAGGER)
+            app = EsiApp(
+                cache_time=None, cache=cache, cache_prefix='esipy_test')
+
+            urlopen_mock.return_value = open(TestEsiApp.ESI_V1_SWAGGER)
+            appv1 = app.get_v1_swagger
+            cache.get(self.ESI_V1_CACHE_KEY)[1]['Expires'] = None
+
+            urlopen_mock.return_value = open(TestEsiApp.ESI_V1_SWAGGER)
+            appv1_uncached = app.get_v1_swagger
+            self.assertNotEqual(appv1, appv1_uncached)
 
     @mock.patch('six.moves.urllib.request.urlopen')
     def test_app_valid_header_etag(self, urlopen_mock):

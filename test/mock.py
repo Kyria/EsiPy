@@ -214,6 +214,28 @@ def eve_status(url, request):
 @httmock.urlmatch(
     scheme="https",
     netloc=r"esi\.evetech\.net$",
+    path=r"^/latest/status/$"
+)
+def eve_status_noetag(url, request):
+    """ Mock endpoint for character location.
+    Authed endpoint that check for auth
+    """
+    return httmock.response(
+        headers={
+            'Expires': make_expire_time_str(1),
+        },
+        status_code=200,
+        content={
+            "players": 29597,
+            "server_version": "1313143",
+            "start_time": "2018-05-20T11:04:30Z"
+        }
+    )
+
+
+@httmock.urlmatch(
+    scheme="https",
+    netloc=r"esi\.evetech\.net$",
     path=r"^/latest/universe/ids/$"
 )
 def post_universe_id(url, request):

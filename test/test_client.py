@@ -4,6 +4,7 @@ from __future__ import absolute_import
 
 from .mock import _all_auth_mock_
 from .mock import eve_status
+from .mock import eve_status_noetag
 from .mock import make_expire_time_str
 from .mock import post_universe_id
 from .mock import public_incursion
@@ -177,6 +178,8 @@ class TestEsiPy(unittest.TestCase):
 
             with self.assertRaises(UserWarning):
                 self.client_no_auth.request(incursion_operation())
+
+            with self.assertRaises(UserWarning):
                 self.client_no_auth.head(incursion_operation())
 
     def test_client_raw_body_only(self):
@@ -321,6 +324,30 @@ class TestEsiPy(unittest.TestCase):
             self.assertEqual(self.cache._dict, {})
             res = self.client.request(operation)
             self.assertNotEqual(self.cache._dict, {})
+            self.assertEqual(res.data.server_version, "1313143")
+
+        time.sleep(2)
+
+        with httmock.HTTMock(check_etag):
+            res = self.client.request(operation)
+            self.assertEqual(res.data.server_version, "1313143")
+
+    def test_esipy_expired_header_noetag(self):
+        def check_etag(url, request):
+            self.assertNotIn('If-None-Match', request.headers)
+            return httmock.response(
+                status_code=200,
+                content={
+                    "players": 29597,
+                    "server_version": "1313143",
+                    "start_time": "2018-05-20T11:04:30Z"
+                }
+            )
+
+        operation = self.app.op['get_status']()
+
+        with httmock.HTTMock(eve_status_noetag):
+            res = self.client.request(operation)
             self.assertEqual(res.data.server_version, "1313143")
 
         time.sleep(2)

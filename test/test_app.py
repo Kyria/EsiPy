@@ -129,6 +129,7 @@ class TestEsiApp(unittest.TestCase):
             esiapp = EsiApp(
                 cache_time=None, cache=cache, cache_prefix='esipy_test')
             self.assertEqual(cached_app, esiapp.app)
+            urlopen_mock.return_value.close()
 
     @mock.patch('six.moves.urllib.request.urlopen')
     def test_app_valid_header_etag(self, urlopen_mock):
@@ -145,3 +146,4 @@ class TestEsiApp(unittest.TestCase):
         with httmock.HTTMock(fail_if_request):
             urlopen_mock.return_value = open(TestEsiApp.ESI_META_SWAGGER)
             EsiApp(cache_time=None, cache=cache, cache_prefix='esipy_test')
+            urlopen_mock.return_value.close()

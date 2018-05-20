@@ -285,7 +285,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 request.url,
                 res.status_code,
-                json_response=response.data,
+                json_response='',
                 request_param=request.query,
                 response_header=response.header
             )

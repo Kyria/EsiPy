@@ -177,6 +177,7 @@ class TestEsiPy(unittest.TestCase):
 
             with self.assertRaises(UserWarning):
                 self.client_no_auth.request(incursion_operation())
+                self.client_no_auth.head(incursion_operation())
 
     def test_client_raw_body_only(self):
         client = EsiClient(raw_body_only=True)
@@ -264,6 +265,10 @@ class TestEsiPy(unittest.TestCase):
             # try without retries
             with self.assertRaises(APIException):
                 self.client.request(operation, raise_on_error=True)
+
+            # try with head
+            with self.assertRaises(APIException):
+                self.client_no_auth.head(operation, raise_on_error=True)
 
     def test_esipy_expired_response(self):
         operation = self.app.op['get_incursions']

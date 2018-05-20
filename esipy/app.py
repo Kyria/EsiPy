@@ -28,7 +28,7 @@ class EsiApp(object):
             'https://esi.evetech.net/swagger.json'
         )
         self.expire = kwargs.pop('cache_time', 86400)
-        if self.expire < 0 and self.expire is not None:
+        if self.expire is not None and self.expire < 0:
             self.expire = 86400
 
         self.cache_prefix = kwargs.pop('cache_prefix', 'esipy')
@@ -92,7 +92,7 @@ class EsiApp(object):
         app = App.create(app_url)
         if self.caching:
             timeout = 0
-            if self.expire > 0:
+            if self.expire is not None and self.expire > 0:
                 timeout = time.time() + self.expire
             self.cache.set(cache_key, (app, res.headers, timeout))
 

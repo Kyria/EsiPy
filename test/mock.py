@@ -332,14 +332,18 @@ def meta_swagger(url, request):
             status_code=304,
             content={}
         )
-    return httmock.response(
+
+    swagger_json = open('test/resources/meta_swagger.json')
+    resp = httmock.response(
         headers={
             'Expires': make_expire_time_str(),
             'Etag': '"esipyetag"'
         },
         status_code=200,
-        content=open('test/resources/meta_swagger.json').read()
+        content=swagger_json.read()
     )
+    swagger_json.close()
+    return resp
 
 
 @httmock.urlmatch(
@@ -351,11 +355,15 @@ def v1_swagger(url, request):
     """ Mock endpoint for incursion.
     Public endpoint returning Expires value in the past
     """
-    return httmock.response(
+    swagger_json = open('test/resources/swagger.json')
+
+    resp = httmock.response(
         headers={'Expires': make_expire_time_str()},
         status_code=200,
-        content=open('test/resources/swagger.json').read()
+        content=swagger_json.read()
     )
+    swagger_json.close()
+    return resp
 
 
 _all_auth_mock_ = [

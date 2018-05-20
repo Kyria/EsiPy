@@ -5,7 +5,6 @@ from __future__ import absolute_import
 import memcache
 import redis
 import shutil
-import time
 import unittest
 
 from collections import namedtuple
@@ -78,10 +77,15 @@ class TestDictCache(BaseTest):
         self.c.set(*self.ex_int)
         self.c.set(*self.ex_cpx)
 
+    def tearDown(self):
+        self.c.invalidate(self.ex_str[0])
+        self.c.invalidate(self.ex_int[0])
+        self.c.invalidate(self.ex_cpx[0])
+
     def test_dict_cache_set(self):
-        self.assertEqual(self.c._dict[self.ex_str[0]][0], self.ex_str[1])
-        self.assertEqual(self.c._dict[self.ex_int[0]][0], self.ex_int[1])
-        self.assertEqual(self.c._dict[self.ex_cpx[0]][0], self.ex_cpx[1])
+        self.assertEqual(self.c._dict[self.ex_str[0]], self.ex_str[1])
+        self.assertEqual(self.c._dict[self.ex_int[0]], self.ex_int[1])
+        self.assertEqual(self.c._dict[self.ex_cpx[0]], self.ex_cpx[1])
 
     def test_dict_cache_get(self):
         self.check_complex(self.c.get(self.ex_cpx[0]))
@@ -89,19 +93,6 @@ class TestDictCache(BaseTest):
     def test_dict_cache_invalidate(self):
         self.c.invalidate(self.ex_cpx[0])
         self.assertIsNone(self.c.get(self.ex_cpx[0]))
-
-    def test_dict_cache_expiry(self):
-        self.check_complex(self.c.get(self.ex_cpx[0]))
-        self.c._dict[self.ex_cpx[0]] = (self.ex_cpx[1], time.time() - 1)
-        self.assertIsNone(self.c.get(self.ex_cpx[0]))
-        self.assertNotIn(self.ex_cpx[0], self.c._dict)
-
-        self.c.set('never', 'expire', 0)
-        self.c.set('nevertoo', 'expire', None)
-        self.assertEqual(self.c.get('never'), 'expire')
-        self.assertEqual(self.c.get('nevertoo'), 'expire')
-        self.assertIsNone(self.c._dict['never'][1])
-        self.assertIsNone(self.c._dict['nevertoo'][1])
 
 
 class TestDummyCache(BaseTest):
@@ -141,16 +132,18 @@ class TestFileCache(BaseTest):
         self.assertEqual(self.c.get(self.ex_int[0]), self.ex_int[1])
         self.check_complex(self.c.get(self.ex_cpx[0]))
 
-        self.c.set('expired', 'baz', -1)
-        self.c.set('never', 'foo', 0)
-        self.c.set('nevertoo', 'bar', None)
-        self.assertEqual(
-            self.c.get('expired', 'default_because_expired'),
-            'default_because_expired'
+    def test_file_cache_update(self):
+        self.c.set(
+            self.ex_cpx[0],
+            CachedResponse(
+                status_code=200,
+                headers={'foo', 'test'},
+                content='Nothing'.encode('latin-1'),
+                url='http://foobarbaz.com'
+            )
         )
-        self.assertEqual(self.c.get('expired'), None)
-        self.assertEqual(self.c.get('never'), 'foo')
-        self.assertEqual(self.c.get('nevertoo'), 'bar')
+        self.c.set(*self.ex_cpx)
+        self.check_complex(self.c.get(self.ex_cpx[0]))
 
     def test_file_cache_invalidate(self):
         self.c.set('key', 'bar')
@@ -167,6 +160,9 @@ class TestMemcachedCache(BaseTest):
         self.c = MemcachedCache(memcached)
 
     def tearDown(self):
+        self.c.invalidate(self.ex_str[0])
+        self.c.invalidate(self.ex_int[0])
+        self.c.invalidate(self.ex_cpx[0])
         self.c._mc.disconnect_all()
 
     def test_memcached_get_set(self):
@@ -177,12 +173,18 @@ class TestMemcachedCache(BaseTest):
         self.assertEqual(self.c.get(self.ex_int[0]), self.ex_int[1])
         self.check_complex(self.c.get(self.ex_cpx[0]))
 
-        self.c.set('expired', 'baz', -1)
-        self.c.set('never', 'foo', 0)
-        self.c.set('nevertoo', 'bar', None)
-        self.assertEqual(self.c.get('expired'), None)
-        self.assertEqual(self.c.get('never'), 'foo')
-        self.assertEqual(self.c.get('nevertoo'), 'bar')
+    def test_memcached_update(self):
+        self.c.set(
+            self.ex_cpx[0],
+            CachedResponse(
+                status_code=200,
+                headers={'foo', 'test'},
+                content='Nothing'.encode('latin-1'),
+                url='http://foobarbaz.com'
+            )
+        )
+        self.c.set(*self.ex_cpx)
+        self.check_complex(self.c.get(self.ex_cpx[0]))
 
     def test_memcached_invalidate(self):
         self.c.set(*self.ex_str)
@@ -202,6 +204,11 @@ class TestRedisCache(BaseTest):
         redis_client = redis.Redis(host='localhost', port=6379, db=0)
         self.c = RedisCache(redis_client)
 
+    def tearDown(self):
+        self.c.invalidate(self.ex_str[0])
+        self.c.invalidate(self.ex_int[0])
+        self.c.invalidate(self.ex_cpx[0])
+
     def test_redis_get_set(self):
         self.c.set(*self.ex_str)
         self.c.set(*self.ex_int)
@@ -210,13 +217,18 @@ class TestRedisCache(BaseTest):
         self.assertEqual(self.c.get(self.ex_int[0]), self.ex_int[1])
         self.check_complex(self.c.get(self.ex_cpx[0]))
 
-        self.c.set('expired', 'baz', 1)
-        self.c.set('never', 'foo', 0)
-        self.c.set('nevertoo', 'bar', None)
-        time.sleep(2)
-        self.assertEqual(self.c.get('expired'), None)
-        self.assertEqual(self.c.get('never'), 'foo')
-        self.assertEqual(self.c.get('nevertoo'), 'bar')
+    def test_redis_update(self):
+        self.c.set(
+            self.ex_cpx[0],
+            CachedResponse(
+                status_code=200,
+                headers={'foo', 'test'},
+                content='Nothing'.encode('latin-1'),
+                url='http://foobarbaz.com'
+            )
+        )
+        self.c.set(*self.ex_cpx)
+        self.check_complex(self.c.get(self.ex_cpx[0]))
 
     def test_redis_invalidate(self):
         self.c.set(*self.ex_str)

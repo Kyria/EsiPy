@@ -8,8 +8,6 @@ import logging
 
 from concurrent.futures import ThreadPoolExecutor
 from collections import namedtuple
-from datetime import datetime
-from email.utils import parsedate
 
 import six
 from pyswagger.core import BaseClient
@@ -301,7 +299,7 @@ class EsiClient(BaseClient):
         """
         if ('expires' in res.headers
                 and method not in self.__uncached_methods__):
-            cache_timeout = get_cache_time_left(res.headers['expires'])
+            cache_timeout = get_cache_time_left(res.headers.get('expires'))
 
             # Occasionally CCP swagger will return an outdated expire
             # warn and skip cache if timeout is <0
@@ -403,7 +401,7 @@ class EsiClient(BaseClient):
         # if we have HTTP 304 (content didn't change), return the cached
         # response updated with the new headers
         if res.status_code == 304 and cached_response is not None:
-            cached_response.headers['expires'] = res.headers.headers['expires']
-            cached_response.headers['date'] = res.headers.headers['date']
+            cached_response.headers['expires'] = res.headers.get('expires')
+            cached_response.headers['date'] = res.headers.get('date')
             return cached_response
         return res

@@ -976,6 +976,164 @@
           "v1"
         ]
       }
+    },
+    "/status/": {
+      "get": {
+        "description": "EVE Server status\n\n---\n\nThis route is cached for up to 30 seconds",
+        "operationId": "get_status",
+        "parameters": [
+          {
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server status",
+            "examples": {
+              "application/json": {
+                "players": 12345,
+                "server_version": "1132976",
+                "start_time": "2017-01-02T12:34:56Z"
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "200 ok object",
+              "properties": {
+                "players": {
+                  "description": "Current online player count",
+                  "title": "get_status_players",
+                  "type": "integer"
+                },
+                "server_version": {
+                  "description": "Running version as string",
+                  "title": "get_status_server_version",
+                  "type": "string"
+                },
+                "start_time": {
+                  "description": "Server start timestamp",
+                  "format": "date-time",
+                  "title": "get_status_start_time",
+                  "type": "string"
+                },
+                "vip": {
+                  "description": "If the server is in VIP mode",
+                  "title": "get_status_vip",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "start_time",
+                "players",
+                "server_version"
+              ],
+              "title": "get_status_ok",
+              "type": "object"
+            }
+          },
+          "304": {
+            "description": "Not modified",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "examples": {
+              "application/json": {
+                "error": "Bad request message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_request"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "examples": {
+              "application/json": {
+                "error": "Internal server error message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/internal_server_error"
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "examples": {
+              "application/json": {
+                "error": "Bad gateway message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_gateway"
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "examples": {
+              "application/json": {
+                "error": "Service unavailable message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/service_unavailable"
+            }
+          }
+        },
+        "summary": "Retrieve the uptime and player counts",
+        "tags": [
+          "Status"
+        ],
+        "x-alternate-versions": [
+          "dev",
+          "legacy",
+          "v1"
+        ],
+        "x-cached-seconds": 30
+      }
     }
   },
   "produces": [

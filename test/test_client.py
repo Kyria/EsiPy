@@ -3,6 +3,8 @@
 from __future__ import absolute_import
 
 from .mock import _all_auth_mock_
+from .mock import eve_status
+from .mock import make_expire_time_str
 from .mock import post_universe_id
 from .mock import public_incursion
 from .mock import public_incursion_expired
@@ -294,3 +296,30 @@ class TestEsiPy(unittest.TestCase):
             res = self.client.head(operation)
             self.assertIsNone(res.data)
             self.assertIn('Expires', res.header)
+
+    def test_esipy_expired_header_etag(self):
+        @httmock.all_requests
+        def check_etag(url, request):
+            self.assertEqual(
+                request.headers.get('If-None-Match'),
+                '"esipy_test_etag_status"'
+            )
+            return httmock.response(
+                headers={'Etag': '"esipy_test_etag_status"',
+                         'expires': make_expire_time_str(),
+                         'date': make_expire_time_str()},
+                status_code=304)
+
+        operation = self.app.op['get_status']()
+
+        with httmock.HTTMock(eve_status):
+            self.assertEqual(self.cache._dict, {})
+            res = self.client.request(operation)
+            self.assertNotEqual(self.cache._dict, {})
+            self.assertEqual(res.data.server_version, "1313143")
+
+        time.sleep(2)
+
+        with httmock.HTTMock(check_etag):
+            res = self.client.request(operation)
+            self.assertEqual(res.data.server_version, "1313143")

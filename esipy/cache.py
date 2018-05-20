@@ -2,7 +2,6 @@
 """ Cache objects for EsiPy """
 import hashlib
 import logging
-import time
 
 try:
     import pickle

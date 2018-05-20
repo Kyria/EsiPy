@@ -92,7 +92,7 @@ class EsiApp(object):
         app = App.create(app_url)
         if self.caching:
             timeout = 0
-            if self.expire >= 0:
+            if self.expire > 0:
                 timeout = time.time() + self.expire
             self.cache.set(cache_key, (app, res.headers, timeout))
 

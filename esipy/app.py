@@ -1,8 +1,13 @@
 # -*- encoding: utf-8 -*-
 """ App entry point. Uses Esi Meta Endpoint to work """
+import time
+
+import requests
+
 from pyswagger import App
 
 from .utils import check_cache
+from .utils import get_cache_time_left
 
 
 class EsiApp(object):
@@ -14,18 +19,17 @@ class EsiApp(object):
 
         :param: cache if specified, use that cache, else use DictCache
         :param: cache_time is the minimum cache time for versions
-        endpoints. If set to 0, never expires". Default 86400sec (1day)
+            endpoints. If set to 0, never expires". None uses header expires
+            Default 86400 (1d)
         :param: cache_prefix the prefix used to all cache key for esiapp
         """
         self.meta_url = kwargs.pop(
             'meta_url',
             'https://esi.evetech.net/swagger.json'
         )
-        cache_time = kwargs.pop('cache_time', 86400)
-        if cache_time == 0 or cache_time is None:
-            self.expire = None
-        else:
-            self.expire = cache_time if cache_time > 0 else 86400
+        self.expire = kwargs.pop('cache_time', 86400)
+        if self.expire < 0 and self.expire is not None:
+            self.expire = 86400
 
         self.cache_prefix = kwargs.pop('cache_prefix', 'esipy')
         self.esi_meta_cache_key = '%s:app:meta_swagger_url' % self.cache_prefix
@@ -40,13 +44,57 @@ class EsiApp(object):
         )
 
     def __get_or_create_app(self, app_url, cache_key):
-        """ Get the app from cache or generate a new one if required """
-        app = self.cache.get(cache_key, None)
+        """ Get the app from cache or generate a new one if required
 
-        if app is None:
-            app = App.create(app_url)
-            if self.caching:
-                self.cache.set(cache_key, app, self.expire)
+        Because app object doesn't have etag/expiry, we have to make
+        a head() call before, to have these informations first... """
+        headers = {"Accept": "application/json"}
+        cached = self.cache.get(cache_key, (None, None, 0))
+        if cached is None or len(cached) != 3:
+            self.cache.invalidate(cache_key)
+            cached_app, cached_headers, cached_expiry = (cached, None, 0)
+        else:
+            cached_app, cached_headers, cached_expiry = cached
+
+        if cached_app is not None and cached_headers is not None:
+            # we didn't set custom expire, use header expiry
+            if self.expire is None:
+                expires = cached_headers.get('expires', None)
+                if expires is not None:
+
+                    cache_timeout = get_cache_time_left(
+                        cached_headers['expires']
+                    )
+                    if cache_timeout >= 0:
+                        return cached_app
+
+            # we set custom expire, check this instead
+            else:
+                if self.expire == 0 or cached_expiry >= time.time():
+                    return cached_app
+
+            # if we have etags, add the header to use them
+            etag = cached_headers.get('etag', None)
+            if etag is not None:
+                headers['If-None-Match'] = etag
+
+            # if nothing makes us use the cache, invalidate it
+            if ((expires is None or cache_timeout < 0 or
+                 0 < self.expire < time.time()) and etag is None):
+                self.cache.invalidate(cache_key)
+
+        # we are here, we know we have to make a head call...
+        res = requests.head(app_url, headers=headers)
+        if res.status_code == 304 and cached_app is not None:
+            return cached_app
+
+        # ok, cache is not accurate, make the full stuff
+        app = App.create(app_url)
+        if self.caching:
+            timeout = 0
+            if self.expire >= 0:
+                timeout = time.time() + self.expire
+            self.cache.set(cache_key, (app, res.headers, timeout))
 
         return app
 

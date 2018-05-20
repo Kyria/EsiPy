@@ -23,6 +23,7 @@ from requests.adapters import HTTPAdapter
 from .events import API_CALL_STATS
 from .utils import make_cache_key
 from .utils import check_cache
+from .utils import get_cache_time_left
 from .exceptions import APIException
 
 
@@ -215,16 +216,10 @@ class EsiClient(BaseClient):
 
         # check cache here so we have all headers, formed url and params
         cache_key = make_cache_key(request)
-        cached_response = self.cache.get(cache_key, None)
+        res = self.__make_request(request, opt, cache_key)
 
-        if cached_response is not None:
-            res = cached_response
-
-        else:
-            res = self.__make_request(request, opt)
-
-            if res.status_code == 200:
-                self.__cache_response(cache_key, res, request.method.upper())
+        if res.status_code == 200:
+            self.__cache_response(cache_key, res, request.method.upper())
 
         # generate the Response object from requests response
         response.raw_body_only = kwargs.pop(
@@ -306,15 +301,7 @@ class EsiClient(BaseClient):
         """
         if ('expires' in res.headers
                 and method not in self.__uncached_methods__):
-            # this date is ALWAYS in UTC (RFC 7231)
-            epoch = datetime(1970, 1, 1)
-            expire = (
-                datetime(
-                    *parsedate(res.headers['expires'])[:6]
-                ) - epoch
-            ).total_seconds()
-            now = (datetime.utcnow() - epoch).total_seconds()
-            cache_timeout = int(expire) - int(now)
+            cache_timeout = get_cache_time_left(res.headers['expires'])
 
             # Occasionally CCP swagger will return an outdated expire
             # warn and skip cache if timeout is <0
@@ -327,7 +314,6 @@ class EsiClient(BaseClient):
                         content=res.content,
                         url=res.url,
                     ),
-                    cache_timeout,
                 )
             else:
                 LOGGER.warning(
@@ -335,16 +321,39 @@ class EsiClient(BaseClient):
                     res.headers)
                 warnings.warn("[%s] returned expired result" % res.url)
 
-    def __make_request(self, request, opt, method=None):
-        """ prepare the request and do it, then return the response
+    def __make_request(self, request, opt, cache_key=None, method=None):
+        """ Check cache, deal with expiration and etag, make the request and
+        return the response or cached response.
 
         :param request: the pyswagger.io.Request object to prepare the request
         :param opt: options, see pyswagger/blob/master/pyswagger/io.py#L144
+        :param cache_key: the cache key used for the cache stuff.
         :param method: [default:None] allows to force the method, especially
             useful if you want to make a HEAD request.
             Default value will use endpoint method
 
         """
+        # check expiration and etags
+        opt_headers = {}
+        cached_response = self.cache.get(cache_key, None)
+        if cached_response is not None:
+            # if we have expires cached, and still validd
+            expires = cached_response.headers.get('expires', None)
+            if expires is not None:
+                cache_timeout = get_cache_time_left(
+                    cached_response.headers['expires']
+                )
+                if cache_timeout >= 0:
+                    return cached_response
+
+            # if we have etags, add the header to use them
+            etag = cached_response.headers.get('etag', None)
+            if etag is not None:
+                opt_headers['If-None-Match'] = etag
+
+            # if nothing makes us use the cache, invalidate everything
+            if (expires is None or cache_timeout < 0) and etag is None:
+                self.cache.invalidate(cache_key)
 
         # apply request-related options before preparation.
         request.prepare(
@@ -355,6 +364,7 @@ class EsiClient(BaseClient):
 
         # prepare the request and make it.
         method = method or request.method.upper()
+        request.header.update(opt_headers)
         prepared_request = self._session.prepare_request(
             Request(
                 method=method,
@@ -390,4 +400,10 @@ class EsiClient(BaseClient):
             message=res.content if res.status_code != 200 else None
         )
 
+        # if we have HTTP 304 (content didn't change), return the cached
+        # response updated with the new headers
+        if res.status_code == 304 and cached_response is not None:
+            cached_response.headers['expires'] = res.headers.headers['expires']
+            cached_response.headers['date'] = res.headers.headers['date']
+            return cached_response
         return res

@@ -17,11 +17,14 @@ class EsiApp(object):
     def __init__(self, **kwargs):
         """ Constructor.
 
-        :param: cache if specified, use that cache, else use DictCache
-        :param: cache_time is the minimum cache time for versions
+        :param cache: if specified, use that cache, else use DictCache
+        :param cache_time: is the minimum cache time for versions
             endpoints. If set to 0, never expires". None uses header expires
             Default 86400 (1d)
-        :param: cache_prefix the prefix used to all cache key for esiapp
+        :param cache_prefix: the prefix used to all cache key for esiapp
+        :param meta_url: the meta url you want to use. Default is meta esi URL
+            https://esi.evetech.net/swagger.json
+        :param datasource: the EVE datasource to be used. Default: tranquility
         """
         self.meta_url = kwargs.pop(
             'meta_url',

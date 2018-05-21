@@ -229,6 +229,7 @@ class EsiSecurity(object):
         a parameter
 
         :param response_json: the response body to use.
+        :param token_identifier: the user identifier for the token
         """
         self.token_identifier = kwargs.pop(
             'token_identifier',

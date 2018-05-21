@@ -7,6 +7,7 @@ from .mock import oauth_verify
 from .mock import oauth_verify_fail
 from esipy import App
 from esipy import EsiSecurity
+from esipy.events import Signal
 from esipy.exceptions import APIException
 
 from requests.utils import quote
@@ -34,6 +35,7 @@ class TestEsiSecurity(unittest.TestCase):
     SECRET_KEY = 'bar'
     BASIC_TOKEN = six.u('Zm9vOmJhcg==')
     SECURITY_NAME = 'evesso'
+    TOKEN_IDENTIFIER = 'ESIPY_TEST_TOKEN'
 
     @mock.patch('six.moves.urllib.request.urlopen')
     def setUp(self, urlopen_mock):
@@ -45,15 +47,18 @@ class TestEsiSecurity(unittest.TestCase):
             'https://esi.evetech.net/latest/swagger.json'
         )
 
+        self.custom_refresh_token_signal = Signal()
+
         self.security = EsiSecurity(
             app=self.app,
             redirect_uri=TestEsiSecurity.CALLBACK_URI,
             client_id=TestEsiSecurity.CLIENT_ID,
             secret_key=TestEsiSecurity.SECRET_KEY,
+            signal_token_updated=self.custom_refresh_token_signal,
+            token_identifier=TestEsiSecurity.TOKEN_IDENTIFIER
         )
 
     def test_esisecurity_init_with_app(self):
-        """ test security init with app and URL"""
         with self.assertRaises(NameError):
             EsiSecurity(
                 app=self.app,
@@ -100,9 +105,12 @@ class TestEsiSecurity(unittest.TestCase):
             self.security.oauth_authorize,
             TestEsiSecurity.OAUTH_AUTHORIZE
         )
+        self.assertEqual(
+            self.security.token_identifier,
+            TestEsiSecurity.TOKEN_IDENTIFIER
+        )
 
     def test_esisecurity_other_init(self):
-        """ test security init without app and with urls """
         with self.assertRaises(AttributeError):
             EsiSecurity(
                 redirect_uri=TestEsiSecurity.CALLBACK_URI,
@@ -131,6 +139,10 @@ class TestEsiSecurity(unittest.TestCase):
         self.assertEqual(
             security.oauth_authorize,
             "foo.com/oauth/authorize"
+        )
+        self.assertEqual(
+            security.token_identifier,
+            None
         )
 
     def test_esisecurity_update_token(self):
@@ -309,3 +321,28 @@ class TestEsiSecurity(unittest.TestCase):
             'Bearer access_token',
             req._p['header']['Authorization']
         )
+
+    def test_esisecurity_callback_refresh(self):
+        class RequestTest(object):
+
+            def __init__(self):
+                self._security = ['evesso']
+                self._p = {'header': {}}
+
+        def callback_function(**kwargs):
+            callback_function.count += 1
+        callback_function.count = 0
+
+        self.custom_refresh_token_signal.add_receiver(callback_function)
+
+        self.security.update_token({
+            'access_token': 'access_token',
+            'refresh_token': 'refresh_token',
+            'expires_in': -1
+        })
+
+        # test the auto refresh callback event customized
+        with httmock.HTTMock(oauth_token):
+            req = RequestTest()
+            self.security(req)
+            self.assertEqual(callback_function.count, 1)

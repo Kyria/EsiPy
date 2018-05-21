@@ -1,35 +1,215 @@
 {
   "basePath": "/latest",
+  "consumes": [
+    "application/json"
+  ],
+  "definitions": {
+    "bad_gateway": {
+      "description": "Bad gateway model",
+      "properties": {
+        "error": {
+          "description": "Bad gateway message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "Bad gateway",
+      "type": "object"
+    },
+    "bad_request": {
+      "description": "Bad request model",
+      "properties": {
+        "error": {
+          "description": "Bad request message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "Bad request",
+      "type": "object"
+    },
+    "forbidden": {
+      "description": "Forbidden model",
+      "properties": {
+        "error": {
+          "description": "Forbidden message",
+          "type": "string"
+        },
+        "sso_status": {
+          "description": "Status code received from SSO",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "Forbidden",
+      "type": "object"
+    },
+    "internal_server_error": {
+      "description": "Internal server error model",
+      "properties": {
+        "error": {
+          "description": "Internal server error message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "Internal server error",
+      "type": "object"
+    },
+    "service_unavailable": {
+      "description": "Service unavailable model",
+      "properties": {
+        "error": {
+          "description": "Service unavailable message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "Service unavailable",
+      "type": "object"
+    },
+    "unauthorized": {
+      "description": "Unauthorized model",
+      "properties": {
+        "error": {
+          "description": "Unauthorized message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "error"
+      ],
+      "title": "Unauthorized",
+      "type": "object"
+    }
+  },
   "host": "esi.evetech.net",
   "info": {
     "description": "An OpenAPI for EVE Online",
     "title": "EVE Swagger Interface",
-    "version": "0.2.6.dev1"
+    "version": "0.8.1"
+  },
+  "parameters": {
+    "If-None-Match": {
+      "description": "ETag from a previous request. A 304 will be returned if this matches the current ETag",
+      "in": "header",
+      "name": "If-None-Match",
+      "type": "string"
+    },
+    "X-User-Agent": {
+      "description": "Client identifier, takes precedence over User-Agent",
+      "in": "header",
+      "name": "X-User-Agent",
+      "type": "string"
+    },
+    "alliance_id": {
+      "description": "An EVE alliance ID",
+      "format": "int32",
+      "in": "path",
+      "minimum": 1,
+      "name": "alliance_id",
+      "required": true,
+      "type": "integer"
+    },
+    "character_id": {
+      "description": "An EVE character ID",
+      "format": "int32",
+      "in": "path",
+      "minimum": 1,
+      "name": "character_id",
+      "required": true,
+      "type": "integer"
+    },
+    "corporation_id": {
+      "description": "An EVE corporation ID",
+      "format": "int32",
+      "in": "path",
+      "minimum": 1,
+      "name": "corporation_id",
+      "required": true,
+      "type": "integer"
+    },
+    "datasource": {
+      "default": "tranquility",
+      "description": "The server name you would like data from",
+      "enum": [
+        "tranquility",
+        "singularity"
+      ],
+      "in": "query",
+      "name": "datasource",
+      "type": "string"
+    },
+    "language": {
+      "default": "en-us",
+      "description": "Language to use in the response",
+      "enum": [
+        "de",
+        "en-us",
+        "fr",
+        "ja",
+        "ru",
+        "zh"
+      ],
+      "in": "query",
+      "name": "language",
+      "type": "string"
+    },
+    "page": {
+      "default": 1,
+      "description": "Which page of results to return",
+      "format": "int32",
+      "in": "query",
+      "minimum": 1,
+      "name": "page",
+      "type": "integer"
+    },
+    "token": {
+      "description": "Access token to use if unable to set a header",
+      "in": "query",
+      "name": "token",
+      "type": "string"
+    },
+    "user_agent": {
+      "description": "Client identifier, takes precedence over headers",
+      "in": "query",
+      "name": "user_agent",
+      "type": "string"
+    }
   },
   "paths": {
     "/characters/{character_id}/location/": {
       "get": {
-        "description": "Information about the characters current location. Returns the current solar system id, and also the current station or structure ID if applicable.\n\n---\n\nAlternate route: `/v1/characters/{character_id}/location/`\n\nAlternate route: `/legacy/characters/{character_id}/location/`\n\nAlternate route: `/dev/characters/{character_id}/location/`\n\n\n---\n\nThis route is cached for up to 5 seconds",
+        "description": "Information about the characters current location. Returns the current solar system id, and also the current station or structure ID if applicable.\n\n---\nAlternate route: `/dev/characters/{character_id}/location/`\n\nAlternate route: `/legacy/characters/{character_id}/location/`\n\nAlternate route: `/v1/characters/{character_id}/location/`\n\n---\nThis route is cached for up to 5 seconds",
         "operationId": "get_characters_character_id_location",
         "parameters": [
           {
-            "description": "An EVE character ID",
-            "format": "int32",
-            "in": "path",
-            "name": "character_id",
-            "required": true,
-            "type": "integer"
+            "$ref": "#/parameters/character_id"
           },
           {
-            "default": "tranquility",
-            "description": "The server name you would like data from",
-            "enum": [
-              "tranquility",
-              "singularity"
-            ],
-            "in": "query",
-            "name": "datasource",
-            "type": "string"
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/token"
+          },
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
           }
         ],
         "responses": {
@@ -44,6 +224,10 @@
             "headers": {
               "Cache-Control": {
                 "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
                 "type": "string"
               },
               "Expires": {
@@ -84,44 +268,91 @@
               "type": "object"
             }
           },
+          "304": {
+            "description": "Not modified",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "examples": {
+              "application/json": {
+                "error": "Bad request message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_request"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "examples": {
+              "application/json": {
+                "error": "Unauthorized message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/unauthorized"
+            }
+          },
           "403": {
             "description": "Forbidden",
             "examples": {
               "application/json": {
-                "error": "Token is not valid for scope(s): esi-location.read_location.v1"
+                "error": "Forbidden message"
               }
             },
             "schema": {
-              "description": "Forbidden",
-              "properties": {
-                "error": {
-                  "description": "Forbidden message",
-                  "title": "get_characters_character_id_location_403_forbidden",
-                  "type": "string"
-                }
-              },
-              "title": "get_characters_character_id_location_forbidden",
-              "type": "object"
+              "$ref": "#/definitions/forbidden"
             }
           },
           "500": {
             "description": "Internal server error",
             "examples": {
               "application/json": {
-                "error": "uncaught exception: IOError('out of memory')"
+                "error": "Internal server error message"
               }
             },
             "schema": {
-              "description": "Internal server error",
-              "properties": {
-                "error": {
-                  "description": "Internal server error message",
-                  "title": "get_characters_character_id_location_500_internal_server_error",
-                  "type": "string"
-                }
-              },
-              "title": "get_characters_character_id_location_internal_server_error",
-              "type": "object"
+              "$ref": "#/definitions/internal_server_error"
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "examples": {
+              "application/json": {
+                "error": "Bad gateway message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_gateway"
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "examples": {
+              "application/json": {
+                "error": "Service unavailable message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/service_unavailable"
             }
           }
         },
@@ -134,26 +365,32 @@
         ],
         "summary": "Get character location",
         "tags": [
-          "Location",
-          "Live"
-        ]
+          "Location"
+        ],
+        "x-alternate-versions": [
+          "dev",
+          "legacy",
+          "v1"
+        ],
+        "x-cached-seconds": 5
       }
     },
     "/incursions/": {
       "get": {
-        "description": "Return a list of current incursions\n\n---\n\nAlternate route: `/v1/incursions/`\n\nAlternate route: `/legacy/incursions/`\n\nAlternate route: `/dev/incursions/`\n\n\n---\n\nThis route is cached for up to 300 seconds",
+        "description": "Return a list of current incursions\n\n---\nAlternate route: `/dev/incursions/`\n\nAlternate route: `/legacy/incursions/`\n\nAlternate route: `/v1/incursions/`\n\n---\nThis route is cached for up to 300 seconds",
         "operationId": "get_incursions",
         "parameters": [
           {
-            "default": "tranquility",
-            "description": "The server name you would like data from",
-            "enum": [
-              "tranquility",
-              "singularity"
-            ],
-            "in": "query",
-            "name": "datasource",
-            "type": "string"
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
           }
         ],
         "responses": {
@@ -174,7 +411,7 @@
                     30004153,
                     30004154
                   ],
-                  "influence": 1.0,
+                  "influence": 0.9,
                   "staging_solar_system_id": 30004154,
                   "state": "mobilizing",
                   "type": "Incursion"
@@ -184,6 +421,10 @@
             "headers": {
               "Cache-Control": {
                 "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
                 "type": "string"
               },
               "Expires": {
@@ -202,13 +443,13 @@
                 "properties": {
                   "constellation_id": {
                     "description": "The constellation id in which this incursion takes place",
-                    "format": "int64",
+                    "format": "int32",
                     "title": "get_incursions_constellation_id",
                     "type": "integer"
                   },
                   "faction_id": {
                     "description": "The attacking faction's id",
-                    "format": "int64",
+                    "format": "int32",
                     "title": "get_incursions_faction_id",
                     "type": "integer"
                   },
@@ -221,10 +462,11 @@
                     "description": "A list of infested solar system ids that are a part of this incursion",
                     "items": {
                       "description": "infested_solar_system integer",
-                      "format": "int64",
+                      "format": "int32",
                       "title": "get_incursions_infested_solar_system",
                       "type": "integer"
                     },
+                    "maxItems": 100,
                     "title": "get_incursions_infested_solar_systems",
                     "type": "array"
                   },
@@ -236,7 +478,7 @@
                   },
                   "staging_solar_system_id": {
                     "description": "Staging solar system for this incursion",
-                    "format": "int64",
+                    "format": "int32",
                     "title": "get_incursions_staging_solar_system_id",
                     "type": "integer"
                   },
@@ -269,36 +511,628 @@
                 "title": "get_incursions_200_ok",
                 "type": "object"
               },
+              "maxItems": 100,
               "title": "get_incursions_ok",
               "type": "array"
+            }
+          },
+          "304": {
+            "description": "Not modified",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "examples": {
+              "application/json": {
+                "error": "Bad request message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_request"
             }
           },
           "500": {
             "description": "Internal server error",
             "examples": {
               "application/json": {
-                "error": "uncaught exception: IOError('out of memory')"
+                "error": "Internal server error message"
               }
             },
             "schema": {
-              "description": "Internal server error",
-              "properties": {
-                "error": {
-                  "description": "Internal server error message",
-                  "title": "get_incursions_500_internal_server_error",
-                  "type": "string"
-                }
-              },
-              "title": "get_incursions_internal_server_error",
-              "type": "object"
+              "$ref": "#/definitions/internal_server_error"
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "examples": {
+              "application/json": {
+                "error": "Bad gateway message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_gateway"
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "examples": {
+              "application/json": {
+                "error": "Service unavailable message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/service_unavailable"
             }
           }
         },
         "summary": "List incursions",
         "tags": [
-          "Incursions",
-          "Live"
+          "Incursions"
+        ],
+        "x-alternate-versions": [
+          "dev",
+          "legacy",
+          "v1"
+        ],
+        "x-cached-seconds": 300
+      }
+    },
+    "/universe/ids/": {
+      "post": {
+        "description": "Resolve a set of names to IDs in the following categories: agents, alliances, characters, constellations, corporations factions, inventory_types, regions, stations, and systems. Only exact matches will be returned. All names searched for are cached for 12 hours.\n\n---\nAlternate route: `/dev/universe/ids/`\n\nAlternate route: `/legacy/universe/ids/`\n\nAlternate route: `/v1/universe/ids/`\n",
+        "operationId": "post_universe_ids",
+        "parameters": [
+          {
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/language"
+          },
+          {
+            "description": "The names to resolve",
+            "in": "body",
+            "name": "names",
+            "required": true,
+            "schema": {
+              "description": "names array",
+              "example": [
+                "CCP Zoetrope"
+              ],
+              "items": {
+                "description": "name string",
+                "maxLength": 100,
+                "minLength": 1,
+                "title": "post_universe_ids_name",
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "minItems": 1,
+              "title": "post_universe_ids_names",
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of id/name associations for a set of names divided by category. Any name passed in that did not have a match will be ommitted.",
+            "examples": {
+              "application/json": {
+                "characters": [
+                  {
+                    "id": 95465499,
+                    "name": "CCP Bartender"
+                  },
+                  {
+                    "id": 2112625428,
+                    "name": "CCP Zoetrope"
+                  }
+                ],
+                "systems": [
+                  {
+                    "id": 30000142,
+                    "name": "Jita"
+                  }
+                ]
+              }
+            },
+            "headers": {
+              "Content-Language": {
+                "description": "The language used in the response",
+                "enum": [
+                  "de",
+                  "en-us",
+                  "fr",
+                  "ja",
+                  "ru",
+                  "zh"
+                ],
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "200 ok object",
+              "properties": {
+                "agents": {
+                  "description": "agents array",
+                  "items": {
+                    "description": "agent object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_agent",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_agents",
+                  "type": "array"
+                },
+                "alliances": {
+                  "description": "alliances array",
+                  "items": {
+                    "description": "alliance object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_alliance",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_alliances",
+                  "type": "array"
+                },
+                "characters": {
+                  "description": "characters array",
+                  "items": {
+                    "description": "character object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_character",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_characters",
+                  "type": "array"
+                },
+                "constellations": {
+                  "description": "constellations array",
+                  "items": {
+                    "description": "constellation object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_constellation",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_constellations",
+                  "type": "array"
+                },
+                "corporations": {
+                  "description": "corporations array",
+                  "items": {
+                    "description": "corporation object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_corporation",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_corporations",
+                  "type": "array"
+                },
+                "factions": {
+                  "description": "factions array",
+                  "items": {
+                    "description": "faction object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_faction",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_factions",
+                  "type": "array"
+                },
+                "inventory_types": {
+                  "description": "inventory_types array",
+                  "items": {
+                    "description": "inventory_type object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_inventory_type",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_inventory_types",
+                  "type": "array"
+                },
+                "regions": {
+                  "description": "regions array",
+                  "items": {
+                    "description": "region object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_region",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_regions",
+                  "type": "array"
+                },
+                "stations": {
+                  "description": "stations array",
+                  "items": {
+                    "description": "station object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_station",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_stations",
+                  "type": "array"
+                },
+                "systems": {
+                  "description": "systems array",
+                  "items": {
+                    "description": "system object",
+                    "properties": {
+                      "id": {
+                        "description": "id integer",
+                        "format": "int32",
+                        "title": "post_universe_ids_id",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "name string",
+                        "title": "post_universe_ids_name",
+                        "type": "string"
+                      }
+                    },
+                    "title": "post_universe_ids_system",
+                    "type": "object"
+                  },
+                  "maxItems": 1000,
+                  "title": "post_universe_ids_systems",
+                  "type": "array"
+                }
+              },
+              "title": "post_universe_ids_ok",
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "examples": {
+              "application/json": {
+                "error": "Bad request message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_request"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "examples": {
+              "application/json": {
+                "error": "Internal server error message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/internal_server_error"
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "examples": {
+              "application/json": {
+                "error": "Bad gateway message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_gateway"
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "examples": {
+              "application/json": {
+                "error": "Service unavailable message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/service_unavailable"
+            }
+          }
+        },
+        "summary": "Bulk names to IDs",
+        "tags": [
+          "Universe"
+        ],
+        "x-alternate-versions": [
+          "dev",
+          "legacy",
+          "v1"
         ]
+      }
+    },
+    "/status/": {
+      "get": {
+        "description": "EVE Server status\n\n---\n\nThis route is cached for up to 30 seconds",
+        "operationId": "get_status",
+        "parameters": [
+          {
+            "$ref": "#/parameters/datasource"
+          },
+          {
+            "$ref": "#/parameters/If-None-Match"
+          },
+          {
+            "$ref": "#/parameters/user_agent"
+          },
+          {
+            "$ref": "#/parameters/X-User-Agent"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Server status",
+            "examples": {
+              "application/json": {
+                "players": 12345,
+                "server_version": "1132976",
+                "start_time": "2017-01-02T12:34:56Z"
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            },
+            "schema": {
+              "description": "200 ok object",
+              "properties": {
+                "players": {
+                  "description": "Current online player count",
+                  "title": "get_status_players",
+                  "type": "integer"
+                },
+                "server_version": {
+                  "description": "Running version as string",
+                  "title": "get_status_server_version",
+                  "type": "string"
+                },
+                "start_time": {
+                  "description": "Server start timestamp",
+                  "format": "date-time",
+                  "title": "get_status_start_time",
+                  "type": "string"
+                },
+                "vip": {
+                  "description": "If the server is in VIP mode",
+                  "title": "get_status_vip",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "start_time",
+                "players",
+                "server_version"
+              ],
+              "title": "get_status_ok",
+              "type": "object"
+            }
+          },
+          "304": {
+            "description": "Not modified",
+            "headers": {
+              "Cache-Control": {
+                "description": "The caching mechanism used",
+                "type": "string"
+              },
+              "ETag": {
+                "description": "RFC7232 compliant entity tag",
+                "type": "string"
+              },
+              "Expires": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              },
+              "Last-Modified": {
+                "description": "RFC7231 formatted datetime string",
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "examples": {
+              "application/json": {
+                "error": "Bad request message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_request"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "examples": {
+              "application/json": {
+                "error": "Internal server error message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/internal_server_error"
+            }
+          },
+          "502": {
+            "description": "Bad gateway",
+            "examples": {
+              "application/json": {
+                "error": "Bad gateway message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/bad_gateway"
+            }
+          },
+          "503": {
+            "description": "Service unavailable",
+            "examples": {
+              "application/json": {
+                "error": "Service unavailable message"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/service_unavailable"
+            }
+          }
+        },
+        "summary": "Retrieve the uptime and player counts",
+        "tags": [
+          "Status"
+        ],
+        "x-alternate-versions": [
+          "dev",
+          "legacy",
+          "v1"
+        ],
+        "x-cached-seconds": 30
       }
     }
   },
@@ -313,24 +1147,74 @@
       "authorizationUrl": "https://login.eveonline.com/oauth/authorize",
       "flow": "implicit",
       "scopes": {
+        "esi-alliances.read_contacts.v1": "EVE SSO scope esi-alliances.read_contacts.v1",
         "esi-assets.read_assets.v1": "EVE SSO scope esi-assets.read_assets.v1",
+        "esi-assets.read_corporation_assets.v1": "EVE SSO scope esi-assets.read_corporation_assets.v1",
         "esi-bookmarks.read_character_bookmarks.v1": "EVE SSO scope esi-bookmarks.read_character_bookmarks.v1",
+        "esi-bookmarks.read_corporation_bookmarks.v1": "EVE SSO scope esi-bookmarks.read_corporation_bookmarks.v1",
         "esi-calendar.read_calendar_events.v1": "EVE SSO scope esi-calendar.read_calendar_events.v1",
         "esi-calendar.respond_calendar_events.v1": "EVE SSO scope esi-calendar.respond_calendar_events.v1",
+        "esi-characters.read_agents_research.v1": "EVE SSO scope esi-characters.read_agents_research.v1",
+        "esi-characters.read_blueprints.v1": "EVE SSO scope esi-characters.read_blueprints.v1",
         "esi-characters.read_contacts.v1": "EVE SSO scope esi-characters.read_contacts.v1",
+        "esi-characters.read_corporation_roles.v1": "EVE SSO scope esi-characters.read_corporation_roles.v1",
+        "esi-characters.read_fatigue.v1": "EVE SSO scope esi-characters.read_fatigue.v1",
+        "esi-characters.read_fw_stats.v1": "EVE SSO scope esi-characters.read_fw_stats.v1",
+        "esi-characters.read_loyalty.v1": "EVE SSO scope esi-characters.read_loyalty.v1",
+        "esi-characters.read_medals.v1": "EVE SSO scope esi-characters.read_medals.v1",
+        "esi-characters.read_notifications.v1": "EVE SSO scope esi-characters.read_notifications.v1",
+        "esi-characters.read_opportunities.v1": "EVE SSO scope esi-characters.read_opportunities.v1",
+        "esi-characters.read_standings.v1": "EVE SSO scope esi-characters.read_standings.v1",
+        "esi-characters.read_titles.v1": "EVE SSO scope esi-characters.read_titles.v1",
+        "esi-characters.write_contacts.v1": "EVE SSO scope esi-characters.write_contacts.v1",
+        "esi-characterstats.read.v1": "EVE SSO scope esi-characterstats.read.v1",
         "esi-clones.read_clones.v1": "EVE SSO scope esi-clones.read_clones.v1",
+        "esi-clones.read_implants.v1": "EVE SSO scope esi-clones.read_implants.v1",
+        "esi-contracts.read_character_contracts.v1": "EVE SSO scope esi-contracts.read_character_contracts.v1",
+        "esi-contracts.read_corporation_contracts.v1": "EVE SSO scope esi-contracts.read_corporation_contracts.v1",
+        "esi-corporations.read_blueprints.v1": "EVE SSO scope esi-corporations.read_blueprints.v1",
+        "esi-corporations.read_contacts.v1": "EVE SSO scope esi-corporations.read_contacts.v1",
+        "esi-corporations.read_container_logs.v1": "EVE SSO scope esi-corporations.read_container_logs.v1",
         "esi-corporations.read_corporation_membership.v1": "EVE SSO scope esi-corporations.read_corporation_membership.v1",
+        "esi-corporations.read_divisions.v1": "EVE SSO scope esi-corporations.read_divisions.v1",
+        "esi-corporations.read_facilities.v1": "EVE SSO scope esi-corporations.read_facilities.v1",
+        "esi-corporations.read_fw_stats.v1": "EVE SSO scope esi-corporations.read_fw_stats.v1",
+        "esi-corporations.read_medals.v1": "EVE SSO scope esi-corporations.read_medals.v1",
+        "esi-corporations.read_outposts.v1": "EVE SSO scope esi-corporations.read_outposts.v1",
+        "esi-corporations.read_standings.v1": "EVE SSO scope esi-corporations.read_standings.v1",
+        "esi-corporations.read_starbases.v1": "EVE SSO scope esi-corporations.read_starbases.v1",
+        "esi-corporations.read_structures.v1": "EVE SSO scope esi-corporations.read_structures.v1",
+        "esi-corporations.read_titles.v1": "EVE SSO scope esi-corporations.read_titles.v1",
+        "esi-corporations.track_members.v1": "EVE SSO scope esi-corporations.track_members.v1",
+        "esi-fittings.read_fittings.v1": "EVE SSO scope esi-fittings.read_fittings.v1",
+        "esi-fittings.write_fittings.v1": "EVE SSO scope esi-fittings.write_fittings.v1",
+        "esi-fleets.read_fleet.v1": "EVE SSO scope esi-fleets.read_fleet.v1",
+        "esi-fleets.write_fleet.v1": "EVE SSO scope esi-fleets.write_fleet.v1",
+        "esi-industry.read_character_jobs.v1": "EVE SSO scope esi-industry.read_character_jobs.v1",
+        "esi-industry.read_character_mining.v1": "EVE SSO scope esi-industry.read_character_mining.v1",
+        "esi-industry.read_corporation_jobs.v1": "EVE SSO scope esi-industry.read_corporation_jobs.v1",
+        "esi-industry.read_corporation_mining.v1": "EVE SSO scope esi-industry.read_corporation_mining.v1",
+        "esi-killmails.read_corporation_killmails.v1": "EVE SSO scope esi-killmails.read_corporation_killmails.v1",
         "esi-killmails.read_killmails.v1": "EVE SSO scope esi-killmails.read_killmails.v1",
         "esi-location.read_location.v1": "EVE SSO scope esi-location.read_location.v1",
+        "esi-location.read_online.v1": "EVE SSO scope esi-location.read_online.v1",
         "esi-location.read_ship_type.v1": "EVE SSO scope esi-location.read_ship_type.v1",
         "esi-mail.organize_mail.v1": "EVE SSO scope esi-mail.organize_mail.v1",
         "esi-mail.read_mail.v1": "EVE SSO scope esi-mail.read_mail.v1",
         "esi-mail.send_mail.v1": "EVE SSO scope esi-mail.send_mail.v1",
+        "esi-markets.read_character_orders.v1": "EVE SSO scope esi-markets.read_character_orders.v1",
+        "esi-markets.read_corporation_orders.v1": "EVE SSO scope esi-markets.read_corporation_orders.v1",
+        "esi-markets.structure_markets.v1": "EVE SSO scope esi-markets.structure_markets.v1",
+        "esi-planets.manage_planets.v1": "EVE SSO scope esi-planets.manage_planets.v1",
+        "esi-planets.read_customs_offices.v1": "EVE SSO scope esi-planets.read_customs_offices.v1",
         "esi-search.search_structures.v1": "EVE SSO scope esi-search.search_structures.v1",
         "esi-skills.read_skillqueue.v1": "EVE SSO scope esi-skills.read_skillqueue.v1",
         "esi-skills.read_skills.v1": "EVE SSO scope esi-skills.read_skills.v1",
+        "esi-ui.open_window.v1": "EVE SSO scope esi-ui.open_window.v1",
+        "esi-ui.write_waypoint.v1": "EVE SSO scope esi-ui.write_waypoint.v1",
         "esi-universe.read_structures.v1": "EVE SSO scope esi-universe.read_structures.v1",
-        "esi-wallet.read_character_wallet.v1": "EVE SSO scope esi-wallet.read_character_wallet.v1"
+        "esi-wallet.read_character_wallet.v1": "EVE SSO scope esi-wallet.read_character_wallet.v1",
+        "esi-wallet.read_corporation_wallets.v1": "EVE SSO scope esi-wallet.read_corporation_wallets.v1"
       },
       "type": "oauth2"
     }

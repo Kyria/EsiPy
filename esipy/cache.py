@@ -2,7 +2,6 @@
 """ Cache objects for EsiPy """
 import hashlib
 import logging
-import time
 
 try:
     import pickle
@@ -26,8 +25,8 @@ class BaseCache(object):
     the cache methods used in esipy
     """
 
-    def set(self, key, value, timeout=300):
-        """ Set a value in the cache. If timeout=(None): never expires """
+    def set(self, key, value):
+        """ Set a value in the cache. """
         raise NotImplementedError
 
     def get(self, key, default=None):
@@ -64,9 +63,8 @@ class FileCache(BaseCache):
         """
         self._cache.close()
 
-    def set(self, key, value, timeout=300):
-        expire_time = None if timeout == 0 else timeout
-        self._cache.set(_hash(key), value, expire=expire_time)
+    def set(self, key, value):
+        self._cache.set(_hash(key), value)
 
     def get(self, key, default=None):
         return self._cache.get(_hash(key), default)
@@ -82,19 +80,10 @@ class DictCache(BaseCache):
         self._dict = {}
 
     def get(self, key, default=None):
-        cache_val = self._dict.get(key, (None, 0))
+        return self._dict.get(key, default)
 
-        if cache_val[1] is not None and cache_val[1] < time.time():
-            self.invalidate(key)
-            return default
-        return cache_val[0]
-
-    def set(self, key, value, timeout=300):
-        if timeout is None or timeout == 0:
-            expire_time = None
-        else:
-            expire_time = timeout + time.time()
-        self._dict[key] = (value, expire_time)
+    def set(self, key, value):
+        self._dict[key] = value
 
     def invalidate(self, key):
         self._dict.pop(key, None)
@@ -108,9 +97,9 @@ class DummyCache(BaseCache):
         self._dict = {}
 
     def get(self, key, default=None):
-        return None
+        return default
 
-    def set(self, key, value, timeout=300):
+    def set(self, key, value):
         pass
 
     def invalidate(self, key):
@@ -136,9 +125,8 @@ class MemcachedCache(BaseCache):
         value = self._mc.get(_hash(key))
         return value if value is not None else default
 
-    def set(self, key, value, timeout=300):
-        expire_time = 0 if timeout is None else timeout
-        return self._mc.set(_hash(key), value, expire_time)
+    def set(self, key, value):
+        return self._mc.set(_hash(key), value)
 
     def invalidate(self, key):
         return self._mc.delete(_hash(key))
@@ -162,10 +150,8 @@ class RedisCache(BaseCache):
         value = self._r.get(_hash(key))
         return pickle.loads(value) if value is not None else default
 
-    def set(self, key, value, timeout=300):
-        if timeout is None or timeout == 0:
-            return self._r.set(_hash(key), pickle.dumps(value))
-        return self._r.setex(_hash(key), pickle.dumps(value), timeout)
+    def set(self, key, value):
+        return self._r.set(_hash(key), pickle.dumps(value))
 
     def invalidate(self, key):
         return self._r.delete(_hash(key))

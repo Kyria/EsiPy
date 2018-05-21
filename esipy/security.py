@@ -39,12 +39,17 @@ class EsiSecurity(object):
         :param sso_url: the default sso URL used when no "app" is provided
         :param esi_url: the default esi URL used for verify endpoint
         :param app: (optionnal) the pyswagger app object
+        :param token_identifier: (optional) identifies the token for the user
+            the value will then be passed as argument to any callback
         :param security_name: (optionnal) the name of the object holding the
-        informations in the securityDefinitions, used to check authed endpoint
+            informations in the securityDefinitions,
+            used to check authed endpoint
         :param esi_datasource: (optional) The ESI datasource used to validate
-        SSO authentication. Defaults to tranquility
+            SSO authentication. Defaults to tranquility
         :param headers: (optional) additional headers to add to the requests
-        done here
+            done here
+        :param signal_token_updated: (optional) allow to define a specific
+            signal to use, instead of using the global AFTER_TOKEN_REFRESH
         """
         app = kwargs.pop('app', None)
         sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
@@ -55,6 +60,7 @@ class EsiSecurity(object):
         self.redirect_uri = redirect_uri
         self.client_id = client_id
         self.secret_key = secret_key
+        self.token_identifier = kwargs.pop('token_identifier', None)
 
         # we provide app object, so we don't use sso_url
         if app is not None:
@@ -125,6 +131,12 @@ class EsiSecurity(object):
         self.refresh_token = None
         self.access_token = None
         self.token_expiry = None
+
+        # other stuff
+        self.signal_token_updated = kwargs.pop(
+            'signal_token_updated',
+            AFTER_TOKEN_REFRESH
+        )
 
     def __get_token_auth_header(self):
         """ Return the Basic Authorization header required to get the tokens
@@ -210,14 +222,19 @@ class EsiSecurity(object):
             }
         )
 
-    def update_token(self, response_json):
+    def update_token(self, response_json, **kwargs):
         """ Update access_token, refresh_token and token_expiry from the
         response body.
         The response must be converted to a json object before being passed as
         a parameter
 
         :param response_json: the response body to use.
+        :param token_identifier: the user identifier for the token
         """
+        self.token_identifier = kwargs.pop(
+            'token_identifier',
+            self.token_identifier
+        )
         self.access_token = response_json['access_token']
         self.token_expiry = int(time.time()) + response_json['expires_in']
 
@@ -250,7 +267,9 @@ class EsiSecurity(object):
             raise APIException(
                 request_data['url'],
                 res.status_code,
-                res.json()
+                json_response=res.json(),
+                request_param=request_data,
+                response_header=res.headers
             )
         json_res = res.json()
         self.update_token(json_res)
@@ -268,7 +287,9 @@ class EsiSecurity(object):
             raise APIException(
                 request_data['url'],
                 res.status_code,
-                res.json()
+                json_response=res.json(),
+                request_param=request_data,
+                response_header=res.headers
             )
         json_res = res.json()
         self.update_token(json_res)
@@ -287,7 +308,9 @@ class EsiSecurity(object):
             raise APIException(
                 self.oauth_verify,
                 res.status_code,
-                res.json()
+                json_response=res.json(),
+                request_param=self.__get_oauth_header(),
+                response_header=res.headers
             )
         return res.json()
 
@@ -303,7 +326,10 @@ class EsiSecurity(object):
 
         if self.is_token_expired():
             json_response = self.refresh()
-            AFTER_TOKEN_REFRESH.send(**json_response)
+            self.signal_token_updated.send(
+                token_identifier=self.token_identifier,
+                **json_response
+            )
 
         for security in request._security:
             if self.security_name not in security:

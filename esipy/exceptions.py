@@ -5,10 +5,12 @@
 class APIException(Exception):
     """ Exception for SSO related errors """
 
-    def __init__(self, url, code, json_response):
+    def __init__(self, url, code, **kwargs):
         self.url = url
         self.status_code = code
-        self.response = json_response
+        self.response = kwargs.pop('json_response', '{}')
+        self.request_param = kwargs.pop('request_param', {})
+        self.response_header = kwargs.pop('response_header', {})
         super(APIException, self).__init__(str(self))
 
     def __str__(self):

@@ -1,6 +1,6 @@
 ---
 layout: base
-section: api/esiapp
+section: api/esiclient
 title: API - EsiApp
 ---
 # EsiClient

@@ -1,6 +1,6 @@
 ---
 layout: base
-section: api/EsiSecurity
+section: api/esisecurity
 title: API - EsiSecurity
 ---
 # EsiSecurity

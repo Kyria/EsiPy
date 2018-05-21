@@ -18,14 +18,25 @@ The `App` object will deal with everything that comes from swagger:
 * Generating operations
 * Validate parameters
 
-To create it, simply do the following:
+To use it, you can either instanciate it directly, or use the `EsiApp` object that also use cache. <br>
+Exemple:
 ```python
+# Using EsiApp [recommended]
+from esipy import EsiApp
+esi_app = EsiApp()
+app = esi_app.get_latest_swagger
+
+# Using App, both "app" are the same at the end
 from esipy import App
 
 # App.create(url, strict=True)
 # with url = the swagger spec URL, leave strict to default
 app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
 ```
+
+<div class="alert alert-dismissible alert-info">
+    For more details about EsiApp, please see <a href="/EsiPy/getting_started/esiapp/">this page</a>.
+</div>
 
 &nbsp;
 

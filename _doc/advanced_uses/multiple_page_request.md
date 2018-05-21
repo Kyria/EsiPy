@@ -42,20 +42,30 @@ client = EsiClient(
     raw_body_only=False,
 )
 
-# create the operation objects
-# we know there are around 26 pages for The Forge
+# we want to know how much pages there are for The Forge
+# so we make a HEAD request first
+op = app.op['get_markets_region_id_orders'](
+    region_id=10000002,
+    page=1,
+    order_type='all',
+)
+res = client.head(op)
 
-operations = []
-for page in range(1,27):
-    operations.append(
-        app.op['get_markets_region_id_orders'](
-            region_id=10000002,
-            page=page,
-            order_type='all',
+# if we have HTTP 200 OK, then we continue
+if res.status == 200:
+    number_of_page = res.header['X-Pages'][0]
+
+    # now we know how many pages we want, let's prepare all the requests
+    operations = []
+    for page in range(1, number_of_page):
+        operations.append(
+            app.op['get_markets_region_id_orders'](
+                region_id=10000002,
+                page=page,
+                order_type='all',
+            )
         )
-    )
 
-results = client.multi_request(operations)
-
-# results now contain a list of tuple with all (request, response) it called
+    results = client.multi_request(operations)
+    # results now contain a list of tuple with all (request, response) it called
 ```

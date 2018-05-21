@@ -80,7 +80,7 @@ client = EsiClient(cache=cache)
 If you need a specific cache, because you already use your own, there's a way to define a valid cache for EsiPy.
 
 1. First you need to inherit from `esipy.cache.BaseCache` and override the `get`, `set` and `invalidate` methods
-2. You need to handle outdated data within the cache, as it's not done in EsiPy.
+2. You **should not** delete outdated data from the cache within the cache process, else you will lose all the benefits from etags. 
 
 &nbsp;
 
@@ -92,12 +92,11 @@ from esipy.cache import BaseCache
 # this is the minimum required
 class YourCache(BaseCache):
 
-    def set(self, key, value, timeout=300):
+    def set(self, key, value):
         # do something and store the value
-        # timeout = 0 or None make the data never expire
 
     def get(self, key, default=None):
-        # return the value or invalidate and return default
+        # return the value or return default
 
     def invalidate(self, key):
         # invalidate the cache key

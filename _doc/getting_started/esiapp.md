@@ -1,6 +1,6 @@
 ---
 layout: base
-section: advanced_uses/esiapp
+section: getting_started/esiapp
 title: EsiApp - Esi Meta Spec App 
 ---
 # EsiApp

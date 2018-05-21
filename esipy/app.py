@@ -37,18 +37,21 @@ class EsiApp(object):
         cache = kwargs.pop('cache', False)
         self.caching = True if cache is not None else False
         self.cache = check_cache(cache)
+        self.datasource = kwargs.pop('datasource', 'tranquility')
 
         self.app = self.__get_or_create_app(
             self.meta_url,
             self.esi_meta_cache_key
         )
 
-    def __get_or_create_app(self, app_url, cache_key):
+    def __get_or_create_app(self, url, cache_key):
         """ Get the app from cache or generate a new one if required
 
         Because app object doesn't have etag/expiry, we have to make
         a head() call before, to have these informations first... """
         headers = {"Accept": "application/json"}
+        app_url = '%s?datasource=%s' % (url, self.datasource)
+
         cached = self.cache.get(cache_key, (None, None, 0))
         if cached is None or len(cached) != 3:
             self.cache.invalidate(cache_key)

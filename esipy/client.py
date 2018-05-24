@@ -401,7 +401,7 @@ class EsiClient(BaseClient):
         # if we have HTTP 304 (content didn't change), return the cached
         # response updated with the new headers
         if res.status_code == 304 and cached_response is not None:
-            cached_response.headers['expires'] = res.headers.get('expires')
-            cached_response.headers['date'] = res.headers.get('date')
+            cached_response.headers['Expires'] = res.headers.get('Expires')
+            cached_response.headers['Date'] = res.headers.get('Date')
             return cached_response
         return res

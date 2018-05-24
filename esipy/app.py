@@ -89,17 +89,23 @@ class EsiApp(object):
                  0 < self.expire < time.time()) and etag is None):
                 self.cache.invalidate(cache_key)
 
+        # set timeout value in case we have to cache it later
+        timeout = 0
+        if self.expire is not None and self.expire > 0:
+            timeout = time.time() + self.expire
+
         # we are here, we know we have to make a head call...
         res = requests.head(app_url, headers=headers)
         if res.status_code == 304 and cached_app is not None:
+            self.cache.set(
+                cache_key,
+                (cached_app, res.headers, timeout)
+            )
             return cached_app
 
         # ok, cache is not accurate, make the full stuff
         app = App.create(app_url)
         if self.caching:
-            timeout = 0
-            if self.expire is not None and self.expire > 0:
-                timeout = time.time() + self.expire
             self.cache.set(cache_key, (app, res.headers, timeout))
 
         return app

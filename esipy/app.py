@@ -64,15 +64,14 @@ class EsiApp(object):
 
         if cached_app is not None and cached_headers is not None:
             # we didn't set custom expire, use header expiry
-            if self.expire is None:
-                expires = cached_headers.get('expires', None)
-                if expires is not None:
-
-                    cache_timeout = get_cache_time_left(
-                        cached_headers['expires']
-                    )
-                    if cache_timeout >= 0:
-                        return cached_app
+            expires = cached_headers.get('expires', None)
+            cache_timeout = -1
+            if self.expire is None and expires is not None:
+                cache_timeout = get_cache_time_left(
+                    cached_headers['expires']
+                )
+                if cache_timeout >= 0:
+                    return cached_app
 
             # we set custom expire, check this instead
             else:
@@ -86,7 +85,7 @@ class EsiApp(object):
 
             # if nothing makes us use the cache, invalidate it
             if ((expires is None or cache_timeout < 0 or
-                 0 < self.expire < time.time()) and etag is None):
+                 cached_expiry < time.time()) and etag is None):
                 self.cache.invalidate(cache_key)
 
         # set timeout value in case we have to cache it later

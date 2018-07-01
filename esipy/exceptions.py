@@ -14,10 +14,4 @@ class APIException(Exception):
         super(APIException, self).__init__(str(self))
 
     def __str__(self):
-        if 'error' in self.response:
-            return 'HTTP Error %s: %s' % (self.status_code,
-                                          self.response['error'])
-        elif 'message' in self.response:
-            return 'HTTP Error %s: %s' % (self.status_code,
-                                          self.response['message'])
-        return 'HTTP Error %s' % (self.status_code)
+        return 'HTTP Error %s: %s' % (self.status_code, self.response)

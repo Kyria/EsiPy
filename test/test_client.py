@@ -13,6 +13,7 @@ from .mock import public_incursion_no_expires
 from .mock import public_incursion_no_expires_second
 from .mock import public_incursion_server_error
 from .mock import public_incursion_warning
+from .mock import non_json_error
 from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
@@ -355,3 +356,24 @@ class TestEsiPy(unittest.TestCase):
         with httmock.HTTMock(check_etag):
             res = self.client.request(operation)
             self.assertEqual(res.data.server_version, "1313143")
+
+    def test_esipy_non_json_response(self):
+        operation = self.app.op['get_status']()
+        with httmock.HTTMock(non_json_error):
+            try:
+                self.client.request(operation)
+            except APIException as exc:
+                self.assertEqual(exc.status_code, 502)
+                self.assertEqual(
+                    exc.response,
+                    six.b('<html><body>Some HTML Errors</body></html>')
+                )
+                
+            try:
+                self.client_no_auth.request(operation)
+            except APIException as exc:
+                self.assertEqual(exc.status_code, 502)
+                self.assertEqual(
+                    exc.response,
+                    six.b('<html><body>Some HTML Errors</body></html>')
+                )

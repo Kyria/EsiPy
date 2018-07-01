@@ -5,6 +5,8 @@ from __future__ import absolute_import
 from .mock import oauth_token
 from .mock import oauth_verify
 from .mock import oauth_verify_fail
+from .mock import non_json_error
+
 from esipy import App
 from esipy import EsiSecurity
 from esipy.events import Signal
@@ -346,3 +348,37 @@ class TestEsiSecurity(unittest.TestCase):
             req = RequestTest()
             self.security(req)
             self.assertEqual(callback_function.count, 1)
+
+    def test_esisecurity_non_json_response(self):
+        self.security.update_token({
+            'access_token': 'access_token',
+            'refresh_token': 'refresh_token',
+            'expires_in': -1
+        })
+        with httmock.HTTMock(non_json_error):
+            try:
+                self.security.verify()
+            except APIException as exc:
+                self.assertEqual(exc.status_code, 502)
+                self.assertEqual(
+                    exc.response,
+                    six.b('<html><body>Some HTML Errors</body></html>')
+                )
+
+            try:
+                self.security.auth('somecode')
+            except APIException as exc:
+                self.assertEqual(exc.status_code, 502)
+                self.assertEqual(
+                    exc.response,
+                    six.b('<html><body>Some HTML Errors</body></html>')
+                )
+
+            try:
+                self.security.refresh()
+            except APIException as exc:
+                self.assertEqual(exc.status_code, 502)
+                self.assertEqual(
+                    exc.response,
+                    six.b('<html><body>Some HTML Errors</body></html>')
+                )

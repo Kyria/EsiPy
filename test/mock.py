@@ -388,6 +388,17 @@ def v1_swagger(url, request):
     return resp
 
 
+@httmock.all_requests
+def non_json_error(url, request):
+    """ Mock endpoint for non json returns (usually errors).
+    """
+    return httmock.response(
+        headers={},
+        status_code=502,
+        content='<html><body>Some HTML Errors</body></html>'
+    )
+
+
 _all_auth_mock_ = [
     oauth_token,
     oauth_verify,

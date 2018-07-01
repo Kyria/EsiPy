@@ -6,7 +6,7 @@ from setuptools import setup
 # install requirements
 install_requirements = [
     "requests",
-    "pyswagger >= 0.8.31",
+    "pyswagger >= 0.8.39",
     "six",
     "pytz",
 ]

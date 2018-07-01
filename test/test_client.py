@@ -368,7 +368,7 @@ class TestEsiPy(unittest.TestCase):
                     exc.response,
                     six.b('<html><body>Some HTML Errors</body></html>')
                 )
-                
+
             try:
                 self.client_no_auth.request(operation)
             except APIException as exc:

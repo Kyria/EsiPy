@@ -144,7 +144,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 req_and_resp[0].url,
                 res.status,
-                json_response=res.data,
+                json_response=res.raw,
                 request_param=req_and_resp[0].query,
                 response_header=res.header
             )
@@ -224,11 +224,23 @@ class EsiClient(BaseClient):
             'raw_body_only',
             self.raw_body_only
         )
-        response.apply_with(
-            status=res.status_code,
-            header=res.headers,
-            raw=six.BytesIO(res.content).getvalue()
-        )
+
+        try:
+            response.apply_with(
+                status=res.status_code,
+                header=res.headers,
+                raw=six.BytesIO(res.content).getvalue()
+            )
+
+        except ValueError:
+            # catch JSONDecodeError/ValueError when response is not JSON
+            raise APIException(
+                request.url,
+                res.status_code,
+                json_response=res.content,
+                request_param=request.query,
+                response_header=res.headers
+            )
 
         if 'warning' in res.headers:
             # send in logger and warnings, so the user doesn't have to use
@@ -240,7 +252,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 request.url,
                 res.status_code,
-                json_response=response.data,
+                json_response=response.raw,
                 request_param=request.query,
                 response_header=response.header
             )

@@ -109,3 +109,23 @@ import json
 json_response = json.loads(raw_response.raw)
 ``` 
 
+&nbsp;
+
+## Requesting endpoints using POST/DELETE/PUT instead of GET
+
+If you are want to use an endpoint that is not "GET" (meaning, it's one of the others, PUT/POST/...) you will actually use it like if it is a GET.
+
+What it means is that the method of the request (GET/PUT/...), how to provide arguments, parameters, message body, etc, is fully managed within pyswagger.
+
+So all you need is an operation object, filled with the parameters you might want and do the request.
+
+```python
+# POST request on /universe/ids/
+post_operation = app.op['post_universe_ids'](names=['Althalus Stenory'])
+
+# do the request
+response = client.request(post_operation)
+
+print response.data
+# displays: {u'characters': [{u'id': 961633431, u'name': u'Althalus Stenory'}]}
+```

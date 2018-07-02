@@ -8,7 +8,7 @@ class APIException(Exception):
     def __init__(self, url, code, **kwargs):
         self.url = url
         self.status_code = code
-        self.response = kwargs.pop('json_response', '{}')
+        self.response = kwargs.pop('response', '{}')
         self.request_param = kwargs.pop('request_param', {})
         self.response_header = kwargs.pop('response_header', {})
         super(APIException, self).__init__(str(self))

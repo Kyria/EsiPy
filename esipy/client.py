@@ -144,7 +144,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 req_and_resp[0].url,
                 res.status,
-                json_response=res.raw,
+                response=res.raw,
                 request_param=req_and_resp[0].query,
                 response_header=res.header
             )
@@ -237,7 +237,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 request.url,
                 res.status_code,
-                json_response=res.content,
+                response=res.content,
                 request_param=request.query,
                 response_header=res.headers
             )
@@ -252,7 +252,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 request.url,
                 res.status_code,
-                json_response=response.raw,
+                response=response.raw,
                 request_param=request.query,
                 response_header=response.header
             )
@@ -297,7 +297,7 @@ class EsiClient(BaseClient):
             raise APIException(
                 request.url,
                 res.status_code,
-                json_response='',
+                response='',
                 request_param=request.query,
                 response_header=response.header
             )

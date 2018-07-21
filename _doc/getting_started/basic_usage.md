@@ -27,12 +27,15 @@ esi_app = EsiApp()
 app = esi_app.get_latest_swagger
 
 # Using App, both "app" are the same at the end
+# DO NOT USE "App", since there's no cache etc. Unless you plan to do it yourself!
 from esipy import App
 
 # App.create(url, strict=True)
 # with url = the swagger spec URL, leave strict to default
 app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
 ```
+
+**This process can be slow (easily ~40sec per version you get). If you use `EsiApp` this will be only once per version / per process you start, or if you use a persistent cache, only once per version**
 
 <div class="alert alert-dismissible alert-info">
     For more details about EsiApp, please see <a href="/EsiPy/getting_started/esiapp/">this page</a>.

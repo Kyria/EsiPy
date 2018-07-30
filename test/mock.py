@@ -62,14 +62,16 @@ def oauth_token(url, request):
     path=r"^/oauth/revoke$"
 )
 def oauth_revoke(url, request):
-    if ('token_type_hint=refresh_token&token=refresh_token' in request.body or
-       'token_type_hint=access_token&token=access_token' in request.body):
+    if (('token_type_hint=refresh_token' in request.body
+        and 'token=refresh_token' in request.body) or
+       ('token_type_hint=access_token' in request.body and
+       'token=access_token' in request.body)):
         return httmock.response(
             status_code=200,
             content=''
         )
     else:
-        raise Exception('Revoke message not properly set')
+        raise Exception('Revoke message not properly set: %s' % request.body)
 
 
 @httmock.urlmatch(

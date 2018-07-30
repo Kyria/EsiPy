@@ -35,10 +35,10 @@ Parameter | Type | Description
 redirect_uri | String | The URI you want the user redirected after he logs in with EVE SSO
 client_id | String | You client ID from developers.eveonline.com
 secret_key | String | You secret key from developers.eveonline.com
-app | App | [Default: None] The pyswagger app object you create with `App.create()`. 
+app | App | [Default: None] The pyswagger app object you create with `App.create()`.
 sso_url | String | [Default: https://login.eveonline.com] The default SSO URL used to generated `oauth/token` and `oauth/authorize` URLs when no `app` is provided
 esi_url | String | [Default: https://esi.tech.ccp.is] The default ESI URL used to generated `/verify/` endpoint URL
-security_name | String | [Default: evesso] The security name in the ESI Swagger Spec. Leave it default 
+security_name | String | [Default: evesso] The security name in the ESI Swagger Spec. Leave it default
 
 __If `app` and `sso_url` are provided, priority is given to the `app` parameter__
 
@@ -46,7 +46,7 @@ __If `app` and `sso_url` are provided, priority is given to the `app` parameter_
 ```python
 from esipy import EsiSecurity
 
-# creating the security object using the app 
+# creating the security object using the app
 security = EsiSecurity(
     app=app,
     redirect_uri='https://callback.com/you/set/on/developers/eveonline',
@@ -54,7 +54,7 @@ security = EsiSecurity(
     secret_key='the_secret_key',
 )
 
-# creating the security object without app, using default TQ sso URL 
+# creating the security object without app, using default TQ sso URL
 security = EsiSecurity(
     redirect_uri='https://callback.com/you/set/on/developers/eveonline',
     client_id='you client id',
@@ -69,7 +69,7 @@ client = EsiClient(security=security)
 
 &nbsp;
 
-## EVE SSO Authentification
+## EVE SSO - Authentification
 
 To authenticate yourself to the EVE SSO, you'll need to follow the auth flow from [Eve Third Party Documentation](http://eveonline-third-party-documentation.readthedocs.io/en/latest/sso/authentication.html).
 
@@ -82,7 +82,7 @@ We'll see here `EsiSecurity` methods that allow you to follow this auth flow.
 
 #### Redirecting the user to EVE SSO Login
 
-First, you'll need to make your user go the SSO Login from EVE Online. 
+First, you'll need to make your user go the SSO Login from EVE Online.
 
 As the login URL have to have some mandatory informations in it, you can use the `EsiSecurity.get_auth_uri()` method:
 
@@ -101,7 +101,7 @@ Once your user logged in, he will be redirected to your callback URL, with a `co
 With that code, you can tell the security object to get the token.
 
 ```python
-# this returns 
+# this returns
 tokens = esi_security.auth(code_you_get_from_user_login)
 
 # tokens is actually a json objects with these values:
@@ -135,3 +135,25 @@ esi_security.verify()
 }
 ```
 
+## EVE SSO - Revoking tokens
+
+In case you want or need to revoke tokens, you can do it by simply calling the `EsiSecurity.revoke()` method.
+Make sure you first updated your security object with the token, else you'll get an error!
+
+```python
+
+# This doesn't have to be done if you just logged in with "auth()" or "refresh()"
+# here for the example we only set "refresh_token", but it'd work with only "access_token"
+security.update_token({
+    'access_token': ''
+    'expires_in': -1,  # seconds until expiry, so we force refresh anyway
+    'refresh_token': 'YOUR_SAVED_REFRESH_TOKEN'
+})
+
+# this doesn't return anything, as EVE SSO doesn't
+security.revoke()
+
+# and you are done.
+```
+
+If you call this `revoke()` multiple time without updating the tokens, you will get an Exception `AttributeError: No access/refresh token are defined.`, as they are removed from the security object at the end of the process.

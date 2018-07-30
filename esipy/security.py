@@ -85,6 +85,10 @@ class EsiSecurity(object):
                 parsed_uri.scheme,
                 parsed_uri.netloc
             )
+            self.oauth_revoke = '%s://%s/oauth/revoke' % (
+                parsed_uri.scheme,
+                parsed_uri.netloc
+            )
 
         # no app object is provided, so we use direct URLs
         else:
@@ -94,6 +98,7 @@ class EsiSecurity(object):
 
             self.oauth_authorize = '%s/oauth/authorize' % sso_url
             self.oauth_token = '%s/oauth/token' % sso_url
+            self.oauth_revoke = '%s/oauth/revoke' % sso_url
 
         # use ESI url for verify, since it's better for caching
         if esi_url is None or esi_url == "":
@@ -112,7 +117,7 @@ class EsiSecurity(object):
                 "Defining a 'User-Agent' header is a"
                 " good practice, and allows CCP to contact you if required."
                 " To do this, simply add the following when creating"
-                " the client: headers={'User-Agent':'something'}."
+                " the security object: headers={'User-Agent':'something'}."
             )
             LOGGER.warning(warning_message)
             warnings.warn(warning_message)
@@ -294,6 +299,35 @@ class EsiSecurity(object):
         json_res = res.json()
         self.update_token(json_res)
         return json_res
+
+    def revoke(self):
+        """ Revoke the current tokens then empty all stored tokens
+        This returns nothing since the endpoint return HTTP/200
+        whatever the result is... """
+        if not self.refresh_token and not self.access_token:
+            raise AttributeError('No access/refresh token are defined.')
+
+        if self.refresh_token:
+            data = {
+                'token_type_hint': 'refresh_token',
+                'token': self.refresh_token,
+            }
+        else:
+            data = {
+                'token_type_hint': 'access_token',
+                'token': self.access_token,
+            }
+
+        request_data = {
+            'headers': self.__get_token_auth_header(),
+            'data': data,
+            'url': self.oauth_revoke,
+        }
+
+        self._session.post(**request_data)
+        self.access_token = None
+        self.refresh_token = None
+        self.token_expiry = None
 
     def verify(self):
         """ Make a get call to the oauth/verify endpoint to get the user data

@@ -58,6 +58,22 @@ def oauth_token(url, request):
 
 @httmock.urlmatch(
     scheme="https",
+    netloc=r"login\.eveonline\.com$",
+    path=r"^/oauth/revoke$"
+)
+def oauth_revoke(url, request):
+    if ('token_type_hint=refresh_token&token=refresh_token' in request.body or
+       'token_type_hint=access_token&token=access_token' in request.body):
+        return httmock.response(
+            status_code=200,
+            content=''
+        )
+    else:
+        raise Exception('Revoke message not properly set')
+
+
+@httmock.urlmatch(
+    scheme="https",
     netloc=r"esi\.evetech\.net$",
     path=r"^/verify/$"
 )

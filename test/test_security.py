@@ -2,10 +2,11 @@
 # pylint: skip-file
 from __future__ import absolute_import
 
+from .mock import non_json_error
 from .mock import oauth_token
 from .mock import oauth_verify
+from .mock import oauth_revoke
 from .mock import oauth_verify_fail
-from .mock import non_json_error
 
 from esipy import App
 from esipy import EsiSecurity
@@ -273,6 +274,17 @@ class TestEsiSecurity(unittest.TestCase):
             with self.assertRaises(APIException):
                 self.security.refresh_token = 'fail_test_token'
                 self.security.refresh()
+
+    def test_esisecurity_revoke(self):
+        with httmock.HTTMock(oauth_revoke):
+            self.security.refresh_token = 'refresh_token'
+            self.security.revoke()
+
+            self.security.access_token = 'access_token'
+            self.security.revoke()
+
+            with self.assertRaises(AttributeError):
+                self.security.revoke()
 
     def test_esisecurity_verify(self):
         self.security.update_token({

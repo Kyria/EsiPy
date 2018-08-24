@@ -11,7 +11,7 @@ import warnings
 
 from requests import Session
 from requests.utils import quote
-from six.moves.urllib.parse import urlparse
+from jose import jwt
 
 from .events import AFTER_TOKEN_REFRESH
 from .exceptions import APIException
@@ -36,81 +36,38 @@ class EsiSecurity(object):
         :param redirect_uri: the uri to redirect the user after login into SSO
         :param client_id: the OAuth2 client ID
         :param secret_key: the OAuth2 secret key
-        :param sso_url: the default sso URL used when no "app" is provided
-        :param esi_url: the default esi URL used for verify endpoint
-        :param app: (optionnal) the pyswagger app object
         :param token_identifier: (optional) identifies the token for the user
             the value will then be passed as argument to any callback
         :param security_name: (optionnal) the name of the object holding the
             informations in the securityDefinitions,
             used to check authed endpoint
-        :param esi_datasource: (optional) The ESI datasource used to validate
-            SSO authentication. Defaults to tranquility
         :param headers: (optional) additional headers to add to the requests
             done here
         :param signal_token_updated: (optional) allow to define a specific
             signal to use, instead of using the global AFTER_TOKEN_REFRESH
+        :param jwks_key: (optional)
         """
-        app = kwargs.pop('app', None)
-        sso_url = kwargs.pop('sso_url', "https://login.eveonline.com")
-        esi_url = kwargs.pop('esi_url', "https://esi.evetech.net")
-        esi_datasource = kwargs.pop('esi_datasource', "tranquility")
+        sso_base_url = kwargs.pop(
+            'sso_base_url',
+            'https://login.eveonline.com'
+        )
+        sso_oauth_desc = kwargs.pop(
+            'sso_oauth_desc',
+            '.well-known/oauth-authorization-server'
+        )
+
+        if (sso_base_url is None or sso_base_url == "" or
+                sso_oauth_desc is None or sso_oauth_desc == ""):
+            raise AttributeError("sso_base_url and sso_oauth_desc "
+                                 "cannot be None or empty")
 
         self.security_name = kwargs.pop('security_name', 'evesso')
         self.redirect_uri = redirect_uri
         self.client_id = client_id
         self.secret_key = secret_key
-        self.token_identifier = kwargs.pop('token_identifier', None)
 
-        # we provide app object, so we don't use sso_url
-        if app is not None:
-            # check if the security_name exists in the securityDefinition
-            security = app.root.securityDefinitions.get(
-                self.security_name,
-                None
-            )
-            if security is None:
-                raise NameError(
-                    "%s is not defined in the securityDefinitions" %
-                    self.security_name
-                )
-
-            self.oauth_authorize = security.authorizationUrl
-
-            # some URL we still need to "manually" define... sadly
-            # we parse the authUrl so we don't care if it's TQ or SISI.
-            # https://github.com/ccpgames/esi-issues/issues/92
-            parsed_uri = urlparse(security.authorizationUrl)
-            self.oauth_token = '%s://%s/oauth/token' % (
-                parsed_uri.scheme,
-                parsed_uri.netloc
-            )
-            self.oauth_revoke = '%s://%s/oauth/revoke' % (
-                parsed_uri.scheme,
-                parsed_uri.netloc
-            )
-
-        # no app object is provided, so we use direct URLs
-        else:
-            if sso_url is None or sso_url == "":
-                raise AttributeError("sso_url cannot be None or empty "
-                                     "without app parameter")
-
-            self.oauth_authorize = '%s/oauth/authorize' % sso_url
-            self.oauth_token = '%s/oauth/token' % sso_url
-            self.oauth_revoke = '%s/oauth/revoke' % sso_url
-
-        # use ESI url for verify, since it's better for caching
-        if esi_url is None or esi_url == "":
-            raise AttributeError("esi_url cannot be None or empty")
-        self.oauth_verify = '%s/verify/?datasource=%s' % (
-            esi_url,
-            esi_datasource
-        )
-
-        # session request stuff
+        # session requests stuff
         self._session = Session()
-
         headers = kwargs.pop('headers', {})
         if 'User-Agent' not in headers:
             warning_message = (
@@ -132,7 +89,19 @@ class EsiSecurity(object):
         self._session.headers.update({"Accept": "application/json"})
         self._session.headers.update(headers)
 
+        # get from EVE SSO all endpoints, raise error if not 200 / json fail
+        res = self._session.get("%s/%s" % (sso_base_url, sso_oauth_desc))
+        res.raise_for_status()
+        sso_endpoints = res.json()
+
+        self.oauth_issuer = sso_endpoints['issuer']
+        self.oauth_authorize = sso_endpoints['authorization_endpoint']
+        self.oauth_token = sso_endpoints['token_endpoint']
+        self.oauth_revoke = sso_endpoints['revocation_endpoint']
+        self.__get_jwks_key(sso_endpoints['jwks_uri'], **kwargs)
+
         # token data
+        self.token_identifier = kwargs.pop('token_identifier', None)
         self.refresh_token = None
         self.access_token = None
         self.token_expiry = None
@@ -142,6 +111,31 @@ class EsiSecurity(object):
             'signal_token_updated',
             AFTER_TOKEN_REFRESH
         )
+
+    def __get_jwks_key(self, jwks_uri, **kwargs):
+        """Get from jwks_ui all the JWK keys required to decode JWT Token.
+
+        Parameters
+        ----------
+        jwks_uri : string
+            The URL where to gather JWKS key
+        kwargs : Dict
+            The constructor parameters
+
+
+        """
+        jwks_key = kwargs.pop('jwks_key', None)
+        if not jwks_key:
+            res = self._session.get(jwks_uri)
+            res.raise_for_status()
+            jwks_key = res.json()
+
+        if 'keys' in jwks_key:
+            self.jwks_key = {}
+            for jwks in jwks_key['keys']:
+                self.jwks_key[jwks['kid']] = jwks
+        else:
+            self.jwks_key = jwks_key
 
     def __get_token_auth_header(self):
         """ Return the Basic Authorization header required to get the tokens
@@ -176,15 +170,17 @@ class EsiSecurity(object):
 
         return request_params
 
-    def get_auth_uri(self, scopes=None, state=None, implicit=False):
+    def get_auth_uri(self, state, scopes=None, implicit=False):
         """ Constructs the full auth uri and returns it.
 
         :param scopes: The list of scope
         :param state: The state to pass through the auth process
         :return: the authorizationUrl with the correct parameters.
         """
-        scopes_list = [] if not scopes else scopes
+        if state is None or state == '':
+            raise AttributeError('"state" must be non empty, non None string')
 
+        scopes_list = [] if not scopes else scopes
         response_type = 'code' if not implicit else 'token'
 
         return '%s?response_type=%s&redirect_uri=%s&client_id=%s%s%s' % (
@@ -193,7 +189,7 @@ class EsiSecurity(object):
             quote(self.redirect_uri, safe=''),
             self.client_id,
             '&scope=%s' % '+'.join(scopes_list) if scopes else '',
-            '&state=%s' % state if state else ''
+            '&state=%s' % state
         )
 
     def get_access_token_params(self, code):
@@ -210,7 +206,7 @@ class EsiSecurity(object):
             }
         )
 
-    def get_refresh_token_params(self):
+    def get_refresh_token_params(self, scope_list=None):
         """ Return the param object for the post() call to get the access_token
         from the refresh_token
 
@@ -220,12 +216,19 @@ class EsiSecurity(object):
         if self.refresh_token is None:
             raise AttributeError('No refresh token is defined.')
 
-        return self.__make_token_request_parameters(
-            {
-                'grant_type': 'refresh_token',
-                'refresh_token': self.refresh_token,
-            }
-        )
+        params = {
+            'grant_type': 'refresh_token',
+            'refresh_token': self.refresh_token,
+        }
+
+        if scope_list:
+            if isinstance(scope_list, list):
+                scopes = '+'.join(scope_list)
+            else:
+                raise AttributeError('scope_list must be a list of scope.')
+            params.update({'scope': scopes})
+
+        return self.__make_token_request_parameters(params)
 
     def update_token(self, response_json, **kwargs):
         """ Update access_token, refresh_token and token_expiry from the
@@ -263,10 +266,10 @@ class EsiSecurity(object):
             return True
         return int(time.time()) >= (self.token_expiry - offset)
 
-    def refresh(self):
+    def refresh(self, scope_list=None):
         """ Update the auth data (tokens) using the refresh token in auth.
         """
-        request_data = self.get_refresh_token_params()
+        request_data = self.get_refresh_token_params(scope_list)
         res = self._session.post(**request_data)
         if res.status_code != 200:
             raise APIException(
@@ -329,24 +332,32 @@ class EsiSecurity(object):
         self.refresh_token = None
         self.token_expiry = None
 
-    def verify(self):
-        """ Make a get call to the oauth/verify endpoint to get the user data
+    def verify(self, kid='JWT-Signature-Key'):
+        """Decode and verify the token and return the decoded informations
 
-        :return: the json with the data.
+        Parameters
+        ----------
+        kid : string
+            The JWKS key id to identify the key to decode the token.
+            Default is 'JWT-Signature-Key'. Only change if CCP changes it.
+
+        Returns
+        -------
+        Dict
+            The JWT informations from the token, such as character name etc.
+
+        Raises
+        ------
+            jose.exceptions.JWTError: If the signature is invalid in any way.
+            jose.exceptions.ExpiredSignatureError: If the signature has expired
+            jose.exceptions.JWTClaimsError: If any claim is invalid in any way.
         """
-        res = self._session.get(
-            self.oauth_verify,
-            headers=self.__get_oauth_header()
+
+        return jwt.decode(
+            self.access_token,
+            self.jwks_key[kid],
+            issuer=self.oauth_issuer
         )
-        if res.status_code != 200:
-            raise APIException(
-                self.oauth_verify,
-                res.status_code,
-                response=res.content,
-                request_param=self.__get_oauth_header(),
-                response_header=res.headers
-            )
-        return res.json()
 
     def __call__(self, request):
         """ Check if the request need security header and apply them.

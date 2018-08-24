@@ -9,6 +9,7 @@ install_requirements = [
     "pyswagger >= 0.8.39",
     "six",
     "pytz",
+    "python-jose >= 3.0 , < 4"
 ]
 
 # test requirements
@@ -24,7 +25,7 @@ test_requirements = [
 ] + install_requirements
 
 with io.open('README.rst', encoding='UTF-8') as reader:
-    readme = reader.read()
+    README = reader.read()
 
 setup(
     name='EsiPy',
@@ -35,7 +36,7 @@ setup(
     author='Kyria',
     author_email='anakhon@gmail.com',
     description='Swagger Client for the ESI API for EVE Online',
-    long_description=readme,
+    long_description=README,
     install_requires=install_requirements,
     extras_require={
         ':python_version == "2.7"': ['futures']

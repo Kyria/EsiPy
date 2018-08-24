@@ -13,3 +13,4 @@ six
 redis
 pylint
 pytz
+python-jose>=3.0,<4

@@ -57,7 +57,7 @@ if res.status == 200:
 
     # now we know how many pages we want, let's prepare all the requests
     operations = []
-    for page in range(1, number_of_page):
+    for page in range(1, number_of_page+1):
         operations.append(
             app.op['get_markets_region_id_orders'](
                 region_id=10000002,

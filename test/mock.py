@@ -27,7 +27,7 @@ def make_expired_time_str(seconds=86400):
 @httmock.urlmatch(
     scheme="https",
     netloc=r"login\.eveonline\.com$",
-    path=r"^/oauth/token$"
+    path=r"^/v2/oauth/token$"
 )
 def oauth_token(url, request):
     """ Mock endpoint to get token (auth / refresh) """
@@ -59,7 +59,7 @@ def oauth_token(url, request):
 @httmock.urlmatch(
     scheme="https",
     netloc=r"login\.eveonline\.com$",
-    path=r"^/oauth/revoke$"
+    path=r"^/v2/oauth/revoke$"
 )
 def oauth_revoke(url, request):
     if (('token_type_hint=refresh_token' in request.body
@@ -76,30 +76,30 @@ def oauth_revoke(url, request):
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.evetech\.net$",
-    path=r"^/verify/$"
+    netloc=r"login\.eveonline\.com$",
+    path=r"^/\.well-known/oauth-authorization-server$"
 )
-def oauth_verify(url, request):
-    return httmock.response(
-        status_code=200,
-        content={
-            'CharacterID': 123456789,
-            'CharacterName': 'EsiPy Tester',
-            'CharacterOwnerHash': 'YetAnotherHash'
-        }
-    )
+def oauth_authorization_server(url, request):
+    """ return the content of the file of the same name """
+    with open('test/resources/oauth-authorization-server.json', 'r') as fd:
+        return httmock.response(
+            status_code=200,
+            content=fd.read()
+        )
 
 
 @httmock.urlmatch(
     scheme="https",
-    netloc=r"esi\.evetech\.net$",
-    path=r"^/verify/$"
+    netloc=r"login\.eveonline\.com$",
+    path=r"^/oauth/jwks$"
 )
-def oauth_verify_fail(url, request):
-    return httmock.response(
-        status_code=400,
-        content={'message': 'Failed successfuly'}
-    )
+def oauth_jwks(url, request):
+    """ return the content of the file of the same name """
+    with open('test/resources/jwks.json', 'r') as fd:
+        return httmock.response(
+            status_code=200,
+            content=fd.read()
+        )
 
 
 @httmock.urlmatch(
@@ -419,7 +419,8 @@ def non_json_error(url, request):
 
 _all_auth_mock_ = [
     oauth_token,
-    oauth_verify,
+    oauth_authorization_server,
+    oauth_jwks,
     auth_character_location,
 ]
 

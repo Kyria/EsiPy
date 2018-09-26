@@ -31,6 +31,7 @@ import six
 import time
 import unittest
 import warnings
+import json
 
 import logging
 # set pyswagger logger to error, as it displays too much thing for test needs
@@ -48,6 +49,9 @@ class TestEsiPy(unittest.TestCase):
     BASIC_TOKEN = six.u('Zm9vOmJhcg==')
     SECURITY_NAME = 'evesso'
 
+    RSC_SSO_ENDPOINTS = "test/resources/oauth-authorization-server.json"
+    RSC_JWKS = "test/resources/jwks.json"
+
     @mock.patch('six.moves.urllib.request.urlopen')
     def setUp(self, urlopen_mock):
         # I hate those mock... thx urlopen instead of requests...
@@ -58,12 +62,16 @@ class TestEsiPy(unittest.TestCase):
             'https://esi.evetech.net/latest/swagger.json'
         )
 
-        self.security = EsiSecurity(
-            app=self.app,
-            redirect_uri=TestEsiPy.CALLBACK_URI,
-            client_id=TestEsiPy.CLIENT_ID,
-            secret_key=TestEsiPy.SECRET_KEY,
-        )
+        with open(TestEsiPy.RSC_SSO_ENDPOINTS, 'r') as sso_endpoints:
+            with open(TestEsiPy.RSC_JWKS, "r") as jwks:
+                self.security = EsiSecurity(
+                    app=self.app,
+                    redirect_uri=TestEsiPy.CALLBACK_URI,
+                    client_id=TestEsiPy.CLIENT_ID,
+                    secret_key=TestEsiPy.SECRET_KEY,
+                    sso_endpoints=json.load(sso_endpoints),
+                    jwks_key=json.load(jwks)
+                )
 
         self.cache = DictCache()
         self.client = EsiClient(self.security, cache=self.cache)

@@ -45,21 +45,21 @@ class EsiSecurity(object):
             done here
         :param signal_token_updated: (optional) allow to define a specific
             signal to use, instead of using the global AFTER_TOKEN_REFRESH
+        :param sso_endpoints: (optional)
         :param jwks_key: (optional)
         """
-        sso_base_url = kwargs.pop(
-            'sso_base_url',
-            'https://login.eveonline.com'
+        sso_endpoints_url = kwargs.pop(
+            'sso_endpoints_url',
+            ('https://login.eveonline.com/'
+             '.well-known/oauth-authorization-server')
         )
         sso_oauth_desc = kwargs.pop(
             'sso_oauth_desc',
             '.well-known/oauth-authorization-server'
         )
 
-        if (sso_base_url is None or sso_base_url == "" or
-                sso_oauth_desc is None or sso_oauth_desc == ""):
-            raise AttributeError("sso_base_url and sso_oauth_desc "
-                                 "cannot be None or empty")
+        if sso_endpoints_url is None or sso_endpoints_url == "":
+            raise AttributeError("sso_endpoints_url cannot be None or empty")
 
         self.security_name = kwargs.pop('security_name', 'evesso')
         self.redirect_uri = redirect_uri
@@ -122,7 +122,6 @@ class EsiSecurity(object):
         kwargs : Dict
             The constructor parameters
 
-
         """
         jwks_key = kwargs.pop('jwks_key', None)
         if not jwks_key:
@@ -130,10 +129,12 @@ class EsiSecurity(object):
             res.raise_for_status()
             jwks_key = res.json()
 
+        self.jwks_key_set = None
+        self.jwks_key = None
         if 'keys' in jwks_key:
-            self.jwks_key = {}
+            self.jwks_key_set = {}
             for jwks in jwks_key['keys']:
-                self.jwks_key[jwks['kid']] = jwks
+                self.jwks_key_set[jwks['kid']] = jwks
         else:
             self.jwks_key = jwks_key
 
@@ -332,7 +333,7 @@ class EsiSecurity(object):
         self.refresh_token = None
         self.token_expiry = None
 
-    def verify(self, kid='JWT-Signature-Key'):
+    def verify(self, kid='JWT-Signature-Key', options=None):
         """Decode and verify the token and return the decoded informations
 
         Parameters
@@ -340,6 +341,9 @@ class EsiSecurity(object):
         kid : string
             The JWKS key id to identify the key to decode the token.
             Default is 'JWT-Signature-Key'. Only change if CCP changes it.
+        options : Dict
+            The dictionary of options for skipping validation steps. See
+            https://python-jose.readthedocs.io/en/latest/jwt/api.html#jose.jwt.decode
 
         Returns
         -------
@@ -352,11 +356,21 @@ class EsiSecurity(object):
             jose.exceptions.ExpiredSignatureError: If the signature has expired
             jose.exceptions.JWTClaimsError: If any claim is invalid in any way.
         """
+        if self.access_token is None or self.access_token == "":
+            raise AttributeError('No access token are available at this time')
+        if options is None:
+            options = {}
+
+        if self.jwks_key_set is None:
+            key = self.jwks_key
+        else:
+            key = self.jwks_key_set[kid]
 
         return jwt.decode(
             self.access_token,
-            self.jwks_key[kid],
-            issuer=self.oauth_issuer
+            key,
+            issuer=self.oauth_issuer,
+            options=options
         )
 
     def __call__(self, request):

@@ -22,6 +22,7 @@ test_requirements = [
     "future",
     "python-memcached",
     "redis",
+    "diskcache",
 ] + install_requirements
 
 with io.open('README.rst', encoding='UTF-8') as reader:

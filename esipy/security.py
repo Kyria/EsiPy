@@ -15,6 +15,7 @@ from jose import jwt
 
 from .events import AFTER_TOKEN_REFRESH
 from .exceptions import APIException
+from .utils import code_challenge
 
 LOGGER = logging.getLogger(__name__)
 
@@ -29,7 +30,8 @@ class EsiSecurity(object):
             self,
             redirect_uri,
             client_id,
-            secret_key,
+            secret_key=None,
+            code_verifier=None,
             **kwargs):
         """ Init the ESI Security Object
 
@@ -53,18 +55,20 @@ class EsiSecurity(object):
             ('https://login.eveonline.com/'
              '.well-known/oauth-authorization-server')
         )
-        sso_oauth_desc = kwargs.pop(
-            'sso_oauth_desc',
-            '.well-known/oauth-authorization-server'
-        )
 
         if sso_endpoints_url is None or sso_endpoints_url == "":
             raise AttributeError("sso_endpoints_url cannot be None or empty")
+
+        if secret_key is None and code_verifier is None:
+            raise AttributeError(
+                "Either secret_key or code_verifier must be filled"
+            )
 
         self.security_name = kwargs.pop('security_name', 'evesso')
         self.redirect_uri = redirect_uri
         self.client_id = client_id
         self.secret_key = secret_key
+        self.code_verifier = code_verifier
 
         # session requests stuff
         self._session = Session()
@@ -89,10 +93,13 @@ class EsiSecurity(object):
         self._session.headers.update({"Accept": "application/json"})
         self._session.headers.update(headers)
 
-        # get from EVE SSO all endpoints, raise error if not 200 / json fail
-        res = self._session.get("%s/%s" % (sso_base_url, sso_oauth_desc))
-        res.raise_for_status()
-        sso_endpoints = res.json()
+        # get sso endpoints from given dict, else get it from EVE SSO
+        # raise error if not 200 / json fail
+        sso_endpoints = kwargs.pop('sso_endpoints', None)
+        if sso_endpoints is None or not isinstance(sso_endpoints, dict):
+            res = self._session.get(sso_endpoints_url)
+            res.raise_for_status()
+            sso_endpoints = res.json()
 
         self.oauth_issuer = sso_endpoints['issuer']
         self.oauth_authorize = sso_endpoints['authorization_endpoint']
@@ -121,7 +128,6 @@ class EsiSecurity(object):
             The URL where to gather JWKS key
         kwargs : Dict
             The constructor parameters
-
         """
         jwks_key = kwargs.pop('jwks_key', None)
         if not jwks_key:
@@ -138,11 +144,19 @@ class EsiSecurity(object):
         else:
             self.jwks_key = jwks_key
 
-    def __get_token_auth_header(self):
-        """ Return the Basic Authorization header required to get the tokens
+    def __get_basic_auth_header(self):
+        """Return the Basic Authorization header for oauth if secret_key exists
 
-        :return: a dict with the headers
+        Returns
+        -------
+        type
+            A dictionary that contains the Basic Authorization key/value,
+            or {} if secret_key is None
+
         """
+        if self.secret_key is None:
+            return {}
+
         # encode/decode for py2/py3 compatibility
         auth_b64 = "%s:%s" % (self.client_id, self.secret_key)
         auth_b64 = base64.b64encode(auth_b64.encode('latin-1'))
@@ -151,20 +165,34 @@ class EsiSecurity(object):
         return {'Authorization': 'Basic %s' % auth_b64}
 
     def __get_oauth_header(self):
-        """ Return the Bearer Authorization header required in oauth calls
+        """Return the Bearer Authorization header for oauth
 
-        :return: a dict with the authorization header
+        Returns
+        -------
+        type
+            A dictionary that contains the Bearer Authorization key/value.
+
         """
         return {'Authorization': 'Bearer %s' % self.access_token}
 
-    def __make_token_request_parameters(self, params):
-        """ Return the token uri from the securityDefinition
+    def __prepare_token_request(self, params):
+        """Generate the request parameters to execute the POST call to
+        get or refresh a token.
 
-        :param params: the data given to the request
-        :return: the oauth/token uri
+        Parameters
+        ----------
+        params : dictionary
+            Contains the parameters that will be given as data to the oauth
+            endpoint
+
+        Returns
+        -------
+        type
+            The filled request parameters with all required informations
+
         """
         request_params = {
-            'headers': self.__get_token_auth_header(),
+            'headers': self.__get_basic_auth_header(),
             'data': params,
             'url': self.oauth_token,
         }
@@ -184,7 +212,8 @@ class EsiSecurity(object):
         scopes_list = [] if not scopes else scopes
         response_type = 'code' if not implicit else 'token'
 
-        return '%s?response_type=%s&redirect_uri=%s&client_id=%s%s%s' % (
+        # generate the auth URI
+        auth_uri = '%s?response_type=%s&redirect_uri=%s&client_id=%s%s%s' % (
             self.oauth_authorize,
             response_type,
             quote(self.redirect_uri, safe=''),
@@ -193,6 +222,13 @@ class EsiSecurity(object):
             '&state=%s' % state
         )
 
+        # add code challenge if we have one
+        if self.secret_key is None and not implicit:
+            auth_uri += '&code_challenge_method=S256&code_challenge=%s' % (
+                code_challenge(self.code_verifier)
+            )
+        return auth_uri
+
     def get_access_token_params(self, code):
         """ Return the param object for the post() call to get the access_token
         from the auth process (using the code)
@@ -200,12 +236,16 @@ class EsiSecurity(object):
         :param code: the code get from the authentification process
         :return: a dict with the url, params and header
         """
-        return self.__make_token_request_parameters(
-            {
-                'grant_type': 'authorization_code',
-                'code': code,
-            }
-        )
+        params = {
+            'grant_type': 'authorization_code',
+            'code': code,
+        }
+
+        if self.secret_key is None:
+            params['code_verifier'] = self.code_verifier
+            params['client_id'] = self.client_id
+
+        return self.__prepare_token_request(params)
 
     def get_refresh_token_params(self, scope_list=None):
         """ Return the param object for the post() call to get the access_token
@@ -227,9 +267,13 @@ class EsiSecurity(object):
                 scopes = '+'.join(scope_list)
             else:
                 raise AttributeError('scope_list must be a list of scope.')
-            params.update({'scope': scopes})
+            params['scope'] = scopes
 
-        return self.__make_token_request_parameters(params)
+        if self.secret_key is None:
+            params['code_verifier'] = self.code_verifier
+            params['client_id'] = self.client_id
+
+        return self.__prepare_token_request(params)
 
     def update_token(self, response_json, **kwargs):
         """ Update access_token, refresh_token and token_expiry from the
@@ -291,6 +335,7 @@ class EsiSecurity(object):
         :param code: the code you get from the auth process
         """
         request_data = self.get_access_token_params(code)
+
         res = self._session.post(**request_data)
         if res.status_code != 200:
             raise APIException(
@@ -300,6 +345,7 @@ class EsiSecurity(object):
                 request_param=request_data,
                 response_header=res.headers
             )
+
         json_res = res.json()
         self.update_token(json_res)
         return json_res
@@ -322,8 +368,12 @@ class EsiSecurity(object):
                 'token': self.access_token,
             }
 
+        if self.secret_key is None:
+            data['code_verifier'] = self.code_verifier
+            data['client_id'] = self.client_id
+
         request_data = {
-            'headers': self.__get_token_auth_header(),
+            'headers': self.__get_basic_auth_header(),
             'data': data,
             'url': self.oauth_revoke,
         }

@@ -15,7 +15,7 @@ from jose import jwt
 
 from .events import AFTER_TOKEN_REFRESH
 from .exceptions import APIException
-from .utils import code_challenge
+from .utils import generate_code_challenge
 
 LOGGER = logging.getLogger(__name__)
 
@@ -159,8 +159,8 @@ class EsiSecurity(object):
 
         # encode/decode for py2/py3 compatibility
         auth_b64 = "%s:%s" % (self.client_id, self.secret_key)
-        auth_b64 = base64.b64encode(auth_b64.encode('latin-1'))
-        auth_b64 = auth_b64.decode('latin-1')
+        auth_b64 = base64.b64encode(auth_b64.encode('utf-8'))
+        auth_b64 = auth_b64.decode('utf-8')
 
         return {'Authorization': 'Basic %s' % auth_b64}
 
@@ -200,11 +200,22 @@ class EsiSecurity(object):
         return request_params
 
     def get_auth_uri(self, state, scopes=None, implicit=False):
-        """ Constructs the full auth uri and returns it.
+        """Constructs the full auth uri and returns it..
 
-        :param scopes: The list of scope
-        :param state: The state to pass through the auth process
-        :return: the authorizationUrl with the correct parameters.
+        Parameters
+        ----------
+        state : string
+            The state to pass through the auth process
+        scopes : list (optional)
+            The list of scope to have
+        implicit : Boolean (optional)
+            Activate or not the implicit flow
+
+        Returns
+        -------
+        String
+            The generated URL for the user to log into EVE SSO
+
         """
         if state is None or state == '':
             raise AttributeError('"state" must be non empty, non None string')
@@ -225,7 +236,7 @@ class EsiSecurity(object):
         # add code challenge if we have one
         if self.secret_key is None and not implicit:
             auth_uri += '&code_challenge_method=S256&code_challenge=%s' % (
-                code_challenge(self.code_verifier)
+                generate_code_challenge(self.code_verifier)
             )
         return auth_uri
 
@@ -351,9 +362,12 @@ class EsiSecurity(object):
         return json_res
 
     def revoke(self):
-        """ Revoke the current tokens then empty all stored tokens
+        """Revoke the current tokens then empty all stored tokens
         This returns nothing since the endpoint return HTTP/200
-        whatever the result is... """
+        whatever the result is...
+
+        Currently not working with JWT, left here for compatibility.
+        """
         if not self.refresh_token and not self.access_token:
             raise AttributeError('No access/refresh token are defined.')
 
@@ -424,11 +438,19 @@ class EsiSecurity(object):
         )
 
     def __call__(self, request):
-        """ Check if the request need security header and apply them.
+        """Check if the request need security header and apply them.
         Required for pyswagger.core.BaseClient.request().
 
-        :param request: the pyswagger request object to check
-        :return: the updated request.
+        Parameters
+        ----------
+        request : pyswagger.io.Request
+            the pyswagger request object to check, generated from app operation
+
+        Returns
+        -------
+        pyswagger.io.Request
+            The pyswagger request with auth headers added if required.
+
         """
         if not request._security:
             return request

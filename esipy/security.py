@@ -48,6 +48,7 @@ class EsiSecurity(object):
         :param signal_token_updated: (optional) allow to define a specific
             signal to use, instead of using the global AFTER_TOKEN_REFRESH
         :param sso_endpoints: (optional)
+        :param sso_endpoints_url: (optional)
         :param jwks_key: (optional)
         """
         sso_endpoints_url = kwargs.pop(
@@ -164,18 +165,7 @@ class EsiSecurity(object):
 
         return {'Authorization': 'Basic %s' % auth_b64}
 
-    def __get_oauth_header(self):
-        """Return the Bearer Authorization header for oauth
-
-        Returns
-        -------
-        type
-            A dictionary that contains the Bearer Authorization key/value.
-
-        """
-        return {'Authorization': 'Bearer %s' % self.access_token}
-
-    def __prepare_token_request(self, params):
+    def __prepare_token_request(self, params, url=None):
         """Generate the request parameters to execute the POST call to
         get or refresh a token.
 
@@ -191,10 +181,14 @@ class EsiSecurity(object):
             The filled request parameters with all required informations
 
         """
+        if self.secret_key is None:
+            params['code_verifier'] = self.code_verifier
+            params['client_id'] = self.client_id
+            
         request_params = {
             'headers': self.__get_basic_auth_header(),
             'data': params,
-            'url': self.oauth_token,
+            'url': self.oauth_token if url is None else url,
         }
 
         return request_params
@@ -252,10 +246,6 @@ class EsiSecurity(object):
             'code': code,
         }
 
-        if self.secret_key is None:
-            params['code_verifier'] = self.code_verifier
-            params['client_id'] = self.client_id
-
         return self.__prepare_token_request(params)
 
     def get_refresh_token_params(self, scope_list=None):
@@ -279,10 +269,6 @@ class EsiSecurity(object):
             else:
                 raise AttributeError('scope_list must be a list of scope.')
             params['scope'] = scopes
-
-        if self.secret_key is None:
-            params['code_verifier'] = self.code_verifier
-            params['client_id'] = self.client_id
 
         return self.__prepare_token_request(params)
 
@@ -382,15 +368,7 @@ class EsiSecurity(object):
                 'token': self.access_token,
             }
 
-        if self.secret_key is None:
-            data['code_verifier'] = self.code_verifier
-            data['client_id'] = self.client_id
-
-        request_data = {
-            'headers': self.__get_basic_auth_header(),
-            'data': data,
-            'url': self.oauth_revoke,
-        }
+        request_data = __prepare_token_request(data, self.oauth_revoke)
 
         self._session.post(**request_data)
         self.access_token = None
@@ -470,6 +448,8 @@ class EsiSecurity(object):
                 )
                 continue
             if self.access_token is not None:
-                request._p['header'].update(self.__get_oauth_header())
+                request._p['header'].update(
+                    {'Authorization': 'Bearer %s' % self.access_token}
+                )
 
         return request

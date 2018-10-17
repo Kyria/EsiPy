@@ -184,7 +184,7 @@ class EsiSecurity(object):
         if self.secret_key is None:
             params['code_verifier'] = self.code_verifier
             params['client_id'] = self.client_id
-            
+
         request_params = {
             'headers': self.__get_basic_auth_header(),
             'data': params,
@@ -368,7 +368,7 @@ class EsiSecurity(object):
                 'token': self.access_token,
             }
 
-        request_data = __prepare_token_request(data, self.oauth_revoke)
+        request_data = self.__prepare_token_request(data, self.oauth_revoke)
 
         self._session.post(**request_data)
         self.access_token = None

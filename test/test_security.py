@@ -395,8 +395,8 @@ class TestEsiSecurity(unittest.TestCase):
     def test_esisecurity_pkce(self):
         uri = self.security_pkce.get_auth_uri('test')
         self.assertIn(
-            uri,
-            'code_challenge=%s' % TestEsiSecurity.CODE_CHALLENGE
+            'code_challenge=%s' % TestEsiSecurity.CODE_CHALLENGE,
+            uri
         )
 
         params = self.security_pkce.get_access_token_params('test')
@@ -408,4 +408,4 @@ class TestEsiSecurity(unittest.TestCase):
             params['data']['client_id'],
             TestEsiSecurity.CLIENT_ID
         )
-        self.assertNotIn('Authorization', params['header'])
+        self.assertNotIn('Authorization', params['headers'])

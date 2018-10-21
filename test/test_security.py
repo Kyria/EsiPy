@@ -34,6 +34,8 @@ class TestEsiSecurity(unittest.TestCase):
     BASIC_TOKEN = six.u('Zm9vOmJhcg==')
     SECURITY_NAME = 'evesso'
     TOKEN_IDENTIFIER = 'ESIPY_TEST_TOKEN'
+    CODE_VERIFIER = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+    CODE_CHALLENGE = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"
 
     RSC_SSO_ENDPOINTS = "test/resources/oauth-authorization-server.json"
     RSC_JWKS = "test/resources/jwks.json"
@@ -50,6 +52,11 @@ class TestEsiSecurity(unittest.TestCase):
                 signal_token_updated=self.custom_refresh_token_signal,
                 token_identifier=TestEsiSecurity.TOKEN_IDENTIFIER
             )
+            self.security_pkce = EsiSecurity(
+                redirect_uri=TestEsiSecurity.CALLBACK_URI,
+                client_id=TestEsiSecurity.CLIENT_ID,
+                code_verifier=TestEsiSecurity.CODE_VERIFIER,
+            )
 
         with open(TestEsiSecurity.RSC_SSO_ENDPOINTS, 'r') as sso_endpoints:
             self.sso_endpoints = json.load(sso_endpoints)
@@ -62,6 +69,12 @@ class TestEsiSecurity(unittest.TestCase):
                     client_id=TestEsiSecurity.CLIENT_ID,
                     secret_key=TestEsiSecurity.SECRET_KEY,
                     sso_endpoints_url=""
+                )
+
+            with self.assertRaises(AttributeError):
+                EsiSecurity(
+                    redirect_uri=TestEsiSecurity.CALLBACK_URI,
+                    client_id=TestEsiSecurity.CLIENT_ID
                 )
 
             with open(TestEsiSecurity.RSC_JWKS, 'r') as jwks:
@@ -378,3 +391,21 @@ class TestEsiSecurity(unittest.TestCase):
                     exc.response,
                     six.b('<html><body>Some HTML Errors</body></html>')
                 )
+
+    def test_esisecurity_pkce(self):
+        uri = self.security_pkce.get_auth_uri('test')
+        self.assertIn(
+            uri,
+            'code_challenge=%s' % TestEsiSecurity.CODE_CHALLENGE
+        )
+
+        params = self.security_pkce.get_access_token_params('test')
+        self.assertEqual(
+            params['data']['code_verifier'],
+            TestEsiSecurity.CODE_VERIFIER
+        )
+        self.assertEqual(
+            params['data']['client_id'],
+            TestEsiSecurity.CLIENT_ID
+        )
+        self.assertNotIn('Authorization', params['header'])

@@ -28,33 +28,24 @@ The `EsiSecurity` object provides:
 * Headers autofilling when doing requests to add OAuth2 headers
 * Tokens management (get, refresh)
 
-`EsiSecurity.__init__()` takes the following parameters. Parameters with default values are optionnal.
+### ClientID / Secret Key
+
+`EsiSecurity.__init__()` takes at least the following parameters with clientID / Secret Key. 
 
 Parameter | Type | Description
 --- | --- | ---
 redirect_uri | String | The URI you want the user redirected after he logs in with EVE SSO
 client_id | String | You client ID from developers.eveonline.com
 secret_key | String | You secret key from developers.eveonline.com
-app | App | [Default: None] The pyswagger app object you create with `App.create()`.
-sso_url | String | [Default: https://login.eveonline.com] The default SSO URL used to generated `oauth/token` and `oauth/authorize` URLs when no `app` is provided
-esi_url | String | [Default: https://esi.tech.ccp.is] The default ESI URL used to generated `/verify/` endpoint URL
-security_name | String | [Default: evesso] The security name in the ESI Swagger Spec. Leave it default
 
-__If `app` and `sso_url` are provided, priority is given to the `app` parameter__
-
+<div class="alert alert-dismissible alert-info">
+    For more details about EsiApp, please see <a href="/EsiPy/api/esisecurity/">this page</a>.
+</div>
 
 ```python
 from esipy import EsiSecurity
 
 # creating the security object using the app
-security = EsiSecurity(
-    app=app,
-    redirect_uri='https://callback.com/you/set/on/developers/eveonline',
-    client_id='you client id',
-    secret_key='the_secret_key',
-)
-
-# creating the security object without app, using default TQ sso URL
 security = EsiSecurity(
     redirect_uri='https://callback.com/you/set/on/developers/eveonline',
     client_id='you client id',
@@ -67,11 +58,41 @@ security = EsiSecurity(
 client = EsiClient(security=security)
 ```
 
+### PKCE
+
+You can also use the security object to use the PKCE flow (especially for desktop application without secret key). <br>
+All you need is to replace the `secret_key` parameter with `code_verifier`.
+
+Parameter | Type | Description
+--- | --- | ---
+redirect_uri | String | The URI you want the user redirected after he logs in with EVE SSO
+client_id | String | You client ID from developers.eveonline.com
+code_verifier | String | A code used for the PKCE flow. Must follow RFC 7636
+
+If you don't know how to generate a random `code_verifier` you can use the `esipy.utils.generate_code_verifier()` function.<br>
+**`EsiSecurity` will only use PKCE flow if `secret_key` is not given / is None. In any other case, it won't be used**
+
+Once you have created the `EsiSecurity` object with the `code_verifier`, you can use it like you would in other cases. 
+
+```python
+from esipy import EsiSecurity
+from esipy.utils import generate_code_verifier
+
+# creating the security object using the app
+security = EsiSecurity(
+    redirect_uri='https://callback.com/you/set/on/developers/eveonline',
+    client_id='you client id',
+    code_verifier=generate_code_verifier(),
+)
+
+client = EsiClient(security=security)
+```
+
 &nbsp;
 
 ## EVE SSO - Authentification
 
-To authenticate yourself to the EVE SSO, you'll need to follow the auth flow from [Eve Third Party Documentation](http://eveonline-third-party-documentation.readthedocs.io/en/latest/sso/authentication.html).
+To authenticate yourself to the EVE SSO, you'll need to follow the OAuth auth flow. You can find more informations about it in [ESI Documentation](https://docs.esi.evetech.net/docs/sso/#table-of-contents).
 
 We'll see here `EsiSecurity` methods that allow you to follow this auth flow.
 

@@ -31,6 +31,7 @@ You will also need the following dependencies :
 * requests 
 * pyswagger
 * six 
-* pytz 
+* pytz
+* python-jose
 
 *You can get them from the requirements.txt in the project*

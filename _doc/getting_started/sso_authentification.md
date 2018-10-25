@@ -28,7 +28,7 @@ The `EsiSecurity` object provides:
 * Headers autofilling when doing requests to add OAuth2 headers
 * Tokens management (get, refresh)
 
-### ClientID / Secret Key
+#### ClientID / Secret Key
 
 `EsiSecurity.__init__()` takes at least the following parameters with clientID / Secret Key. 
 
@@ -58,7 +58,7 @@ security = EsiSecurity(
 client = EsiClient(security=security)
 ```
 
-### PKCE
+#### PKCE
 
 You can also use the security object to use the PKCE flow (especially for desktop application without secret key). <br>
 All you need is to replace the `secret_key` parameter with `code_verifier`.
@@ -155,6 +155,8 @@ esi_security.verify()
     "IntellectualProperty": "EVE"
 }
 ```
+
+&nbsp;
 
 ## EVE SSO - Revoking tokens
 

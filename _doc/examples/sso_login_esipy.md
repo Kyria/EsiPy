@@ -53,7 +53,7 @@ pip install esipy
 Now, in the python console, we'll create the `App`, `EsiClient` and `EsiSecurity`:
 
 ```python
-from esipy import App
+from esipy import EsiApp
 from esipy import EsiClient
 from esipy import EsiSecurity
 

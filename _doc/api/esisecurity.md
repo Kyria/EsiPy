@@ -21,7 +21,7 @@ The EsiPy App wrapper that will deal with `pyswagger.App` and caching.
 * **sso_endpoints** - *(Optional)* Dict containing the content of the SSO endpoint discovery URL. Can be used if this information is cached client side. Default is `None`. If this is `None`, `EsiSecurity` will make a request to get the informations.
 * **jwks_key** - *(Optional)* Dict containing the content of the SSO JSON Web Key Set (URL found in SSO endpoint discovery). Default is `None`. If this is `None`, `EsiSecurity` will make a request to get the informations.
 
-### `EsiSecurity.verify()`
+### `EsiSecurity.verify(kid='JWT-Signature-Key', options=None)`
 Use `python-jose` to validate and decode the token and return the token informations.
 
 **Parameters:**
@@ -34,7 +34,7 @@ Get the tokens from SSO using the given code, and return the json response conta
 **Parameters:**
 * **code** - The code sent by EVE SSO when the logger
 
-### `EsiSecurity.refresh()`
+### `EsiSecurity.refresh(scope_list=None)`
 Use the given refresh token (using `update_token` or `auth`) to get a new access_token.
 
 **Parameters:**

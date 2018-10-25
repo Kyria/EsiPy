@@ -69,7 +69,7 @@ redirect_uri | String | The URI you want the user redirected after he logs in wi
 client_id | String | You client ID from developers.eveonline.com
 code_verifier | String | A code used for the PKCE flow. Must follow RFC 7636
 
-If you don't know how to generate a random `code_verifier` you can use the `esipy.utils.generate_code_verifier()` function.<br>
+If you don't know how to generate a random `code_verifier` you can use the [`esipy.utils.generate_code_verifier()`](https://github.com/Kyria/EsiPy/blob/master/esipy/utils.py#L48) function.<br>
 **`EsiSecurity` will only use PKCE flow if `secret_key` is not given / is None. In any other case, it won't be used**
 
 Once you have created the `EsiSecurity` object with the `code_verifier`, you can use it like you would in other cases. 

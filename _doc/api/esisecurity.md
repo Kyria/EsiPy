@@ -56,7 +56,7 @@ Update the security object with the given tokens.
 * **response_json** - The dict (json) that contains the token information: `{'access_token':'token', 'refresh_token':'token', 'expires_in': seconds`}
 * **token_identifier** - The user identifier that identifies the token for him.
 
-### `EsiSecurity.get_auth_uri(scopes=None, state=None, implicit=False)`
+### `EsiSecurity.get_auth_uri(state, scopes=None, implicit=False)`
 Generate the SSO auth URL, using the given parameters and `EsiSecurity` attributes. If no `secret_key` is provided but `code_verifier`, the function will automatically use the PCKE flow. 
 
 **Parameters:** All parameters are optional.

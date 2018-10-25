@@ -21,7 +21,7 @@ In the following steps, I will admit you saved somewhere your tokens, closed the
 Like in the login example, we'll need to create the esipy objects before beeing able to do anything.
 
 ```python
-from esipy import App
+from esipy import EsiApp
 from esipy import EsiClient
 from esipy import EsiSecurity
 

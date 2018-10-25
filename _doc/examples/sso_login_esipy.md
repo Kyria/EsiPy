@@ -62,7 +62,6 @@ app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tra
 # replace the redirect_uri, client_id and secret_key values
 # with the values you get from the STEP 1 !
 security = EsiSecurity(
-    app=app,
     redirect_uri='callback URL',
     client_id='you client id',
     secret_key='the_secret_key',
@@ -88,7 +87,7 @@ __Login and get the code__
 
 ```python
 # this print a URL where we can log in
-print security.get_auth_uri(scopes=['esi-wallet.read_character_wallet.v1'])
+print security.get_auth_uri(state='SomeRandomGeneratedState', scopes=['esi-wallet.read_character_wallet.v1'])
 ```
 
 The URL will have the form of <br>
@@ -118,7 +117,7 @@ __By doing this, your security object also knows these tokens and will use them 
 print tokens
 
 {
-  "access_token": "frenafeifafrbaefluerbfeainb",
+  "access_token": "frenafeifafrbaefluerbfeainb.tgzggtggtz5fgtz541fra34faerfa.gtgzeg5gt",
   "token_type": "Bearer",
   "expires_in": 1200,
   "refresh_token": "fera48ftea4at64fr684fae"
@@ -134,7 +133,8 @@ You can save these values somewhere if you want (and then they can be used in [t
 Now that you are authed, we can do a real request on the ESI API: 
 
 ```python
-# use the verify endpoint to know who we are
+# use JWT to verify the token and get some basic informations
+# this will return an exception if any error happens
 api_info = security.verify()
 
 # api_info contains data like this

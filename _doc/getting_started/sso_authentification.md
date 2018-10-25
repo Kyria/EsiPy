@@ -28,6 +28,8 @@ The `EsiSecurity` object provides:
 * Headers autofilling when doing requests to add OAuth2 headers
 * Tokens management (get, refresh)
 
+&nbsp;
+
 #### ClientID / Secret Key
 
 `EsiSecurity.__init__()` takes at least the following parameters with clientID / Secret Key. 
@@ -57,6 +59,8 @@ security = EsiSecurity(
 # --> simplified client
 client = EsiClient(security=security)
 ```
+
+&nbsp;
 
 #### PKCE
 

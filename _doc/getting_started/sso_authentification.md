@@ -105,6 +105,8 @@ We'll see here `EsiSecurity` methods that allow you to follow this auth flow.
 	If you want to see a full example with login, see the examples in the menu, or go to <a href="/EsiPy/examples/sso_login_esipy/">this page</a>
 </div>
 
+&nbsp;
+
 #### Redirecting the user to EVE SSO Login
 
 First, you'll need to make your user go the SSO Login from EVE Online.
@@ -118,6 +120,8 @@ eve_sso_auth_url = security.get_auth_uri(
 	scopes=['Scope1', 'Scope2', 'Scope3']  # or None (default) if you don't need any scope
 )
 ```
+
+&nbsp;
 
 #### Code from login
 
@@ -140,6 +144,8 @@ tokens = esi_security.auth(code_you_get_from_user_login)
 
 Now the security object knows everything, it can use OAuth endpoints without problems. <br>
 You don't also have to get the tokens returned if you don't need them as they are stored within the security object.
+
+&nbsp;
 
 #### Getting the logged in character informations
 

@@ -114,8 +114,8 @@ As the login URL have to have some mandatory informations in it, you can use the
 ```python
 # this will give you the url where your user must be redirected to.
 eve_sso_auth_url = security.get_auth_uri(
-	scopes=['Scope1', 'Scope2', 'Scope3'],  # or None (default) if you don't need any scope
-	state="what you want and can be None(default)"
+	state="what you want and it is required",
+	scopes=['Scope1', 'Scope2', 'Scope3']  # or None (default) if you don't need any scope
 )
 ```
 

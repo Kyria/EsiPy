@@ -57,7 +57,7 @@ from esipy import App
 from esipy import EsiClient
 from esipy import EsiSecurity
 
-app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tranquility")
+app = EsiApp.get_latest_swagger
 
 # replace the redirect_uri, client_id and secret_key values
 # with the values you get from the STEP 1 !

@@ -31,7 +31,6 @@ from hyper.contrib import HTTP20Adapter
 
 # create the EsiSecurity, adding transport_adapter adapter parameter
 security = EsiSecurity(
-    app=app,
     redirect_uri='https://callback.com/you/set/on/developers/eveonline',
     client_id='you client id',
     secret_key='the_secret_key',

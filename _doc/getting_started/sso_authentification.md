@@ -156,13 +156,19 @@ esi_security.verify()
 
 # returns this json object:
 {
-    "CharacterID": 123456487,
-    "CharacterName": "Char Name",
-    "ExpiresOn": "2016-12-23T15:26:46.555002",
-    "Scopes": "publicData",
-    "TokenType": "Character",
-    "CharacterOwnerHash": "aef564ae6fae46era4fer8=",
-    "IntellectualProperty": "EVE"
+  "sub": "CHARACTER:EVE:9632612331",
+  "iss": "login.eveonline.com",
+  "owner": "vfrzifeeefzf68ezFZf=",
+  "jti": "4f86aer4-fr4a-fr44-a57r-4fra64frae64fr",
+  "exp": 1540544567,
+  "azp": "da5638arae1ra57f4ra6f4ra6afc8",
+  "kid": "JWT-Signature-Key",
+  "scp": [
+    "Scope1",
+    "Scope2",
+    "Scope3"
+  ],
+  "name": "SomeCharacter Name"
 }
 ```
 

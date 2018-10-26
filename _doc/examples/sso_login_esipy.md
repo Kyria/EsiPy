@@ -137,16 +137,22 @@ Now that you are authed, we can do a real request on the ESI API:
 # this will return an exception if any error happens
 api_info = security.verify()
 
-# api_info contains data like this
-# {
-#   "Scopes": "esi-wallet.read_character_wallet.v1",
-#   "ExpiresOn": "2017-07-14T21:09:20",
-#   "TokenType": "Character",
-#   "CharacterName": "SOME Char",
-#   "IntellectualProperty": "EVE",
-#   "CharacterOwnerHash": "4raef4rea8aferfa+E=",
-#   "CharacterID": 123456789
-# }
+# api_info contains data like this (btw, these have been edited for the example)
+#{
+#  "sub": "CHARACTER:EVE:964323431",
+#  "iss": "login.eveonline.com",
+#  "owner": "vfrzifeeefzf68ezFZf=",
+#  "jti": "4f86aer4-fr4a-fr44-a57r-4fra64frae64fr",
+#  "exp": 1540544567,
+#  "azp": "da5638arae1ra57f4ra6f4ra6afc8",
+#  "kid": "JWT-Signature-Key",
+#  "scp": [
+#    "esi-characters.read_blueprints.v1",
+#    "esi-characters.read_corporation_roles.v1",
+#    "esi-corporations.read_blueprints.v1"
+#  ],
+#  "name": "Some CharacterName"
+#}
 
 # now get the wallet data
 op = app.op['get_characters_character_id_wallet'](

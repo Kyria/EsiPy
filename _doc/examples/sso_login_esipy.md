@@ -57,7 +57,7 @@ from esipy import EsiApp
 from esipy import EsiClient
 from esipy import EsiSecurity
 
-app = EsiApp.get_latest_swagger
+app = EsiApp().get_latest_swagger
 
 # replace the redirect_uri, client_id and secret_key values
 # with the values you get from the STEP 1 !

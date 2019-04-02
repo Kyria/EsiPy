@@ -156,7 +156,7 @@ api_info = security.verify()
 
 # now get the wallet data
 op = app.op['get_characters_character_id_wallet'](
-    character_id=api_info['CharacterID']
+    character_id=api_info['sub'].split(':')[-1]
 )
 wallet = client.request(op)
 

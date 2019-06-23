@@ -4,11 +4,13 @@ from __future__ import absolute_import
 
 from esipy import EsiApp
 from esipy.cache import DictCache
+from esipy.exceptions import APIException
 from pyswagger import App
 
 import httmock
 import mock
 import unittest
+from six.moves.urllib.error import HTTPError
 
 from .mock import _swagger_spec_mock_
 from .mock import make_expire_time_str
@@ -182,3 +184,40 @@ class TestEsiApp(unittest.TestCase):
             urlopen_mock.return_value = open(TestEsiApp.ESI_META_SWAGGER)
             EsiApp(cache_time=None, cache=cache, cache_prefix='esipy_test')
             urlopen_mock.return_value.close()
+
+    @mock.patch('six.moves.urllib.request.urlopen')
+    def test_app_http_error_retry_fail(self, urlopen_mock):
+        urlopen_mock.side_effect = HTTPError(
+            "http://mock.test",
+            500,
+            "HTTP 500 whatever",
+            None,
+            None
+        )
+        with httmock.HTTMock(*_swagger_spec_mock_):
+            with self.assertRaises(APIException):
+                self.app = EsiApp(cache_prefix='esipy_test')
+            self.assertEqual(urlopen_mock.call_count, 3)
+
+    @mock.patch('six.moves.urllib.request.urlopen')
+    def test_app_http_error_retry_ok(self, urlopen_mock):
+        http_error = HTTPError(
+            "http://mock.test",
+            500,
+            "HTTP 500 whatever",
+            None,
+            None
+        )
+
+        # this will make the function raise exception / return the value
+        # in this given order
+        side_effect_results = [
+            http_error,
+            http_error,
+            open(TestEsiApp.ESI_META_SWAGGER)
+        ]
+
+        urlopen_mock.side_effect = side_effect_results
+        with httmock.HTTMock(*_swagger_spec_mock_):
+            EsiApp(cache_prefix='esipy_test')
+            self.assertEqual(urlopen_mock.call_count, 3)

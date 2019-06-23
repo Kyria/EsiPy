@@ -2,12 +2,17 @@
 """ App entry point. Uses Esi Meta Endpoint to work """
 import time
 
+import logging
 import requests
+from six.moves.urllib.error import HTTPError
 
 from pyswagger import App
 
 from .utils import check_cache
 from .utils import get_cache_time_left
+from .exceptions import APIException
+
+LOGGER = logging.getLogger(__name__)
 
 
 class EsiApp(object):
@@ -103,8 +108,30 @@ class EsiApp(object):
             return cached_app
 
         # ok, cache is not accurate, make the full stuff
-        app = App.create(app_url)
-        if self.caching:
+        # also retry up to 3 times if we get any errors
+        app = None
+        for _retry in range(1, 4):
+            try:
+                app = App.create(app_url)
+            except HTTPError as error:
+                LOGGER.warning(
+                    "[failure #%d] %s %d: %r",
+                    _retry,
+                    app_url,
+                    error.code,
+                    error.msg
+                )
+                continue
+            break
+
+        if app is None:
+            raise APIException(
+                app_url,
+                500,
+                response="Cannot fetch '%s'." % app_url
+            )
+
+        if self.caching and app:
             self.cache.set(cache_key, (app, res.headers, timeout))
 
         return app

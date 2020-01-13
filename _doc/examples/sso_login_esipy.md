@@ -65,12 +65,13 @@ security = EsiSecurity(
     redirect_uri='callback URL',
     client_id='you client id',
     secret_key='the_secret_key',
+    headers={'User-Agent': 'Something CCP can use to contact you and that define your app'},
 )
 
 # and the client object, replace the header user agent value with something reliable !
 client = EsiClient(
     retry_requests=True,
-    header={'User-Agent': 'Something CCP can use to contact you and that define your app'},
+    headers={'User-Agent': 'Something CCP can use to contact you and that define your app'},
     security=security
 )
 ```

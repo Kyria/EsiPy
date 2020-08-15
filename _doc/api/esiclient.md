@@ -11,12 +11,13 @@ The EsiClient that will make the requests and do all the caching.
 **Parameters:**
 * **security** - the security object used for security checks and headers. Default is `None`
 * **retry_requests** - flag to set auto retry on 5XX errors. Default False
-* **headers** - A dict containing any header you want to add. Not adding `User-Agent` header will trigger a warn. 
+* **headers** - A dict containing any header you want to add. Not adding `User-Agent` header will trigger a warn.
 * **transport_adapter** - A HTTPAdapter implementation. Default is `requests.HTTPAdapter`
 * **cache** - Any cache that implement `esipy.cache.BaseCache`
 * **raw_body_only** - Disable the auto parsing of response if `True`. Default `False`
 * **timeout** - Set a timeout for request. Default is `None` for no timeout.
-* **signal_api_call_stats** - Allow to define a custom Signal to replace `API_CALL_STATS` using `signal_api_call_stats` when initializing the client 
+* **signal_api_call_stats** - Allow to define a custom Signal to replace `API_CALL_STATS` using `signal_api_call_stats` when initializing the client
+* **no_etag_body** - Disable the body from the result of the request if the response from ESI is a 304 (normal HTTP 304 behavior). Default is `False`
 
 ### `EsiClient.request(req_and_resp, **kwargs)`
 Make a GET/POST/PUT/DELETE request, depending on the operation and return the response.

@@ -2,6 +2,7 @@
 """ Cache objects for EsiPy """
 import hashlib
 import logging
+import datetime
 
 try:
     import pickle
@@ -25,7 +26,7 @@ class BaseCache(object):
     the cache methods used in esipy
     """
 
-    def set(self, key, value):
+    def set(self, key, value, expire=300):
         """ Set a value in the cache. """
         raise NotImplementedError
 
@@ -63,8 +64,9 @@ class FileCache(BaseCache):
         """
         self._cache.close()
 
-    def set(self, key, value):
-        self._cache.set(_hash(key), value)
+    def set(self, key, value, expire=300):
+        expire = None if expire == 0 else expire
+        self._cache.set(_hash(key), value, expire=expire)
 
     def get(self, key, default=None):
         return self._cache.get(_hash(key), default)
@@ -74,7 +76,9 @@ class FileCache(BaseCache):
 
 
 class DictCache(BaseCache):
-    """ BaseCache implementation using Dict to store the cached data. """
+    """ BaseCache implementation using Dict to store the cached data.
+
+    Caution: due to its nature, DictCache do not expire keys !"""
 
     def __init__(self):
         self._dict = {}
@@ -82,11 +86,14 @@ class DictCache(BaseCache):
     def get(self, key, default=None):
         return self._dict.get(key, default)
 
-    def set(self, key, value):
+    def set(self, key, value, expire=300):
         self._dict[key] = value
 
     def invalidate(self, key):
         self._dict.pop(key, None)
+
+    def clear(self):
+        self._dict.clear()
 
 
 class DummyCache(BaseCache):
@@ -99,7 +106,7 @@ class DummyCache(BaseCache):
     def get(self, key, default=None):
         return default
 
-    def set(self, key, value):
+    def set(self, key, value, expire=300):
         pass
 
     def invalidate(self, key):
@@ -125,8 +132,9 @@ class MemcachedCache(BaseCache):
         value = self._mc.get(_hash(key))
         return value if value is not None else default
 
-    def set(self, key, value):
-        return self._mc.set(_hash(key), value)
+    def set(self, key, value, expire=300):
+        expire = 0 if expire is None else expire
+        return self._mc.set(_hash(key), value, time=expire)
 
     def invalidate(self, key):
         return self._mc.delete(_hash(key))
@@ -150,8 +158,14 @@ class RedisCache(BaseCache):
         value = self._r.get(_hash(key))
         return pickle.loads(value) if value is not None else default
 
-    def set(self, key, value):
-        return self._r.set(_hash(key), pickle.dumps(value))
+    def set(self, key, value, expire=300):
+        if expire is None or expire == 0:
+            return self._r.set(_hash(key), pickle.dumps(value))
+        return self._r.setex(
+            name=_hash(key),
+            value=pickle.dumps(value),
+            time=datetime.timedelta(seconds=expire),
+        )
 
     def invalidate(self, key):
         return self._r.delete(_hash(key))

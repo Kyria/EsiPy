@@ -55,7 +55,7 @@ cache = MemcachedCache(memcache_client=mc)
 
 # and feed the client you create
 client = EsiClient(cache=cache)
-``` 
+```
 
 &nbsp;
 
@@ -72,7 +72,7 @@ cache = RedisCache(redis_client)
 
 # and feed the client you create
 client = EsiClient(cache=cache)
-``` 
+```
 
 &nbsp;
 
@@ -80,7 +80,7 @@ client = EsiClient(cache=cache)
 If you need a specific cache, because you already use your own, there's a way to define a valid cache for EsiPy.
 
 1. First you need to inherit from `esipy.cache.BaseCache` and override the `get`, `set` and `invalidate` methods
-2. You **should not** delete outdated data from the cache within the cache process, else you will lose all the benefits from etags. 
+2. You **should not** delete outdated data from the cache within the cache process, else you will lose all the benefits from etags.
 
 &nbsp;
 
@@ -92,7 +92,7 @@ from esipy.cache import BaseCache
 # this is the minimum required
 class YourCache(BaseCache):
 
-    def set(self, key, value):
+    def set(self, key, value, expire=300):
         # do something and store the value
 
     def get(self, key, default=None):

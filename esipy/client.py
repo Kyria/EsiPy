@@ -232,8 +232,8 @@ class EsiClient(BaseClient):
                 raw=six.BytesIO(res.content).getvalue()
             )
 
-        except ValueError:
-            # catch JSONDecodeError/ValueError when response is not JSON
+        except (ValueError, Exception):
+            # catch when response is not JSON
             raise APIException(
                 request.url,
                 res.status_code,
@@ -324,6 +324,7 @@ class EsiClient(BaseClient):
                         content=res.content,
                         url=res.url,
                     ),
+                    cache_timeout
                 )
             else:
                 LOGGER.warning(

@@ -1,7 +1,9 @@
-import esipy
+# -*- encoding: utf-8 -*-
+""" Setup for EsiPy """
 import io
-
 from setuptools import setup
+
+import esipy
 
 # install requirements
 install_requirements = [

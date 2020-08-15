@@ -6,11 +6,10 @@ services:
   - redis
 
 python:
-  - "2.7"
-  - "3.4"
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 
 install:
   - if [[ `python --version | grep 3.6` ]]; then pip install -U setuptools; fi;

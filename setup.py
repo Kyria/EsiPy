@@ -39,20 +39,16 @@ setup(
     description='Swagger Client for the ESI API for EVE Online',
     long_description=README,
     install_requires=install_requirements,
-    extras_require={
-        ':python_version == "2.7"': ['futures']
-    },
     tests_require=test_requirements,
     test_suite='nose.collector',
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
     ]
 )

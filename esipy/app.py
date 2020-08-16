@@ -100,13 +100,13 @@ class EsiApp(object):
 
         # we are here, we know we have to make a head call...
         res = requests.head(app_url, headers=headers)
+        if self.expire is not None and self.expire > 0:
+            expiration = self.expire
+        else:
+            expiration = get_cache_time_left(
+                res.headers.get('expires')
+            )
         if res.status_code == 304 and cached_app is not None:
-            if self.expire is not None and self.expire > 0:
-                expiration = self.expire
-            else:
-                expiration = get_cache_time_left(
-                    res.headers.get('expires')
-                )
             self.cache.set(
                 cache_key,
                 (cached_app, res.headers, timeout),
@@ -139,7 +139,7 @@ class EsiApp(object):
             )
 
         if self.caching and app:
-            self.cache.set(cache_key, (app, res.headers, timeout), timeout)
+            self.cache.set(cache_key, (app, res.headers, timeout), expiration)
 
         return app
 

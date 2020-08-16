@@ -65,7 +65,7 @@ class FileCache(BaseCache):
         self._cache.close()
 
     def set(self, key, value, expire=300):
-        expire = None if expire == 0 else expire
+        expire = None if expire == 0 or expire is None else int(expire)
         self._cache.set(_hash(key), value, expire=expire)
 
     def get(self, key, default=None):
@@ -134,7 +134,7 @@ class MemcachedCache(BaseCache):
 
     def set(self, key, value, expire=300):
         expire = 0 if expire is None else expire
-        return self._mc.set(_hash(key), value, time=expire)
+        return self._mc.set(_hash(key), value, time=int(expire))
 
     def invalidate(self, key):
         return self._mc.delete(_hash(key))
@@ -164,7 +164,7 @@ class RedisCache(BaseCache):
         return self._r.setex(
             name=_hash(key),
             value=pickle.dumps(value),
-            time=datetime.timedelta(seconds=expire),
+            time=datetime.timedelta(seconds=int(expire)),
         )
 
     def invalidate(self, key):

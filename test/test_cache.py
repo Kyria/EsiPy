@@ -6,6 +6,7 @@ import memcache
 import redis
 import shutil
 import unittest
+import time
 
 from collections import namedtuple
 
@@ -94,6 +95,12 @@ class TestDictCache(BaseTest):
         self.c.invalidate(self.ex_cpx[0])
         self.assertIsNone(self.c.get(self.ex_cpx[0]))
 
+    def test_dict_cache_clear(self):
+        self.assertEqual(self.c._dict[self.ex_str[0]], self.ex_str[1])
+        self.assertEqual(len(self.c._dict), 3)
+        self.c.clear()
+        self.assertEqual(len(self.c._dict), 0)
+
 
 class TestDummyCache(BaseTest):
     """ DummyCache test class. """
@@ -151,6 +158,22 @@ class TestFileCache(BaseTest):
         self.c.invalidate('key')
         self.assertEqual(self.c.get('key'), None)
 
+    def test_file_cache_expire(self):
+        self.c.set('key', 'bar', expire=1)
+        self.assertEqual(self.c.get('key'), 'bar')
+        time.sleep(1)
+        self.assertEqual(self.c.get('key', None), None)
+
+        self.c.set('key', 'bar', expire=0)
+        self.assertEqual(self.c.get('key'), 'bar')
+        time.sleep(1)
+        self.assertEqual(self.c.get('key', None), 'bar')
+
+        self.c.set('foo', 'baz', expire=None)
+        self.assertEqual(self.c.get('foo'), 'baz')
+        time.sleep(1)
+        self.assertEqual(self.c.get('foo', None), 'baz')
+
 
 class TestMemcachedCache(BaseTest):
     """ Memcached tests """
@@ -196,6 +219,22 @@ class TestMemcachedCache(BaseTest):
         with self.assertRaises(TypeError):
             MemcachedCache(None)
 
+    def test_memcached_expire(self):
+        self.c.set(self.ex_str[0], self.ex_str[1], expire=1)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        time.sleep(1)
+        self.assertEqual(self.c.get(self.ex_str[0], None), None)
+
+        self.c.set(self.ex_str[0], self.ex_str[1], expire=0)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        time.sleep(1)
+        self.assertEqual(self.c.get(self.ex_str[0], None), self.ex_str[1])
+
+        self.c.set(self.ex_int[0], self.ex_int[1], expire=None)
+        self.assertEqual(self.c.get(self.ex_int[0]), self.ex_int[1])
+        time.sleep(1)
+        self.assertEqual(self.c.get(self.ex_int[0], None), self.ex_int[1])
+
 
 class TestRedisCache(BaseTest):
     """RedisCache tests"""
@@ -239,3 +278,19 @@ class TestRedisCache(BaseTest):
     def test_redis_invalid_argument(self):
         with self.assertRaises(TypeError):
             RedisCache(None)
+
+    def test_redis_expire(self):
+        self.c.set(self.ex_str[0], self.ex_str[1], expire=1)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        time.sleep(1)
+        self.assertEqual(self.c.get(self.ex_str[0], None), None)
+
+        self.c.set(self.ex_str[0], self.ex_str[1], expire=0)
+        self.assertEqual(self.c.get(self.ex_str[0]), self.ex_str[1])
+        time.sleep(1)
+        self.assertEqual(self.c.get(self.ex_str[0], None), self.ex_str[1])
+
+        self.c.set(self.ex_int[0], self.ex_int[1], expire=None)
+        self.assertEqual(self.c.get(self.ex_int[0]), self.ex_int[1])
+        time.sleep(1)
+        self.assertEqual(self.c.get(self.ex_int[0], None), self.ex_int[1])

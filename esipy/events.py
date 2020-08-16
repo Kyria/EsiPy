@@ -3,7 +3,6 @@
 to some defined event within EsiPy for the user to be able to do
 specific actions at some times """
 import logging
-import sys
 
 LOGGER = logging.getLogger(__name__)
 
@@ -53,11 +52,11 @@ class Signal(object):
         for receiver in self.event_receivers:
             try:
                 receiver(**kwargs)
-            except Exception as err:  # pylint: disable=W0703
-                if not hasattr(err, '__traceback__'):
-                    LOGGER.error(sys.exc_info()[2])
-                else:
-                    LOGGER.error(getattr(err, '__traceback__'))
+            except Exception:  # pylint: disable=W0703
+                LOGGER.exception(
+                    'Exception while sending to "%s".',
+                    getattr(receiver, '__name__', repr(receiver))
+                )
 
 
 # define required alarms

@@ -54,7 +54,8 @@ class EsiClient(BaseClient):
             signal to use, instead of using the global API_CALL_STATS
         :param timeout: (optional) default value [None=No timeout]
         timeout in seconds for requests
-
+        :param no_etag_body: (optional) default False, set to return empty
+        response when ETag requests return 304 (normal http behavior)
         """
         super(EsiClient, self).__init__(security)
         self.security = security
@@ -104,6 +105,7 @@ class EsiClient(BaseClient):
         )
 
         self.timeout = kwargs.pop('timeout', None)
+        self.no_etag_body = kwargs.pop('no_etag_body', False)
 
     def _retry_request(self, req_and_resp, _retry=0, **kwargs):
         """Uses self._request in a sane retry loop (for 5xx level errors).
@@ -232,8 +234,8 @@ class EsiClient(BaseClient):
                 raw=six.BytesIO(res.content).getvalue()
             )
 
-        except ValueError:
-            # catch JSONDecodeError/ValueError when response is not JSON
+        except (ValueError, Exception):
+            # catch when response is not JSON
             raise APIException(
                 request.url,
                 res.status_code,
@@ -324,6 +326,7 @@ class EsiClient(BaseClient):
                         content=res.content,
                         url=res.url,
                     ),
+                    cache_timeout
                 )
             else:
                 LOGGER.warning(
@@ -412,7 +415,9 @@ class EsiClient(BaseClient):
 
         # if we have HTTP 304 (content didn't change), return the cached
         # response updated with the new headers
-        if res.status_code == 304 and cached_response is not None:
+        if (res.status_code == 304
+                and cached_response is not None
+                and not self.no_etag_body):
             cached_response.headers['Expires'] = res.headers.get('Expires')
             cached_response.headers['Date'] = res.headers.get('Date')
             return cached_response

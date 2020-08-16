@@ -341,6 +341,31 @@ class TestEsiPy(unittest.TestCase):
             res = self.client.request(operation)
             self.assertEqual(res.data.server_version, "1313143")
 
+    def test_esipy_expired_header_etag_no_body(self):
+        # check that the response is empty with no_etag_body=True
+        @httmock.all_requests
+        def check_etag(url, request):
+            return httmock.response(
+                headers={'Etag': '"esipy_test_etag_status"',
+                         'expires': make_expire_time_str(),
+                         'date': make_expire_time_str()},
+                status_code=304)
+
+        operation = self.app.op['get_status']()
+        self.client.no_etag_body = True
+
+        with httmock.HTTMock(eve_status):
+            self.assertEqual(self.cache._dict, {})
+            res = self.client.request(operation)
+            self.assertNotEqual(self.cache._dict, {})
+            self.assertEqual(res.data.server_version, "1313143")
+
+        time.sleep(2)
+
+        with httmock.HTTMock(check_etag):
+            res = self.client.request(operation)
+            self.assertEqual(res.data, None)
+
     def test_esipy_expired_header_noetag(self):
         def check_etag(url, request):
             self.assertNotIn('If-None-Match', request.headers)

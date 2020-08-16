@@ -103,7 +103,8 @@ class EsiApp(object):
         if res.status_code == 304 and cached_app is not None:
             self.cache.set(
                 cache_key,
-                (cached_app, res.headers, timeout)
+                (cached_app, res.headers, timeout),
+                timeout
             )
             return cached_app
 
@@ -132,7 +133,7 @@ class EsiApp(object):
             )
 
         if self.caching and app:
-            self.cache.set(cache_key, (app, res.headers, timeout))
+            self.cache.set(cache_key, (app, res.headers, timeout), timeout)
 
         return app
 

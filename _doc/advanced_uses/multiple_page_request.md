@@ -38,7 +38,7 @@ app = App.create(url="https://esi.tech.ccp.is/latest/swagger.json?datasource=tra
 # create the client
 client = EsiClient(
     retry_requests=True, 
-    header={'User-Agent': 'Something CCP can use to contact you and that define your app'},
+    headers={'User-Agent': 'Something CCP can use to contact you and that define your app'},
     raw_body_only=False,
 )
 

@@ -402,7 +402,8 @@ class EsiSecurity(object):
             raise AttributeError('No access token are available at this time')
         if options is None:
             options = {}
-
+        #Interim fix for JWT aud error
+        options["verify_aud"] = False
         if self.jwks_key_set is None:
             key = self.jwks_key
         else:

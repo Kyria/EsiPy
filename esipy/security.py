@@ -412,7 +412,8 @@ class EsiSecurity(object):
             self.access_token,
             key,
             issuer=self.oauth_issuer,
-            options=options
+            options=options,
+            audience="EVE Online"
         )
 
     def __call__(self, request):

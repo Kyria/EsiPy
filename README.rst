@@ -6,6 +6,9 @@ EsiPy |PyPI Version| |PyPI Python Version|
 | **Full Documentation can be found here:**
 | |Documentation Status|
 
+If someone wants to maintain a fork, please let me know so I can mention it here and in the docs
+======
+
 What is EsiPy
 -------------
 
